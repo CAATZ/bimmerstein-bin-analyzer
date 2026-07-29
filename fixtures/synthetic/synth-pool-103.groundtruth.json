@@ -1,0 +1,926 @@
+{
+  "fixture": "synth-pool-103",
+  "binSha256": "a59bfcb984c3a703e50cd75bbaed6bd5ad630a1ef32b34ab89ac87ffeb6e56f3",
+  "maps": [
+    {
+      "id": "gtp-103-0-0",
+      "name": "Pool 10x12 g0t0",
+      "address": 63483,
+      "rows": 10,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 12,
+        "address": 63355,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 10,
+        "address": 63335,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-0-1",
+      "name": "Pool 10x12 g0t1",
+      "address": 63667,
+      "rows": 10,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 12,
+        "address": 63355,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 10,
+        "address": 63368,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-0-2",
+      "name": "Pool 12x10 g0t2",
+      "address": 63805,
+      "rows": 12,
+      "cols": 10,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 10,
+        "address": 63368,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 12,
+        "address": 63355,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-0-3",
+      "name": "Pool 10x6 g0t3",
+      "address": 64102,
+      "rows": 10,
+      "cols": 6,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 6,
+        "address": 63380,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 10,
+        "address": 63368,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-1-0",
+      "name": "Pool 10x6 g1t0",
+      "address": 65045,
+      "rows": 10,
+      "cols": 6,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 6,
+        "address": 64773,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 10,
+        "address": 64781,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-1-1",
+      "name": "Pool 11x10 g1t1",
+      "address": 65184,
+      "rows": 11,
+      "cols": 10,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 10,
+        "address": 64781,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 64761,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-2-0",
+      "name": "Pool 6x15 g2t0",
+      "address": 66131,
+      "rows": 6,
+      "cols": 15,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 15,
+        "address": 65714,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 6,
+        "address": 65730,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-2-1",
+      "name": "Pool 6x15 g2t1",
+      "address": 66225,
+      "rows": 6,
+      "cols": 15,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 15,
+        "address": 65714,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 6,
+        "address": 65730,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-2-2",
+      "name": "Pool 6x15 g2t2",
+      "address": 66317,
+      "rows": 6,
+      "cols": 15,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 15,
+        "address": 65714,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 6,
+        "address": 65730,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-2-3",
+      "name": "Pool 6x15 g2t3",
+      "address": 66409,
+      "rows": 6,
+      "cols": 15,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 15,
+        "address": 65714,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 6,
+        "address": 65730,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-3-0",
+      "name": "Pool 4x11 g3t0",
+      "address": 67047,
+      "rows": 4,
+      "cols": 11,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 66896,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 4,
+        "address": 66880,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-3-1",
+      "name": "Pool 4x11 g3t1",
+      "address": 67159,
+      "rows": 4,
+      "cols": 11,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 66896,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 4,
+        "address": 66880,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-3-2",
+      "name": "Pool 11x9 g3t2",
+      "address": 67250,
+      "rows": 11,
+      "cols": 9,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 9,
+        "address": 66885,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 66896,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-4-0",
+      "name": "Pool 12x11 g4t0",
+      "address": 68167,
+      "rows": 12,
+      "cols": 11,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 67908,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 12,
+        "address": 67894,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-4-1",
+      "name": "Pool 11x5 g4t1",
+      "address": 68495,
+      "rows": 11,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 5,
+        "address": 67888,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 67908,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-4-2",
+      "name": "Pool 12x5 g4t2",
+      "address": 68580,
+      "rows": 12,
+      "cols": 5,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 5,
+        "address": 67888,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 12,
+        "address": 67894,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-5-0",
+      "name": "Pool 9x6 g5t0",
+      "address": 69383,
+      "rows": 9,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 6,
+        "address": 68987,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 9,
+        "address": 68994,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-5-1",
+      "name": "Pool 9x6 g5t1",
+      "address": 69440,
+      "rows": 9,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 6,
+        "address": 68987,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 9,
+        "address": 68994,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-5-2",
+      "name": "Pool 9x6 g5t2",
+      "address": 69498,
+      "rows": 9,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 6,
+        "address": 68987,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 9,
+        "address": 68994,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-6-0",
+      "name": "Pool 10x10 g6t0",
+      "address": 69973,
+      "rows": 10,
+      "cols": 10,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 10,
+        "address": 69839,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 10,
+        "address": 69861,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-6-1",
+      "name": "Pool 11x10 g6t1",
+      "address": 70137,
+      "rows": 11,
+      "cols": 10,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 10,
+        "address": 69839,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 69826,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-6-2",
+      "name": "Pool 11x4 g6t2",
+      "address": 70296,
+      "rows": 11,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 4,
+        "address": 69883,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 69826,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gtp-103-6-3",
+      "name": "Pool 11x10 g6t3",
+      "address": 70388,
+      "rows": 11,
+      "cols": 10,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 10,
+        "address": 69839,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 69826,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+/**
+ * Core data model for BimmerStein Bin Analyzer.
+ * Source of truth: the v1 design spec §3 (internal notes).
+ * Changing anything here requires updating the spec in the same commit.
+ */
+
+/** Tuner convention: LoHi = 'little', HiLo = 'big'. */
+export type Endianness = 'little' | 'big';
+
+export interface ValueFormat {
+  /** Bytes per cell. */
+  width: 1 | 2 | 4;
+  signed: boolean;
+  /** Ignored for width 1. */
+  endianness: Endianness;
+  /** Width-4 IEEE 754 single precision. */
+  float?: boolean;
+}
+
+/**
+ * physical = raw * factor + offset.
+ * Non-affine imported expressions are preserved in rawExpression and the UI
+ * falls back to raw display with a warning — never silently mis-scale.
+ */
+export interface Scaling {
+  factor: number;
+  offset: number;
+  units: string;
+  digits: number;
+  rawExpression?: string;
+}
+
+export interface AxisDef {
+  /**
+   * 'referenced' = axis values stored in the bin at `address`;
+   * 'literal'    = axis values carried in the definition itself (RomRaider
+   *                static axes) — stored in `values`, no bin address;
+   * 'index'      = 0,1,2,… (no axis data at all).
+   */
+  kind: 'referenced' | 'literal' | 'index';
+  address?: number;
+  count: number;
+  /** Required when kind === 'literal'; length === count. */
+  values?: number[];
+  format?: ValueFormat;
+  scaling?: Scaling;
+  name?: string;
+}
+
+export type Provenance = 'auto' | 'manual' | 'imported';
+
+/**
+ * Which detection tier produced an auto-detected map (spec §4.5/§4.6), ordered
+ * by evidence strength: `family` = code-xref-proven (a cal-reader CALL site
+ * references it — only on full firmware reads); `structural` = placed from a
+ * count-prefixed axis pair's stored lengths (pool.ts); `pool` = byte-detected
+ * and bound to a shared count-prefixed axis pair; `generic` = pure byte-
+ * smoothness heuristic. Only valid on `provenance === 'auto'` maps (the engine
+ * sets it on every auto detection); lets the UI and exports distinguish
+ * code-proven maps from heuristic ones.
+ */
+export type DetectorTier = 'family' | 'structural' | 'pool' | 'generic';
+
+/** One named byte-pattern a Switch table can hold (RomRaider <state>). */
+export interface SwitchState {
+  name: string;
+  /** Raw byte values (integers 0..255); length === rows*cols*format.width of the owning map. */
+  data: number[];
+}
+
+export interface MapDef {
+  /**
+   * Stable unique id. Auto-detected maps use a deterministic
+   * address/shape-derived id (the engine forbids randomness);
+   * user-created/imported maps may use UUIDs.
+   */
+  id: string;
+  name: string;
+  category?: string;
+  /** Absolute byte offset of the first data cell. */
+  address: number;
+  /** 1 for curves (1D). */
+  rows: number;
+  cols: number;
+  format: ValueFormat;
+  scaling: Scaling;
+  orientation: 'row-major' | 'col-major';
+  /** length must equal cols (row-major). */
+  xAxis?: AxisDef;
+  /** length must equal rows. */
+  yAxis?: AxisDef;
+  provenance: Provenance;
+  /** 0..1, present iff provenance === 'auto'. */
+  confidence?: number;
+  /** Detection tier that produced this map; set iff provenance === 'auto'. */
+  detector?: DetectorTier;
+  /**
+   * Named byte-pattern states — present ⇔ this map is a SWITCH table
+   * (RomRaider type="Switch"). Canonical switch shape, enforced by
+   * validateMapDef: cols === 1, format.width === 1 (u8), no axes; rows is the
+   * switch's byte count. v1 is read-only: states are MATCHED against the bin
+   * for display, never written.
+   */
+  states?: SwitchState[];
+  notes?: string;
+}
+
+export interface BinImage {
+  bytes: Uint8Array;
+  sha256: string;
+  size: number;
+  /** Display only — never used for identity. */
+  name: string;
+}
+
+export interface Project {
+  schemaVersion: 1;
+  /** Bin referenced by identity, never embedded. */
+  bin: { name: string; sha256: string; size: number };
+  /** View defaults (e.g. MS41: width 2, big-endian). */
+  valueDefaults: ValueFormat;
+  /**
+   * How imported definition addresses were mapped into file offsets:
+   * 'ms41full' = fo(SA) = (0x10000+SA)^0x4000 flash-bus frame (spec
+   * 2026-07-14-fullread-def-frame-design). Absent = no mapping (24KB CAL).
+   */
+  addressFrame?: 'ms41full';
+  /** User-confirmed maps. */
+  maps: MapDef[];
+  /** Auto-detected, unconfirmed (provenance 'auto'). */
+  potentialMaps: MapDef[];
+}
+
+/** Typed result used across all package boundaries — parsing never throws. */
+export type Result<T, E = string> = { ok: true; value: T } | { ok: false; error: E };

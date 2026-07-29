@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: install, typecheck, test, eval
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test (all packages)
+        run: pnpm test
+
+      # Real BMW MS41 firmware is never committed (fixtures/README.md) —
+      # fixtures/ms41/*.bin is gitignored, so this checkout has none, and
+      # discoverFixtures() in packages/eval/src/cli.ts only pairs a .bin with
+      # its .groundtruth.json (a stray .groundtruth.json here is just never
+      # matched to a .bin and is silently skipped). Both commands below run
+      # against the committed synthetic fixtures only. Verified by running
+      # them in a clean `git worktree` checkout (no gitignored files) before
+      # this workflow was added: both exit 0. The real-MS41 spec-§5
+      # acceptance gate (MS41_GATE) only binds on a machine that has the real
+      # bins locally — it never runs here.
+      - name: Detection-quality eval (synthetic fixtures)
+        run: pnpm eval
+
+      - name: Detection-quality eval — holdout (anti-overfitting check)
+        run: pnpm eval holdout
