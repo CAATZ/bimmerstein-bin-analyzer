@@ -1,0 +1,3490 @@
+{
+  "fixture": "ms41-e36m3-stock",
+  "binSha256": "2d3ab7db6fe0f9a1f4680339f416aeeef43871730cd468cfd990f6dc80c03208",
+  "maps": [
+    {
+      "name": "AlphaN - TPS",
+      "address": 83084,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 5.447058823529412,
+        "offset": 0,
+        "units": "mg/stroke *Limit = 1389*",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "AlphaN",
+      "notes": "AlphaN - TPS If there is a DTC 12 (TPS) then \"AlphaN - TPS (DTC 12)\" else \"AlphaN - TPS\" [ [\"AlphaN - IACV\" x \"AlphaN - IACV (TPS Compensation)\"] + [\"AlphaN - TPS\"] ] x \"AlphaN - IAT Compensation\" This results in a calculated Load (and Airflow) value that is used throughout the rest of the code. AlphaN should never be used with a Forced Induction engine.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 82889,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "TPS",
+        "scaling": {
+          "factor": 0.47,
+          "offset": 0,
+          "units": "TPS%",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 82898,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x48c"
+    },
+    {
+      "name": "AlphaN - IACV (TPS Compensation)",
+      "address": 83144,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.39215686274509803,
+        "offset": 0,
+        "units": "Multiplier %",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "AlphaN",
+      "notes": "AlphaN - IACV (TPS Compensation)",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 82889,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "TPS",
+        "scaling": {
+          "factor": 0.47,
+          "offset": 0,
+          "units": "TPS%",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 82898,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x4c8"
+    },
+    {
+      "name": "AlphaN - IACV",
+      "address": 83204,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 5.447058823529412,
+        "offset": 0,
+        "units": "mg/stroke *Limit = 1389*",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "AlphaN",
+      "notes": "AlphaN - IACV",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 82946,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "IACV",
+        "scaling": {
+          "factor": 0.0015259021896696422,
+          "offset": 0,
+          "units": "%",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 82898,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x504"
+    },
+    {
+      "name": "Ignition Timing - Base - ECT/IAT Compensation - Multiplicative",
+      "address": 84334,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": -0.00392,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Ignition Timing",
+      "notes": "IP_TIA_TCO_FAC__TIA__TCO - This is multiplied to the \"Ignition Timing - Base - ECT/IAT Compensation - Nominal\" table to determine total adjustment to ignition angle based on coolant and air temperature.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 84061,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Air Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84068,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x96e"
+    },
+    {
+      "name": "IACV - TPS",
+      "address": 84656,
+      "rows": 7,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.39215686274509803,
+        "offset": -20,
+        "units": "%",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Idle Air Control Valve",
+      "notes": "IP_ISAPWM__TPS -",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83816,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83803,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "TPS",
+        "scaling": {
+          "factor": 0.47,
+          "offset": 0,
+          "units": "TPS %",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0xab0"
+    },
+    {
+      "name": "Dashpot - Nominal",
+      "address": 84696,
+      "rows": 7,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.392,
+        "offset": 0,
+        "units": "%",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Special Functions/Thresholds",
+      "notes": "IP_ISAPWM_DHP_(AT)__N_32__TPS - The Dashpot function acts like a Throttle lever damper on a carbureted engine. It is used when closing the Throttle to promote smooth torque reduction. It may need to be adjusted for large diameter Throttle bodies because even a small change in Throttle can result in a large percentage difference in airflow, especially at low Throttle angles. The values in this table are immediately applied when they are increasing but are only allowed to decrease gradually using \"Dashpot - Change Limitation\".",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83803,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "TPS",
+        "scaling": {
+          "factor": 0.47,
+          "offset": 0,
+          "units": "TPS%",
+          "digits": 1
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83816,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0xad8"
+    },
+    {
+      "name": "Fuel Injection - Base",
+      "address": 84756,
+      "rows": 16,
+      "cols": 12,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.0053,
+        "offset": 0,
+        "units": "Injector Pulsewidth (ms)",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Fuel",
+      "notes": "This table contains the Injector Pulse Width (in milliseconds) needed to get an AFR of 14.7 at a given Load and Engine Speed. Adjust this by a percentage of injector difference from stock as a baseline. Tune a needed.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 84120,
+        "count": 12,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 0.02119478141451133,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84146,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 1,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0xb14"
+    },
+    {
+      "name": "Fuel Injection - Base - VANOS Correction",
+      "address": 85224,
+      "rows": 16,
+      "cols": 12,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.001526,
+        "offset": -50.003968,
+        "units": "Multiplier",
+        "digits": 4
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Fuel",
+      "notes": "This table modifies Fuel Injector Pulsewidth when VANOS is active. The values in this map are mutliplied to the measured VANOS angle and added or subtracted to \"Fuel Injection - Base\".",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 84120,
+        "count": 12,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 0.02119478141451133,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84146,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 1,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0xce8"
+    },
+    {
+      "name": "Ignition Timing - Base",
+      "address": 85630,
+      "rows": 16,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": -23.6,
+        "units": "°BTDC",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Ignition Timing",
+      "notes": "This is the main ignition timing advance map.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 84120,
+        "count": 12,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 0.02119478141451133,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84146,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 1,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0xe7e"
+    },
+    {
+      "name": "Ignition Timing - Anti-Jerk",
+      "address": 85826,
+      "rows": 8,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": -48,
+        "units": "°BTDC",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Ignition Timing",
+      "notes": "This is the main Anti-Jerk map.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 84036,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84043,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0xf42"
+    },
+    {
+      "name": "Ignition Retard - ASC",
+      "address": 85878,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": -48,
+        "units": "°CRK",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Special Functions/Thresholds",
+      "notes": "NEEDS TESTING - This table retards Ignition Timing if requested by the ASC module.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 84084,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84089,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0xf76"
+    },
+    {
+      "name": "Ignition Timing - Base - ECT/IAT Compensation - Nominal",
+      "address": 86108,
+      "rows": 8,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": -0.375,
+        "offset": 48,
+        "units": "°CRK",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Ignition Timing",
+      "notes": "IP_IGA_N_MAF__N_32__MAF - This is multiplied to the \"Ignition Timing - Base - ECT/IAT Compensation - Multiplicative\" table to determine total adjustment to ignition angle based on coolant and air temperature.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 84197,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84204,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x105c"
+    },
+    {
+      "name": "Ignition Timing - Base - VANOS Correction",
+      "address": 86440,
+      "rows": 16,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.392,
+        "offset": -50.176,
+        "units": "Multiplier",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Ignition Timing",
+      "notes": "This table modifies Ignition Timing when VANOS is active. The values in this map are mutliplied to the measured VANOS angle and added or subtracted to \"Ignition Timing - Base\".",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 84120,
+        "count": 12,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 0.02119478141451133,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84146,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 1,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x11a8"
+    },
+    {
+      "name": "Muffler Flap Solenoid",
+      "address": 87300,
+      "rows": 11,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.47,
+        "offset": 0,
+        "units": "TPS (%)",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Muffler Flap",
+      "notes": "This tables defines when the muffler flap is opened. If the values in this table exceed current TPS% at a given Coolant Temp and RPM, the muffler flap solenoid opens. Set this entire table to 0 if the muffler flap should be open at all times.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87018,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "ECT",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 86982,
+        "count": 11,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1504"
+    },
+    {
+      "name": "VANOS - Min. Load (Light Throttle) (AT)",
+      "address": 87370,
+      "rows": 11,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 5.447058823529412,
+        "offset": 0,
+        "units": "mg/stroke [Limit = 1389]",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "VANOS",
+      "notes": "During \"Light Throttle\" if Load is greater than the values in this table, VANOS will be activated. This table is for Automatic Transmission cars.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87024,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 86994,
+        "count": 11,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x154a"
+    },
+    {
+      "name": "VANOS - Min. Load (Light Throttle) (MT)",
+      "address": 87444,
+      "rows": 11,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 5.447058823529412,
+        "offset": 0,
+        "units": "mg/stroke [Limit = 1389]",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "VANOS",
+      "notes": "During \"Light Throttle\" at a particular Engine Speed and Coolant Temperature if Load is greater than the values in this table, VANOS will be activated. This table is for Manual Transmission cars.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87030,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87006,
+        "count": 11,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1594"
+    },
+    {
+      "name": "Fuel Enrichment - Increasing Load - Initial",
+      "address": 87570,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.0078125,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Acceleration",
+      "notes": "The \"Fuel Enrichment - Increasing Load\" (FEIL) tables are used to add additional fuel when Load is increasing. If MAF is tuned to represent the correct real world Load, these tables may not need to be modified if using the stock intake manifold while Normally Aspirated. During a 'First Trigger', this table is multiplied only to \"FEIL Nominal\". Also, a hidden variable, 'FEIL Session Numerator' is set to 0 which increments by 1 every ECU cycle. During a 'Re-Trigger', the value from this table when a 'First Trigger' was recently initiated is multiplied to both \"FEIL Nominal\" and one of the \"FEIL Reduction Gradient\" tables.",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87084,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87074,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1612"
+    },
+    {
+      "name": "Fuel Enrichment - Increasing TPS",
+      "address": 87590,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.015625,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Acceleration",
+      "notes": "The \"Fuel Enrichment - Increasing TPS\" (FEIT) tables are used to add additional fuel when TPS is increasing. Used in two scenarios; 'First Triggering' and 'New Triggering'. During 'First Triggering' this table is multiplied to \"Fuel Enrichment - Increasing TPS - Initial\". During 'New Triggering', it is multiplied to the original value of \"Fuel Enrichment - Increasing TPS - Initial\" used during 'First Triggering' of the current Throttle acceleration enrichment session.",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87060,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87067,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Throttle Gradient",
+        "scaling": {
+          "factor": 11.671875,
+          "offset": 0,
+          "units": "TPS/sec",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1626"
+    },
+    {
+      "name": "Fuel Enrichment - Increasing Load - Nominal",
+      "address": 87630,
+      "rows": 4,
+      "cols": 6,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.000244140625,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Acceleration",
+      "notes": "During a 'First Trigger', this table is multiplied only to \"FEIL Initial\". During a 'Re-Trigger', this table is multiplied to both \"FEIL Initial\" and one of the \"FEIL Reduction Gradient\" tables. 'Load Ratio' is the Load when FEIL was first triggered divided by the current Load.",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87094,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load Ratio",
+        "scaling": {
+          "factor": 0.00390625,
+          "offset": 0,
+          "units": "Ratio",
+          "digits": 2
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87060,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x164e"
+    },
+    {
+      "name": "Fuel Enleanment - Decreasing TPS - Multiplicative",
+      "address": 87682,
+      "rows": 4,
+      "cols": 6,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.00390625,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Deceleration",
+      "notes": "IP_TI_FAC_TRA_PUR(_AT)__MAF_RATIO_PUR__TCO - This table is used during both FT and NT events. See \"Fuel Enleanment - Decreasing TPS\" for description. 'Load Ratio' is the current Load divided by the Load when Fuel Enleanment was first triggered.",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87099,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load Ratio",
+        "scaling": {
+          "factor": 0.00390625,
+          "offset": 0,
+          "units": "Ratio",
+          "digits": 2
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87060,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1682"
+    },
+    {
+      "name": "CH - Fuel Enrichment - Additive",
+      "address": 87734,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.0244,
+        "offset": -49.9712,
+        "units": "%",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Catalyst Heating",
+      "notes": "Add the values in this table after multiplying \"CH - Fuel Enrichment - Nominal\" to either \"CH - Fuel Enrichment - Multiplicative (Idle)\" or \"CH - Fuel Enrichment - Multiplicative (above Idle)\" to calculate Fuel Enrichment % when the Catalyst Heating function is enabled.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87114,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Counter since Engine Start",
+        "scaling": {
+          "factor": 1,
+          "offset": 0,
+          "units": "Time",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87104,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x16b6"
+    },
+    {
+      "name": "Fuel Enleanment - Decreasing TPS",
+      "address": 87890,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": -0.39215686274509803,
+        "offset": 0,
+        "units": "%",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Deceleration",
+      "notes": "IP_TI_FAC_PUR(_AT)__N_32__MAF - During a FT event, this table is multiplied to the \"Fuel Enleanment - Decreasing TPS - Multiplicative\" table to determine Fuel Enleanment when Throttle is decreasing. However, during a NT event, the value used during the last FT event is multiplied to the \"Fuel Enleanment - Decreasing TPS - Multiplicative\" table which is then multiplied to the \"Fuel Enleanment - Deactivation Factor\" table.",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87143,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87138,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1752"
+    },
+    {
+      "name": "CH - Fuel Enrichment - Nominal",
+      "address": 87910,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.39215686274509803,
+        "offset": 0,
+        "units": "%",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Catalyst Heating",
+      "notes": "Multiply this table to \"CH - Fuel Enrichment - Multiplicative (Idle)\" or \"CH - Fuel Enrichment - Multiplicative (above Idle)\" and add \"CH - Fuel Enrichment - Additive\" to calculate Fuel Enrichment % when the Catalyst Heating function is enabled.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87148,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87157,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1766"
+    },
+    {
+      "name": "Fuel Injection - Warmup Enrichment (ECT Compensation)",
+      "address": 87998,
+      "rows": 8,
+      "cols": 3,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.00784,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 3
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Fuel",
+      "notes": "Fuel enrichment for a cold engine. Multiply the values in this table to \"Fuel Injection - Warmup Enrichment\" to calculate final Warmup Enrichment",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87166,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature @ Engine Start",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 86973,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x17be"
+    },
+    {
+      "name": "Fuel Injection - Warmup Enrichment",
+      "address": 88026,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.392,
+        "offset": 0,
+        "units": "Enrichment (%)",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Fuel",
+      "notes": "Fuel enrichment for a cold engine. Multiply the values in this table to \"Fuel Injection - Warmup Enrichment (ECT Compensation)\" to calculate Warmup Enrichment.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87148,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87157,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x17da"
+    },
+    {
+      "name": "Fuel Enrichment - Increasing Load - Initial Session Denominator",
+      "address": 88094,
+      "rows": 4,
+      "cols": 6,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "ECU Cycles",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Acceleration",
+      "notes": "Initialized only during a 'First Trigger'. 'FEIL Session Numerator' is set to 0 which increments by 1 every ECU cycle. If (1 - 'FEIL Session Numerator' / \"FEIL Initial Session Denominator\" is less than \"FEIL Re-Trigger Duration\", a 'First Trigger' is possible if Load is increasing.",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87256,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87060,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x181e"
+    },
+    {
+      "name": "Fuel Enleanment - Decreasing TPS - Session Duration",
+      "address": 88146,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "ECU Cycles",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Deceleration",
+      "notes": "IP_TI_CYCNR_PUR(_AT)__N_32__TCO - This table is used to set the \"Session Duration Counter\" during a FT event and determines the duration of each \"Fuel Enleanment - Decreasing TPS\" session. This Counter decrements every ECU cycle and after it reaches 0, if Decreasing TPS occurs again, it will be considered a FT event.",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 86920,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 86937,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1852"
+    },
+    {
+      "name": "Ignition Retard - Decreasing TPS - Step Size",
+      "address": 88182,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.00146484375,
+        "offset": 0,
+        "units": "°CRK",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Deceleration",
+      "notes": "IP_IGA_LGRD_PU(_AT)__N_32__MAF_MMV - \"Ignition Retard - Decreasing TPS - Step Size\" and \"Ignition Retard - Decreasing TPS - Step Size (ECT Compensation)\" are added together to determine how gradually Ignition Timing is allowed to decrease when Throttle is slowly reduced. This is used during both \"Ignition Retard - Decreasing TPS\" and \"Ignition Retard - Decreasing TPS (Closed)\" but not \"Ignition Retard - Fast Decreasing TPS (Closed)\". A larger 'step size' will result in a faster change to applied Ignition Timing.",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87261,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87268,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 0.02119478141451133,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1876"
+    },
+    {
+      "name": "Ignition Retard - Decreasing TPS",
+      "address": 88246,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": -48,
+        "units": "°CRK",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Deceleration",
+      "notes": "IP_IGA_PU(_AT)__N__TCO - Ignition Timing is gradually reduced by this table when Throttle is decreasing, or when Throttle is closed and Engine Speed is less than the sum of \"Fuel Restore - RPM\" and \"Fuel Cut - RPM Hysteresis\" tables.",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87176,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 1,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87203,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x18b6"
+    },
+    {
+      "name": "Detection - Increasing TPS",
+      "address": 88294,
+      "rows": 6,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 11.671875,
+        "offset": 0,
+        "units": "TPS/sec",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Acceleration",
+      "notes": "ID_TPS_GRD_BOL_AE(_AT)__N_32__TPS - If the Throttle is increasing faster than the sum of \"Detection - Increasing TPS\" and \"Detection - Increasing TPS (ECT Compensation)\" then Acceleration tables are used.",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87213,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87220,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Throttle Position",
+        "scaling": {
+          "factor": 0.47,
+          "offset": 0,
+          "units": "%",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x18e6"
+    },
+    {
+      "name": "Detection - Decreasing TPS",
+      "address": 88322,
+      "rows": 6,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": -11.671875,
+        "offset": 0,
+        "units": "TPS/sec",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Deceleration",
+      "notes": "ID_TPS_GRD_BOL_PUR(_AT)__N_32__TPS - If Throttle is decreasing faster than the sum of \"Detection - Decreasing TPS\" and \"Detection - Decreasing TPS (ECT Compensation)\" then Deceleration tables are used.",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87213,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87225,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Throttle Position",
+        "scaling": {
+          "factor": 0.47,
+          "offset": 0,
+          "units": "%",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1902"
+    },
+    {
+      "name": "VANOS - On/Off (Heavy Throttle) (AT)",
+      "address": 88524,
+      "rows": 7,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "on/off",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "VANOS",
+      "notes": "During \"Heavy Throttle\" at a particular Engine Speed and Vehicle Speed if the value in this table is 1, VANOS will be activated. This table is for Automatic Transmission cars.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 86914,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Vehicle Speed",
+        "scaling": {
+          "factor": 1,
+          "offset": 0,
+          "units": "kph",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87235,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x19cc"
+    },
+    {
+      "name": "VANOS - On/Off (Heavy Throttle) (MT)",
+      "address": 88564,
+      "rows": 7,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "on/off",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "VANOS",
+      "notes": "During \"Heavy Throttle\" at a particular Engine Speed and Vehicle Speed if the value in this table is 1, VANOS will be activated. This table is for Manual Transmission cars. Only use this table to edit RPM axis.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 86914,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Vehicle Speed",
+        "scaling": {
+          "factor": 1,
+          "offset": 0,
+          "units": "kph",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87235,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x19f4"
+    },
+    {
+      "name": "Ignition Retard - Fast Increasing TPS",
+      "address": 88628,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": -48,
+        "units": "°CRK",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Acceleration",
+      "notes": "ID_IGA_TRA_KNK(_AT)__N_32__MAF - This table determines how much to retard the Ignition Timing when the Throttle is opened quickly. This table is used to prevent knock when the Throttle is opened quickly.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87277,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87230,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1a34"
+    },
+    {
+      "name": "IACV - Cranking",
+      "address": 88792,
+      "rows": 3,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.39215686274509803,
+        "offset": 0,
+        "units": "%",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Idle Air Control Valve",
+      "notes": "IP_ISAPWM__TPS -",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88726,
+        "count": 3,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 1,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 88733,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1ad8"
+    },
+    {
+      "name": "Fuel Injection - Cranking",
+      "address": 88948,
+      "rows": 3,
+      "cols": 8,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.0053,
+        "offset": 0,
+        "units": "Injector Pulse Width (milliseconds)",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Fuel",
+      "notes": "Injector Pulse Width while cranking.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 88733,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88726,
+        "count": 3,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 1,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1b74"
+    },
+    {
+      "name": "Ignition Timing - Idle - Base",
+      "address": 89888,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": -23.6,
+        "units": "°BTDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Ignition Timing",
+      "notes": "This ignition timing advance map is used during engine idle mode.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 89326,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 0.02119478141451133,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89336,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 1,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x1f20"
+    },
+    {
+      "name": "COP - Minimum Load",
+      "address": 90632,
+      "rows": 6,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 5.447058823529412,
+        "offset": 0,
+        "units": "mg/stroke [Limit = 1389]",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Catalyst Overheating Protection",
+      "notes": "IP_MAF_MIN_COP__N_32__IGA_COP - This table sets the minimum Load for COP to be active. Setting these values to max will disable Fuel Enrichment due to COP.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90320,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Ignition Correction (Knock + ECT/IAT Compensation)",
+        "scaling": {
+          "factor": 0.375,
+          "offset": -48,
+          "units": "°CRK",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90306,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x2208"
+    },
+    {
+      "name": "Adaptation Additive - Warm-up Compensation",
+      "address": 90772,
+      "rows": 5,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.39215686274509803,
+        "offset": 0,
+        "units": "Multiplicative %",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Adaptive Fuel Learning",
+      "notes": "The applied Adaptation Additive is multiplied by this table to reduce its effect when Coolant Temperature is less than \"Adaptive Fuel Learning - Minimum ECT\".",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90242,
+        "count": 5,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Adaptation Additive",
+        "scaling": {
+          "factor": 0.0053,
+          "offset": -173.6704,
+          "units": "milliseconds",
+          "digits": 2
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90221,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x2294"
+    },
+    {
+      "name": "Adaptation Multiplicative - Warm-up Compensation",
+      "address": 90802,
+      "rows": 5,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.39215686274509803,
+        "offset": 0,
+        "units": "Multiplicative %",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Adaptive Fuel Learning",
+      "notes": "The applied Adaptation Multiplicative is multiplied by this table to reduce its effect when Coolant Temperature is less than \"Adaptive Fuel Learning - Minimum ECT\".",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90254,
+        "count": 5,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Adaptation Multiplicative",
+        "scaling": {
+          "factor": 0.0015259021896696422,
+          "offset": -50.000762951094835,
+          "units": "%",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90221,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x22b2"
+    },
+    {
+      "name": "COP - Fuel Enrichment - Nominal",
+      "address": 90838,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.39215686274509803,
+        "offset": 0,
+        "units": "%",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Catalyst Overheating Protection",
+      "notes": "IP_TI_COP__N_32__MAF - This table is added to \"COP - Fuel Enrichment - Additive\" to determine final Fuel Enrichment due to COP. The code will not allow any negative Fuel Enrichment so setting this table to all 0 will disable all Catalyst Overheating Protection. Only do this if there is no Catalytic Converter present.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90313,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90306,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x22d6"
+    },
+    {
+      "name": "Knock Detection - Min. Load",
+      "address": 91038,
+      "rows": 8,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 5.447058823529412,
+        "offset": 0,
+        "units": "mg/stroke [Limit = 1389]",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "IP_MAF_MIN_KNK__N__TCO - Minimum Load to enable Knock Detection.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90997,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Coolant Temperature",
+        "scaling": {
+          "factor": 0.75,
+          "offset": -48,
+          "units": "°C",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90988,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x239e"
+    },
+    {
+      "name": "Max. Knock Retard",
+      "address": 91084,
+      "rows": 8,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": -48,
+        "units": "°CRK",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "IP_IGA_MAX_KNK__N_32__MAF - Maximum Ignition Retard due to Knock.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91002,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90988,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x23cc"
+    },
+    {
+      "name": "Knock Detection Threshold - Multiplicative Factor - Cylinder 6",
+      "address": 91148,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.0313,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "Multiplicative factor for knock detection threshold calculation for each cylinder.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x240c"
+    },
+    {
+      "name": "Knock Detection Threshold - Multiplicative Factor - Cylinder 2",
+      "address": 91216,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.0313,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "Multiplicative factor for knock detection threshold calculation for each cylinder.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x2450"
+    },
+    {
+      "name": "Knock Detection Threshold - Multiplicative Factor - Cylinder 4",
+      "address": 91284,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.0313,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "Multiplicative factor for knock detection threshold calculation for each cylinder.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x2494"
+    },
+    {
+      "name": "Knock Detection Threshold - Multiplicative Factor - Cylinder 1",
+      "address": 91352,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.0313,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "Multiplicative factor for knock detection threshold calculation for each cylinder.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x24d8"
+    },
+    {
+      "name": "Knock Detection Threshold - Multiplicative Factor - Cylinder 5",
+      "address": 91420,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.0313,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "Multiplicative factor for knock detection threshold calculation for each cylinder.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x251c"
+    },
+    {
+      "name": "Knock Detection Threshold - Multiplicative Factor - Cylinder 3",
+      "address": 91488,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.0313,
+        "offset": 0,
+        "units": "Multiplicative Factor",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "Multiplicative factor for knock detection threshold calculation for each cylinder.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x2560"
+    },
+    {
+      "name": "Knock Detection Window - Start - Cylinder 4",
+      "address": 91556,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 0,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for beginning of control window to the cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x25a4"
+    },
+    {
+      "name": "Knock Detection Window - Start - Cylinder 1",
+      "address": 91624,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 0,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for beginning of control window to the cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x25e8"
+    },
+    {
+      "name": "Knock Detection Window - Start - Cylinder 5",
+      "address": 91692,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 0,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for beginning of control window to the cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x262c"
+    },
+    {
+      "name": "Knock Detection Window - Start - Cylinder 3",
+      "address": 91760,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 0,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for beginning of control window to the cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x2670"
+    },
+    {
+      "name": "Knock Detection Window - Start - Cylinder 6",
+      "address": 91828,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 0,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for beginning of control window to the cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x26b4"
+    },
+    {
+      "name": "Knock Detection Window - Start - Cylinder 2",
+      "address": 91896,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 0,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for beginning of control window to the cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x26f8"
+    },
+    {
+      "name": "Knock Detection Window - End - Cylinder 4",
+      "address": 91964,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 12,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for end of the control window to cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x273c"
+    },
+    {
+      "name": "Knock Detection Window - End - Cylinder 1",
+      "address": 92032,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 12,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for end of the control window to cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x2780"
+    },
+    {
+      "name": "Knock Detection Window - End - Cylinder 5",
+      "address": 92100,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 12,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for end of the control window to cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x27c4"
+    },
+    {
+      "name": "Knock Detection Window - End - Cylinder 3",
+      "address": 92168,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 12,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for end of the control window to cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x2808"
+    },
+    {
+      "name": "Knock Detection Window - End - Cylinder 6",
+      "address": 92236,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 12,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for end of the control window to cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x284c"
+    },
+    {
+      "name": "Knock Detection Window - End - Cylinder 2",
+      "address": 92304,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.375,
+        "offset": 12,
+        "units": "(°) ATDC",
+        "digits": 1
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Knock",
+      "notes": "The tables for end of the control window to cylinders and knock sensors.",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91016,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Load",
+        "scaling": {
+          "factor": 5.447058823529412,
+          "offset": 0,
+          "units": "mg/stroke [Limit = 1389]",
+          "digits": 0
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90971,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        },
+        "name": "Engine Speed",
+        "scaling": {
+          "factor": 32,
+          "offset": 0,
+          "units": "RPM",
+          "digits": 0
+        }
+      },
+      "id": "ms41-12-0x2890"
+    },
+    {
+      "name": "MAF",
+      "address": 92886,
+      "rows": 16,
+      "cols": 16,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 0.015625,
+        "offset": 0,
+        "units": "kg/hr [Limit = 1024 kg/hr]",
+        "digits": 2
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "category": "Sensors Scaling",
+      "notes": "This is the scaling for the MAF sensor when the stock MAF Mode = 1024 kg/hr just in a convenient 16x16 format for easier editing. If another MAF table for a higher 2048 kg/hr table is shown below, then editing this table will not result in changes being saved. Only the last MAF table displayed will save changes. You have two options at this point. Either edit and reflash the 256KB version which allows setting the MAF Mode to 2048kg/hr, or know the values displayed in the 2048kg/hr table are artificially multiplied by 2 compared to actual if in stock 1024kg/hr mode. Please see the forums for more assistance if needed.",
+      "xAxis": {
+        "kind": "literal",
+        "count": 16,
+        "values": [
+          0,
+          0.02,
+          0.04,
+          0.06,
+          0.08,
+          0.1,
+          0.12,
+          0.14,
+          0.16,
+          0.18,
+          0.2,
+          0.22,
+          0.24,
+          0.26,
+          0.28,
+          0.3
+        ],
+        "name": "0 to 5 Volts - Each row is ~0.3 Volts wide"
+      },
+      "yAxis": {
+        "kind": "literal",
+        "count": 16,
+        "values": [
+          0,
+          0.32,
+          0.64,
+          0.96,
+          1.26,
+          1.58,
+          1.9,
+          2.2,
+          2.52,
+          2.82,
+          3.14,
+          3.46,
+          3.78,
+          4.08,
+          4.4,
+          4.7
+        ],
+        "name": "0 to 5 Volts"
+      },
+      "id": "ms41-12-0x2ad6"
+    }
+  ]
+}

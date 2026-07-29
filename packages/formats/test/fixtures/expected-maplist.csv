@@ -1,0 +1,5 @@
+name,category,address,rows,cols,width,signed,endian,factor,offset,units,digits,xAxisAddress,xAxisCount,yAxisAddress,yAxisCount,confidence,provenance,detector,kind
+"Ignition, ""Base""",Ignition,0x1448c,16,12,1,false,little,0.375,-23.6,°BTDC,2,0x14898,12,0x148b2,16,,imported,,
+MAF,,0x16ad6,16,16,2,true,big,1,0,,0,,,,,0.87,auto,family,
+Flex Fuel Enable,Switches,0x2000,1,1,1,false,little,1,0,,0,,,,,,imported,,switch
+Param 0x142DC u8,Code-referenced parameter,0x142dc,1,1,1,false,big,1,0,,0,,,,,0.3,auto,family,param

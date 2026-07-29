@@ -1,0 +1,486 @@
+{
+  "fixture": "synth-pcurve-403",
+  "binSha256": "df20a55dd71b6b29d2307377ab3c4ce85455146de900ec51ab866ca26abed203",
+  "maps": [
+    {
+      "id": "synthpc-403-0x280c",
+      "name": "Synthetic Partial Curve 0x280c",
+      "address": 10252,
+      "rows": 9,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10241,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x2834",
+      "name": "Synthetic Partial Curve 0x2834",
+      "address": 10292,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10283,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x283e",
+      "name": "Synthetic Partial Curve 0x283e",
+      "address": 10302,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10277,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x2858",
+      "name": "Synthetic Partial Curve 0x2858",
+      "address": 10328,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10323,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x2871",
+      "name": "Synthetic Partial Curve 0x2871",
+      "address": 10353,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10345,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x2894",
+      "name": "Synthetic Partial Curve 0x2894",
+      "address": 10388,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10381,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x289c",
+      "name": "Synthetic Partial Curve 0x289c",
+      "address": 10396,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10375,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x28b6",
+      "name": "Synthetic Partial Curve 0x28b6",
+      "address": 10422,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10417,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x28ce",
+      "name": "Synthetic Partial Curve 0x28ce",
+      "address": 10446,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10437,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x28ee",
+      "name": "Synthetic Partial Curve 0x28ee",
+      "address": 10478,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10469,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x28f8",
+      "name": "Synthetic Partial Curve 0x28f8",
+      "address": 10488,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10463,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x2910",
+      "name": "Synthetic Partial Curve 0x2910",
+      "address": 10512,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10507,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x292d",
+      "name": "Synthetic Partial Curve 0x292d",
+      "address": 10541,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10531,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x2952",
+      "name": "Synthetic Partial Curve 0x2952",
+      "address": 10578,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10569,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x295c",
+      "name": "Synthetic Partial Curve 0x295c",
+      "address": 10588,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10563,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthpc-403-0x2974",
+      "name": "Synthetic Partial Curve 0x2974",
+      "address": 10612,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10607,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    }
+  ]
+}

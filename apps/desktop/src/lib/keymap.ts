@@ -1,0 +1,59 @@
+/**
+ * THE keyboard dispatcher (one module, no per-component global keydowns).
+ * The v1 map is FROZEN in spec §7:
+ *   M/W columns ± · Ctrl+←/→ origin · K selection→map / promote ·
+ *   Ctrl+B optimize value range · F/Shift+F next/prev potential ·
+ *   T/Shift+T cycle view · P preview.
+ * RESERVED for v2 (must stay unbound): '+', '-', 'F11'.
+ * Pure: KeyInput in, action name out; the App shell maps names to store actions.
+ */
+
+export type UiAction =
+  | 'columns-inc'
+  | 'columns-dec'
+  | 'origin-left'
+  | 'origin-right'
+  | 'confirm-selection'
+  | 'optimize-range'
+  | 'next-potential'
+  | 'prev-potential'
+  | 'view-next'
+  | 'view-prev'
+  | 'toggle-preview';
+
+export interface KeyInput {
+  key: string;
+  ctrl: boolean;
+  shift: boolean;
+  alt: boolean;
+  meta: boolean;
+  /** True when focus is in an input/select/textarea/contenteditable. */
+  inEditable: boolean;
+}
+
+export function resolveKey(k: KeyInput): UiAction | undefined {
+  if (k.inEditable || k.alt || k.meta) return undefined;
+  if (k.ctrl) {
+    if (k.key === 'ArrowLeft') return 'origin-left';
+    if (k.key === 'ArrowRight') return 'origin-right';
+    if (k.key === 'b' || k.key === 'B') return 'optimize-range';
+    return undefined;
+  }
+  const key = k.key.length === 1 ? k.key.toLowerCase() : k.key;
+  switch (key) {
+    case 'm':
+      return 'columns-inc';
+    case 'w':
+      return 'columns-dec';
+    case 'k':
+      return 'confirm-selection';
+    case 'f':
+      return k.shift ? 'prev-potential' : 'next-potential';
+    case 't':
+      return k.shift ? 'view-prev' : 'view-next';
+    case 'p':
+      return 'toggle-preview';
+    default:
+      return undefined; // includes RESERVED '+', '-', 'F11'
+  }
+}

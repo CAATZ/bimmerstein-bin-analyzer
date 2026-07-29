@@ -1,0 +1,22 @@
+node_modules/
+dist/
+target/
+*.local
+.DS_Store
+Thumbs.db
+eval-report.json
+coverage/
+
+# Real ECU firmware is never committed (copyright). Synthetic fixtures are allowed.
+fixtures/**/*.bin
+!fixtures/synthetic/*.bin
+
+# Source definition files for ground truth stay local (third-party licensing).
+fixtures/**/defs/
+
+# Uncommitted diagnostic scripts
+scratch/
+
+# Internal development docs (kept local, not part of the public tree)
+/docs/
+

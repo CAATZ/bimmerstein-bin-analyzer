@@ -1,0 +1,18 @@
+{
+  "name": "bimmerstein-bin-analyzer",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Open-source ECU bin tuning-table analyzer",
+  "license": "GPL-3.0-or-later",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "eval": "pnpm --filter @binanalyzer/eval start",
+    "dev": "pnpm --filter desktop tauri dev",
+    "build": "pnpm -r --if-present build"
+  }
+}

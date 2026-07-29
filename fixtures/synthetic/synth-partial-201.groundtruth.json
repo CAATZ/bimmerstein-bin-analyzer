@@ -1,0 +1,1766 @@
+{
+  "fixture": "synth-partial-201",
+  "binSha256": "c535a1dd6de3575245fa6474113fc32283b2e9c4c6bef0467eed359c15846acc",
+  "maps": [
+    {
+      "id": "synthp-201-0x1804",
+      "name": "Synthetic Partial 0x1804",
+      "address": 6148,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 257,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 266,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1838",
+      "name": "Synthetic Partial 0x1838",
+      "address": 6200,
+      "rows": 5,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 275,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 282,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x185a",
+      "name": "Synthetic Partial 0x185a",
+      "address": 6234,
+      "rows": 8,
+      "cols": 10,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 290,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 301,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x18ae",
+      "name": "Synthetic Partial 0x18ae",
+      "address": 6318,
+      "rows": 5,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 312,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 318,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x18cb",
+      "name": "Synthetic Partial 0x18cb",
+      "address": 6347,
+      "rows": 4,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 326,
+        "count": 12,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 339,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x18ff",
+      "name": "Synthetic Partial 0x18ff",
+      "address": 6399,
+      "rows": 9,
+      "cols": 7,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 346,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 354,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1942",
+      "name": "Synthetic Partial 0x1942",
+      "address": 6466,
+      "rows": 7,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 366,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 371,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1962",
+      "name": "Synthetic Partial 0x1962",
+      "address": 6498,
+      "rows": 6,
+      "cols": 9,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 381,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 391,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x199c",
+      "name": "Synthetic Partial 0x199c",
+      "address": 6556,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 400,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 409,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x19d0",
+      "name": "Synthetic Partial 0x19d0",
+      "address": 6608,
+      "rows": 5,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 418,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 425,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x19f2",
+      "name": "Synthetic Partial 0x19f2",
+      "address": 6642,
+      "rows": 8,
+      "cols": 10,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 433,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 444,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1a46",
+      "name": "Synthetic Partial 0x1a46",
+      "address": 6726,
+      "rows": 5,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 455,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 461,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1a63",
+      "name": "Synthetic Partial 0x1a63",
+      "address": 6755,
+      "rows": 4,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 469,
+        "count": 12,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 482,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1a97",
+      "name": "Synthetic Partial 0x1a97",
+      "address": 6807,
+      "rows": 9,
+      "cols": 7,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 489,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 497,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1ada",
+      "name": "Synthetic Partial 0x1ada",
+      "address": 6874,
+      "rows": 7,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 509,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 514,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1afa",
+      "name": "Synthetic Partial 0x1afa",
+      "address": 6906,
+      "rows": 6,
+      "cols": 9,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 524,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 534,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1b34",
+      "name": "Synthetic Partial 0x1b34",
+      "address": 6964,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 543,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 552,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1b68",
+      "name": "Synthetic Partial 0x1b68",
+      "address": 7016,
+      "rows": 5,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 561,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 568,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1b8a",
+      "name": "Synthetic Partial 0x1b8a",
+      "address": 7050,
+      "rows": 8,
+      "cols": 10,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 576,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 587,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1bde",
+      "name": "Synthetic Partial 0x1bde",
+      "address": 7134,
+      "rows": 5,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 598,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 604,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1bfb",
+      "name": "Synthetic Partial 0x1bfb",
+      "address": 7163,
+      "rows": 4,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 612,
+        "count": 12,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 625,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1c2f",
+      "name": "Synthetic Partial 0x1c2f",
+      "address": 7215,
+      "rows": 9,
+      "cols": 7,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 632,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 640,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1c72",
+      "name": "Synthetic Partial 0x1c72",
+      "address": 7282,
+      "rows": 7,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 652,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 657,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1c92",
+      "name": "Synthetic Partial 0x1c92",
+      "address": 7314,
+      "rows": 6,
+      "cols": 9,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 667,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 677,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1ccc",
+      "name": "Synthetic Partial 0x1ccc",
+      "address": 7372,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 686,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 695,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1d00",
+      "name": "Synthetic Partial 0x1d00",
+      "address": 7424,
+      "rows": 5,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 704,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 711,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1d22",
+      "name": "Synthetic Partial 0x1d22",
+      "address": 7458,
+      "rows": 8,
+      "cols": 10,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 719,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 730,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1d76",
+      "name": "Synthetic Partial 0x1d76",
+      "address": 7542,
+      "rows": 5,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 741,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 747,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1d93",
+      "name": "Synthetic Partial 0x1d93",
+      "address": 7571,
+      "rows": 4,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 755,
+        "count": 12,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 768,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1dc7",
+      "name": "Synthetic Partial 0x1dc7",
+      "address": 7623,
+      "rows": 9,
+      "cols": 7,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 775,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 783,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1e0a",
+      "name": "Synthetic Partial 0x1e0a",
+      "address": 7690,
+      "rows": 7,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 795,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 800,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1e2a",
+      "name": "Synthetic Partial 0x1e2a",
+      "address": 7722,
+      "rows": 6,
+      "cols": 9,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 810,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 820,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1e64",
+      "name": "Synthetic Partial 0x1e64",
+      "address": 7780,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 829,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 838,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1e98",
+      "name": "Synthetic Partial 0x1e98",
+      "address": 7832,
+      "rows": 5,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 847,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 854,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1eba",
+      "name": "Synthetic Partial 0x1eba",
+      "address": 7866,
+      "rows": 8,
+      "cols": 10,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 862,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 873,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1f0e",
+      "name": "Synthetic Partial 0x1f0e",
+      "address": 7950,
+      "rows": 5,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 884,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 890,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1f2b",
+      "name": "Synthetic Partial 0x1f2b",
+      "address": 7979,
+      "rows": 4,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 898,
+        "count": 12,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 911,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1f5f",
+      "name": "Synthetic Partial 0x1f5f",
+      "address": 8031,
+      "rows": 9,
+      "cols": 7,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 918,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 926,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1fa2",
+      "name": "Synthetic Partial 0x1fa2",
+      "address": 8098,
+      "rows": 7,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 938,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 943,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1fc2",
+      "name": "Synthetic Partial 0x1fc2",
+      "address": 8130,
+      "rows": 6,
+      "cols": 9,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 953,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 963,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x1ffc",
+      "name": "Synthetic Partial 0x1ffc",
+      "address": 8188,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 972,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 981,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x2030",
+      "name": "Synthetic Partial 0x2030",
+      "address": 8240,
+      "rows": 5,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 990,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 997,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x2052",
+      "name": "Synthetic Partial 0x2052",
+      "address": 8274,
+      "rows": 8,
+      "cols": 10,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 1005,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1016,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthp-201-0x20a6",
+      "name": "Synthetic Partial 0x20a6",
+      "address": 8358,
+      "rows": 5,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 1027,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1033,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    }
+  ]
+}

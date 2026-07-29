@@ -1,0 +1,1146 @@
+{
+  "fixture": "synth-curve-307",
+  "binSha256": "f41f945ad93018a82360b87a87be47a485a751c0753c9156f3159e9bacff6d3c",
+  "maps": [
+    {
+      "id": "synthc-307-0x813",
+      "name": "Synthetic Curve 0x813",
+      "address": 83987,
+      "rows": 10,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83969,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x831",
+      "name": "Synthetic Curve 0x831",
+      "address": 84017,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84001,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x853",
+      "name": "Synthetic Curve 0x853",
+      "address": 84051,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84037,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x86d",
+      "name": "Synthetic Curve 0x86d",
+      "address": 84077,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84063,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x888",
+      "name": "Synthetic Curve 0x888",
+      "address": 84104,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84092,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x8a5",
+      "name": "Synthetic Curve 0x8a5",
+      "address": 84133,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84118,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x8c6",
+      "name": "Synthetic Curve 0x8c6",
+      "address": 84166,
+      "rows": 10,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84152,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x8e2",
+      "name": "Synthetic Curve 0x8e2",
+      "address": 84194,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84183,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x8fb",
+      "name": "Synthetic Curve 0x8fb",
+      "address": 84219,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84209,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x917",
+      "name": "Synthetic Curve 0x917",
+      "address": 84247,
+      "rows": 10,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84229,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x943",
+      "name": "Synthetic Curve 0x943",
+      "address": 84291,
+      "rows": 10,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84274,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x95d",
+      "name": "Synthetic Curve 0x95d",
+      "address": 84317,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84304,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x978",
+      "name": "Synthetic Curve 0x978",
+      "address": 84344,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84334,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x990",
+      "name": "Synthetic Curve 0x990",
+      "address": 84368,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84353,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x9ab",
+      "name": "Synthetic Curve 0x9ab",
+      "address": 84395,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84387,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x9c1",
+      "name": "Synthetic Curve 0x9c1",
+      "address": 84417,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84403,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x9dd",
+      "name": "Synthetic Curve 0x9dd",
+      "address": 84445,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84436,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0x9f2",
+      "name": "Synthetic Curve 0x9f2",
+      "address": 84466,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84453,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0xa11",
+      "name": "Synthetic Curve 0xa11",
+      "address": 84497,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84486,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0xa2f",
+      "name": "Synthetic Curve 0xa2f",
+      "address": 84527,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84511,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0xa52",
+      "name": "Synthetic Curve 0xa52",
+      "address": 84562,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84549,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0xa68",
+      "name": "Synthetic Curve 0xa68",
+      "address": 84584,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84573,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0xa89",
+      "name": "Synthetic Curve 0xa89",
+      "address": 84617,
+      "rows": 10,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84601,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0xaa7",
+      "name": "Synthetic Curve 0xaa7",
+      "address": 84647,
+      "rows": 10,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84633,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0xad2",
+      "name": "Synthetic Curve 0xad2",
+      "address": 84690,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84674,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-307-0xaed",
+      "name": "Synthetic Curve 0xaed",
+      "address": 84717,
+      "rows": 9,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 84703,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-headerLow-0xc39",
+      "name": "Synthetic Fallback Header-Low Curve 0xc39",
+      "address": 85049,
+      "rows": 2,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 85041,
+        "count": 2,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-headerLow-0xde3",
+      "name": "Synthetic Fallback Header-Low Curve 0xde3",
+      "address": 85475,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 85468,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-headerLow-0xf8a",
+      "name": "Synthetic Fallback Header-Low Curve 0xf8a",
+      "address": 85898,
+      "rows": 2,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 85888,
+        "count": 2,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-headerLow-0x1177",
+      "name": "Synthetic Fallback Header-Low Curve 0x1177",
+      "address": 86391,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 86384,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-fwdAdj-0x12d5",
+      "name": "Synthetic Fallback Fwd-Adjacency Curve 0x12d5",
+      "address": 86741,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 86736,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-fwdAdj-0x14b5",
+      "name": "Synthetic Fallback Fwd-Adjacency Curve 0x14b5",
+      "address": 87221,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87205,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-fwdAdj-0x162e",
+      "name": "Synthetic Fallback Fwd-Adjacency Curve 0x162e",
+      "address": 87598,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87590,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-fwdAdj-0x17cb",
+      "name": "Synthetic Fallback Fwd-Adjacency Curve 0x17cb",
+      "address": 88011,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88001,
+        "count": 5,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-revAdj-0x1915",
+      "name": "Synthetic Fallback Rev-Adjacency Curve 0x1915",
+      "address": 88341,
+      "rows": 10,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88352,
+        "count": 10,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-revAdj-0x1a99",
+      "name": "Synthetic Fallback Rev-Adjacency Curve 0x1a99",
+      "address": 88729,
+      "rows": 9,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88748,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-revAdj-0x1bf8",
+      "name": "Synthetic Fallback Rev-Adjacency Curve 0x1bf8",
+      "address": 89080,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89087,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "id": "synthc-fb-307-revAdj-0x1dc7",
+      "name": "Synthetic Fallback Rev-Adjacency Curve 0x1dc7",
+      "address": 89543,
+      "rows": 9,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89562,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    }
+  ]
+}

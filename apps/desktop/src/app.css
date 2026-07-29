@@ -1,0 +1,149 @@
+/* App-wide layout + palette. Dark, neutral, keyboard-first. */
+:root {
+  --bg: #1b1d21;
+  --bg-panel: #22252b;
+  --bg-raise: #2b2f37;
+  --fg: #e8eaed;
+  --fg-dim: #9aa0a6;
+  --accent: #4c8dff;
+  --warn: #ffb74d;
+  --err: #ef5350;
+  --chip: #7a5cff;
+  font-size: 14px;
+}
+* { box-sizing: border-box; }
+html, body, #app { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+button, select, input {
+  background: var(--bg-raise);
+  color: var(--fg);
+  border: 1px solid #3a3f48;
+  border-radius: 4px;
+  padding: 3px 10px;
+  font: inherit;
+}
+button:hover:not(:disabled) { border-color: var(--accent); cursor: pointer; }
+button:disabled { opacity: 0.45; }
+button.active { border-color: var(--accent); background: #2a3f63; }
+.app { display: flex; flex-direction: column; height: 100%; }
+.body { display: flex; flex: 1; min-height: 0; }
+.view { flex: 1; min-width: 0; position: relative; background: var(--bg); }
+.empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-dim);
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid #333842;
+  flex-wrap: wrap;
+}
+.toolbar .sep { width: 1px; align-self: stretch; background: #3a3f48; margin: 0 4px; }
+.toolbar label { display: flex; align-items: center; gap: 4px; color: var(--fg-dim); }
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  overflow-y: auto;
+  background: var(--bg-panel);
+  border-right: 1px solid #333842;
+  padding: 6px;
+}
+.sidebar h2 { font-size: 12px; text-transform: uppercase; color: var(--fg-dim); margin: 8px 4px 4px; }
+.sidebar ul { list-style: none; margin: 0; padding: 0; }
+.sidebar li { display: flex; align-items: center; border-radius: 4px; }
+.sidebar li.selected { background: #2a3f63; }
+.sidebar li .row {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 3px 6px;
+  text-align: left;
+  min-width: 0;
+}
+.sidebar li .row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar li .row .addr, .sidebar li .row .conf { color: var(--fg-dim); flex-shrink: 0; }
+.sidebar li .row .tier {
+  flex-shrink: 0;
+  font-size: 0.68em;
+  line-height: 1.5;
+  padding: 0 4px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  opacity: 0.9;
+}
+/* evidence strength: code-proven → heuristic */
+.tier-family { color: #5bc26a; }
+.tier-structural { color: #5b9bd5; }
+.tier-pool { color: #4db6ac; }
+.tier-generic { color: var(--fg-dim); }
+.sidebar li .row .oned {
+  flex-shrink: 0;
+  font-size: 0.68em;
+  line-height: 1.5;
+  padding: 0 4px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  opacity: 0.9;
+  color: var(--chip);
+}
+.sidebar li .row .sw {
+  flex-shrink: 0;
+  font-size: 0.68em;
+  line-height: 1.5;
+  padding: 0 4px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  opacity: 0.9;
+  color: var(--warn);
+}
+.sidebar li .x { background: none; border: none; color: var(--fg-dim); padding: 0 6px; }
+.sidebar li .x:hover { color: var(--err); }
+.status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 10px;
+  background: var(--bg-panel);
+  border-top: 1px solid #333842;
+  color: var(--fg-dim);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.status .grow { flex: 1; }
+.status .err { color: var(--err); }
+.toasts { position: fixed; top: 46px; right: 12px; display: flex; flex-direction: column; gap: 6px; z-index: 40; }
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 420px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--bg-raise);
+  border-left: 3px solid var(--accent);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 50%);
+}
+.toast.error { border-left-color: var(--err); }
+.toast button { background: none; border: none; color: var(--fg-dim); padding: 0 2px; }

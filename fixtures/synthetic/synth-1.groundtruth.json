@@ -1,0 +1,326 @@
+{
+  "fixture": "synth-1",
+  "binSha256": "c633ca179e94bbfcc432b1deafb36dbe7bf69a352f9f454b2eb0ea32ca08cc91",
+  "maps": [
+    {
+      "id": "gt-1-0",
+      "name": "Planted 11x8 #0",
+      "address": 43711,
+      "rows": 11,
+      "cols": 8,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 8,
+        "address": 43673,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 43689,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gt-1-1",
+      "name": "Planted 5x11 #1",
+      "address": 43937,
+      "rows": 5,
+      "cols": 11,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 43905,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 5,
+        "address": 43927,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gt-1-2",
+      "name": "Planted 5x13 #2",
+      "address": 44123,
+      "rows": 5,
+      "cols": 13,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 13,
+        "address": 44087,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 5,
+        "address": 44113,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gt-1-3",
+      "name": "Planted 8x14 #3",
+      "address": 44343,
+      "rows": 8,
+      "cols": 14,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 14,
+        "address": 44299,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 8,
+        "address": 44327,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gt-1-4",
+      "name": "Planted 8x16 #4",
+      "address": 44659,
+      "rows": 8,
+      "cols": 16,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 16,
+        "address": 44611,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 8,
+        "address": 44643,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gt-1-5",
+      "name": "Planted 12x15 #5",
+      "address": 45003,
+      "rows": 12,
+      "cols": 15,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 15,
+        "address": 44949,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 12,
+        "address": 44979,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gt-1-6",
+      "name": "Planted 4x11 #6",
+      "address": 45443,
+      "rows": 4,
+      "cols": 11,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 45413,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 4,
+        "address": 45435,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    },
+    {
+      "id": "gt-1-7",
+      "name": "Planted 7x11 #7",
+      "address": 45590,
+      "rows": 7,
+      "cols": 11,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "big"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "xAxis": {
+        "kind": "referenced",
+        "count": 11,
+        "address": 45554,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "count": 7,
+        "address": 45576,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "provenance": "imported"
+    }
+  ]
+}

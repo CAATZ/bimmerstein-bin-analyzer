@@ -1,0 +1,105 @@
+<!-- Structural excerpt from "Siemens MS41.0 ID41 861" (MS4X dev team), an XDF
+     saved by TunerPro. Committed as the format-semantics reference sample
+     (golden-sample rule): mmedtypeflags 0x01=signed,
+     0x02=LSB-first; CATEGORYMEM.category = CATEGORY.index+1; referenced axes
+     are linked axis-table objects (embedinfo type="3"). Do not edit. -->
+<XDFFORMAT version="1.70">
+  <XDFHEADER>
+    <flags>0x1</flags>
+    <fileversion>1.0</fileversion>
+    <deftitle>Siemens MS41.0 ID41 861</deftitle>
+    <author>MS4X Dev team</author>
+    <BASEOFFSET offset="81920" subtract="0" />
+    <DEFAULTS datasizeinbits="8" sigdigits="2" outputtype="1" signed="0" lsbfirst="0" float="0" />
+    <REGION type="0xFFFFFFFF" startaddress="0x0" size="0x40000" regioncolor="0x0" regionflags="0x0" name="Binary File" desc="This region describes the bin file edited by this XDF" />
+    <CATEGORY index="0x0" name="Control Bits" />
+    <CATEGORY index="0x1" name="Catalyst Heating" />
+    <CATEGORY index="0x14" name="Axis" />
+  </XDFHEADER>
+  <XDFTABLE uniqueid="0x6121" flags="0x30">
+    <title>Catalyst Heating - Duration - Ignition Retard</title>
+    <description>This table determines the duration after engine start for retarded Ignition Timing that is part of the Catalyst Heating function. Disabling this also disables the &quot;Fuel Enrichment&quot; part of the Catalyst Heating function.</description>
+    <CATEGORYMEM index="0" category="2" />
+    <XDFAXIS id="x" uniqueid="0x0">
+      <EMBEDDEDDATA mmedelementsizebits="8" mmedmajorstridebits="-32" mmedminorstridebits="0" />
+      <units>&#176;C</units>
+      <indexcount>8</indexcount>
+      <embedinfo type="3" linkobjid="0x3E42" />
+      <datatype>0</datatype>
+      <unittype>0</unittype>
+      <DALINK index="0" />
+      <MATH equation="X">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+    <XDFAXIS id="y" uniqueid="0x0">
+      <EMBEDDEDDATA mmedelementsizebits="8" mmedmajorstridebits="-32" mmedminorstridebits="0" />
+      <units>s</units>
+      <indexcount>1</indexcount>
+      <datatype>0</datatype>
+      <unittype>0</unittype>
+      <DALINK index="0" />
+      <LABEL index="0" value="0.00" />
+      <MATH equation="X">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+    <XDFAXIS id="z">
+      <EMBEDDEDDATA mmedtypeflags="0x02" mmedaddress="0x1316" mmedelementsizebits="16" mmedrowcount="1" mmedcolcount="8" mmedmajorstridebits="0" mmedminorstridebits="0" />
+      <units>s</units>
+      <decimalpl>2</decimalpl>
+      <min>0.000000</min>
+      <max>1.000000</max>
+      <outputtype>1</outputtype>
+      <MATH equation="X*0.1">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+  </XDFTABLE>
+  <XDFTABLE uniqueid="0x3E42" flags="0x30">
+    <title>Axis - Coolant Temperature At Engine Start 1x8 0x66B</title>
+    <CATEGORYMEM index="0" category="21" />
+    <XDFAXIS id="x" uniqueid="0x0">
+      <EMBEDDEDDATA mmedelementsizebits="8" mmedmajorstridebits="-32" mmedminorstridebits="0" />
+      <units>&#176;C</units>
+      <indexcount>1</indexcount>
+      <datatype>0</datatype>
+      <unittype>0</unittype>
+      <DALINK index="0" />
+      <LABEL index="0" value="0.00" />
+      <MATH equation="X">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+    <XDFAXIS id="y" uniqueid="0x0">
+      <EMBEDDEDDATA mmedelementsizebits="8" mmedmajorstridebits="-32" mmedminorstridebits="0" />
+      <indexcount>8</indexcount>
+      <outputtype>2</outputtype>
+      <datatype>0</datatype>
+      <unittype>0</unittype>
+      <DALINK index="0" />
+      <LABEL index="0" value="01" />
+      <LABEL index="1" value="02" />
+      <LABEL index="2" value="03" />
+      <LABEL index="3" value="04" />
+      <LABEL index="4" value="05" />
+      <LABEL index="5" value="06" />
+      <LABEL index="6" value="07" />
+      <LABEL index="7" value="08" />
+      <MATH equation="X">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+    <XDFAXIS id="z">
+      <EMBEDDEDDATA mmedaddress="0x66B" mmedelementsizebits="8" mmedrowcount="8" mmedmajorstridebits="0" mmedminorstridebits="0" />
+      <units>&#176;C</units>
+      <decimalpl>2</decimalpl>
+      <min>-48.000000</min>
+      <max>143.000000</max>
+      <outputtype>1</outputtype>
+      <MATH equation="X*0.75-48">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+  </XDFTABLE>
+</XDFFORMAT>
