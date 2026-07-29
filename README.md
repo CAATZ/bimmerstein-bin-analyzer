@@ -1,5 +1,7 @@
 # BimmerStein Bin Analyzer
 
+[![CI](https://github.com/CAATZ/bimmerstein-bin-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/CAATZ/bimmerstein-bin-analyzer/actions/workflows/ci.yml)
+
 An open-source desktop app for **ECU bin file tuning-table analysis**: load a raw ECU firmware dump, view it as hexdump / 2D / 3D, automatically detect tuning tables ("maps") and their axes, refine them manually, and export RomRaider XML / TunerPro XDF / CSV / JSON definitions.
 
 **Status: v0.1.0 — first public preview, under active development.** v1 is
