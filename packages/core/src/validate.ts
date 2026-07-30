@@ -1,4 +1,4 @@
-import type { AxisDef, MapDef, Result } from './types.js';
+import type { AxisDef, AxisLibEntry, MapDef, Result } from './types.js';
 
 /**
  * MapDef invariants (spec §8): a MapDef accepted here is always fully readable.
@@ -67,4 +67,23 @@ export function validateMapDef(map: MapDef, binSize: number): Result<MapDef> {
     }
   }
   return { ok: true, value: map };
+}
+
+/**
+ * Axis Library entry invariants (2026-07-29 shared-axis-library spec §2): an
+ * entry accepted here can be stamped onto any dimension-matching map and
+ * decoded by readAxisValues against a bin of `binSize` bytes. Uniqueness of
+ * entry ids is a LIST-level property checked where lists are built.
+ */
+export function validateAxisLibEntry(entry: AxisLibEntry, binSize: number): Result<AxisLibEntry> {
+  const failEntry = (error: string): Result<AxisLibEntry> => ({ ok: false, error });
+  if (entry.id.length === 0) return failEntry('entry id must be non-empty');
+  if (entry.name.length === 0) return failEntry('entry name must be non-empty');
+  const axis = entry.axis;
+  if (axis.kind === 'index') return failEntry(`entry "${entry.name}": axis kind must be referenced or literal`);
+  if (axis.libId !== undefined) return failEntry(`entry "${entry.name}": the entry's own axis cannot carry libId`);
+  if (!Number.isInteger(axis.count) || axis.count < 1) return failEntry(`entry "${entry.name}": count must be an integer ≥ 1`);
+  const e = axisError(axis, axis.count, binSize, `entry "${entry.name}"`);
+  if (e !== undefined) return failEntry(e);
+  return { ok: true, value: entry };
 }
