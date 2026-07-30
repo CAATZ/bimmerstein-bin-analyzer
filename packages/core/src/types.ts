@@ -45,6 +45,28 @@ export interface AxisDef {
   format?: ValueFormat;
   scaling?: Scaling;
   name?: string;
+  /**
+   * Axis Library stamp marker (2026-07-29 shared-axis-library spec §2): id of
+   * the AxisLibEntry this axis was stamped from. Pure metadata — no exporter
+   * reads it; it persists only via the project file; a dangling libId is
+   * cleared on load, never an error (the inline copy is self-sufficient).
+   */
+  libId?: string;
+}
+
+/**
+ * One Axis Library entry (2026-07-29 shared-axis-library spec §2): define an
+ * axis once, stamp inline copies onto many maps. The stored axis is kind
+ * 'referenced' | 'literal' only, carries no libId of its own, and any inner
+ * name is ignored — entry.name is authoritative (stamped as axis.name).
+ */
+export interface AxisLibEntry {
+  /** Unique within the project; minted app-side via crypto.randomUUID(). */
+  id: string;
+  /** Non-empty display name; stamped onto attached axes. */
+  name: string;
+  axis: AxisDef;
+  notes?: string;
 }
 
 export type Provenance = 'auto' | 'manual' | 'imported';
@@ -114,7 +136,11 @@ export interface BinImage {
 }
 
 export interface Project {
-  schemaVersion: 1;
+  /**
+   * 2 since the Axis Library (2026-07-29 spec): writers emit 2 unconditionally;
+   * parseProject accepts 1 AND 2 and normalizes v1 → v2 on load.
+   */
+  schemaVersion: 1 | 2;
   /** Bin referenced by identity, never embedded. */
   bin: { name: string; sha256: string; size: number };
   /** View defaults (e.g. MS41: width 2, big-endian). */
@@ -125,6 +151,8 @@ export interface Project {
    * 2026-07-14-fullread-def-frame-design). Absent = no mapping (24KB CAL).
    */
   addressFrame?: 'ms41full';
+  /** Axis Library (schemaVersion 2). Absent ≡ empty. */
+  axisLibrary?: AxisLibEntry[];
   /** User-confirmed maps. */
   maps: MapDef[];
   /** Auto-detected, unconfirmed (provenance 'auto'). */
