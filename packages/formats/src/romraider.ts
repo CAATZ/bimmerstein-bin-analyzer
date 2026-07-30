@@ -463,7 +463,11 @@ function axisLines(role: 'X' | 'Y', axis: AxisDef, mapName: string, lines: strin
   return undefined;
 }
 
-/** MapDef.id is not persisted — RomRaider has no id attribute; re-importing regenerates importer-convention ids. */
+/**
+ * MapDef.id and AxisDef.libId are not persisted — RomRaider has neither
+ * concept; re-importing regenerates importer-convention ids and yields
+ * unstamped axes (round-trip is deep-equal modulo libId).
+ */
 export function exportRomRaiderXml(romId: string, maps: MapDef[], options: RomRaiderExportOptions = {}): Result<string> {
   const lines: string[] = [
     '<?xml version="1.0" encoding="UTF-8"?>',

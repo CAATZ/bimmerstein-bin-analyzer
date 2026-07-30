@@ -157,6 +157,21 @@ describe('exportRomRaiderXml', () => {
     expect(back.value.maps).toEqual(maps);
   });
 
+  it('never writes libId and round-trips modulo libId (library stamps are project-file-only)', () => {
+    const maps = sampleMaps();
+    const first = maps[0]!;
+    const stamped: MapDef[] = [{ ...first, xAxis: { ...first.xAxis!, libId: 'lib-load' } }, ...maps.slice(1)];
+    const exported = exportRomRaiderXml('T1', stamped);
+    expect(exported.ok).toBe(true);
+    if (!exported.ok) return;
+    expect(exported.value).not.toContain('libId');
+    expect(exported.value).not.toContain('lib-load');
+    const back = importRomRaiderXml(exported.value);
+    expect(back.ok).toBe(true);
+    if (!back.ok) return;
+    expect(back.value.maps).toEqual(sampleMaps()); // deep-equal modulo libId: import restores the unstamped originals
+  });
+
   it('emits family-style attributes: hex addresses without 0x, no endian on width-1, both scaling directions', () => {
     const xml = (exportRomRaiderXml('T1', sampleMaps()) as { ok: true; value: string }).value;
     expect(xml).toContain('storageaddress="E7E"');
