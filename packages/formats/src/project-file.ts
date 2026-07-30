@@ -1,21 +1,25 @@
-import type { AxisDef, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
-import { validateMapDef } from '@binanalyzer/core';
+import type { AxisDef, AxisLibEntry, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
+import { validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 
 /**
  * .binproj.json save/load (spec §3, §8): JSON with canonical key order,
- * schemaVersion-checked (newer versions rejected with a clear message), bin
- * referenced by name+sha256+size — never embedded. parseProject guarantees
- * the spec §8 invariant "a project that loads is fully readable": every map
- * passes validateMapDef against the recorded size, maps[] carries only
- * non-auto provenance, potentialMaps[] only auto. Comparing the recorded
- * sha256 against the actual bin bytes is the app's job (it has the bytes).
+ * schemaVersion 1|2 accepted (2 written, v1 normalized on load; anything newer
+ * rejected with a clear message), bin referenced by name+sha256+size — never
+ * embedded. parseProject guarantees the spec §8 invariant "a project that
+ * loads is fully readable": every map passes validateMapDef against the
+ * recorded size, maps[] carries only non-auto provenance, potentialMaps[] only
+ * auto. Comparing the recorded sha256 against the actual bin bytes is the
+ * app's job (it has the bytes). schemaVersion 2 is written unconditionally; v1
+ * documents are accepted and normalized on load (2026-07-29 shared-axis-library
+ * spec §3).
  */
 export function serializeProject(project: Project): string {
   const canonical: Project = {
-    schemaVersion: project.schemaVersion,
+    schemaVersion: 2,
     bin: { name: project.bin.name, sha256: project.bin.sha256, size: project.bin.size },
     valueDefaults: project.valueDefaults,
     ...(project.addressFrame !== undefined ? { addressFrame: project.addressFrame } : {}),
+    ...(project.axisLibrary !== undefined && project.axisLibrary.length > 0 ? { axisLibrary: project.axisLibrary } : {}),
     maps: project.maps,
     potentialMaps: project.potentialMaps,
   };
@@ -77,7 +81,21 @@ function axisShapeError(v: unknown, label: string): string | undefined {
     if (e) return `${label} axis ${e}`;
   }
   if (a.name !== undefined && typeof a.name !== 'string') return `${label} axis name must be a string`;
+  if (a.libId !== undefined && typeof a.libId !== 'string') return `${label} axis libId must be a string when present`;
   return undefined;
+}
+
+/**
+ * Nested-field gate for AxisLibEntry (2026-07-29 shared-axis-library spec §3)
+ * — shape only; range/semantic rules live in core validateAxisLibEntry.
+ */
+function axisLibEntryShapeError(v: unknown): string | undefined {
+  if (typeof v !== 'object' || v === null) return 'entry must be an object';
+  const e = v as Partial<AxisLibEntry>;
+  if (typeof e.id !== 'string') return 'entry id must be a string';
+  if (typeof e.name !== 'string') return 'entry name must be a string';
+  if (e.notes !== undefined && typeof e.notes !== 'string') return 'entry notes must be a string';
+  return axisShapeError(e.axis, `entry "${e.name}"`);
 }
 
 /**
@@ -137,8 +155,8 @@ export function parseProject(json: string): Result<Project> {
   }
   if (typeof doc !== 'object' || doc === null) return { ok: false, error: 'project must be a JSON object' };
   const p = doc as Partial<Project> & { schemaVersion?: unknown };
-  if (p.schemaVersion !== 1) {
-    return { ok: false, error: `unsupported schemaVersion ${JSON.stringify(p.schemaVersion)} — this build supports schemaVersion 1` };
+  if (p.schemaVersion !== 1 && p.schemaVersion !== 2) {
+    return { ok: false, error: `unsupported schemaVersion ${JSON.stringify(p.schemaVersion)} — this build supports schemaVersion 1 and 2` };
   }
   if (typeof p.bin !== 'object' || p.bin === null) return { ok: false, error: 'bin must be an object' };
   const bin = p.bin;
@@ -152,6 +170,22 @@ export function parseProject(json: string): Result<Project> {
   const frame = (p as { addressFrame?: unknown }).addressFrame;
   if (frame !== undefined && frame !== 'ms41full') {
     return { ok: false, error: `addressFrame must be 'ms41full' when present, got ${JSON.stringify(frame)}` };
+  }
+  const lib = (p as { axisLibrary?: unknown }).axisLibrary;
+  let axisLibrary: AxisLibEntry[] | undefined;
+  if (lib !== undefined) {
+    if (!Array.isArray(lib)) return { ok: false, error: 'axisLibrary must be an array' };
+    const entryIds = new Set<string>();
+    for (const [i, rawEntry] of lib.entries()) {
+      const shapeError = axisLibEntryShapeError(rawEntry);
+      if (shapeError !== undefined) return { ok: false, error: `axisLibrary[${i}]: ${shapeError}` };
+      const e = rawEntry as AxisLibEntry;
+      const v = validateAxisLibEntry(e, bin.size);
+      if (!v.ok) return { ok: false, error: `axisLibrary[${i}]: ${v.error}` };
+      if (entryIds.has(e.id)) return { ok: false, error: `axisLibrary[${i}] ("${e.name}"): duplicate entry id ${JSON.stringify(e.id)}` };
+      entryIds.add(e.id);
+    }
+    axisLibrary = lib as AxisLibEntry[];
   }
   if (!Array.isArray(p.maps) || !Array.isArray(p.potentialMaps)) {
     return { ok: false, error: 'maps and potentialMaps must be arrays' };
@@ -174,10 +208,11 @@ export function parseProject(json: string): Result<Project> {
   return {
     ok: true,
     value: {
-      schemaVersion: 1,
+      schemaVersion: 2,
       bin: { name: bin.name, sha256: bin.sha256, size: bin.size },
       valueDefaults: p.valueDefaults,
       ...(frame === 'ms41full' ? { addressFrame: 'ms41full' as const } : {}),
+      ...(axisLibrary !== undefined && axisLibrary.length > 0 ? { axisLibrary } : {}),
       maps: p.maps as MapDef[],
       potentialMaps: p.potentialMaps as MapDef[],
     },
