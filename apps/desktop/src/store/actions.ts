@@ -1,12 +1,13 @@
 import { get } from 'svelte/store';
-import type { BinImage, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
-import { readValue, validateMapDef } from '@binanalyzer/core';
+import type { AxisDef, AxisLibEntry, BinImage, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
+import { readValue, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
 import {
-  DEFAULT_VIEW_PARAMS, addressFrame, bin, framePromptAnswered, maps, modalOpen, potentialMaps, regions, scanStatus,
-  scrollRequest, selection, toasts, viewParams,
+  DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, framePromptAnswered, maps, modalOpen, potentialMaps, regions,
+  scanStatus, scrollRequest, selection, toasts, viewParams,
   type Selection, type Toast, type ViewMode,
 } from './stores.js';
+import { detachedAxis, libraryAxis, stampAxis } from '../lib/axislib.js';
 
 /**
  * Every store mutation in the app lives here.
@@ -54,6 +55,7 @@ export function resetStores(): void {
   bin.set(null);
   maps.set([]);
   potentialMaps.set([]);
+  axisLibrary.set([]);
   regions.set([]);
   scanStatus.set({ state: 'idle' });
   selection.set(null);
@@ -70,6 +72,7 @@ export function setBin(image: BinImage): void {
   bin.set(image);
   maps.set([]);
   potentialMaps.set([]);
+  axisLibrary.set([]); // a new bin is a new address space — stale library entries would silently mis-decode
   regions.set([]);
   scanStatus.set({ state: 'idle' });
   selection.set(null);
@@ -211,6 +214,107 @@ export function updateMapMeta(id: string, patch: MapMetaPatch): Result<MapDef> {
   if (!valid.ok) return valid;
   maps.update((ms) => ms.map((m) => (m.id === id ? next : m)));
   return { ok: true, value: next };
+}
+
+/**
+ * The ONE map-axis mutator (2026-07-29 shared-axis-library spec §5): expresses
+ * stamp, detach (libId-stripped copy), local edit, and remove (undefined).
+ * Confirmed maps only — potentials are immutable; attach promotes first.
+ */
+export function setMapAxis(id: string, slot: 'x' | 'y', axis: AxisDef | undefined): Result<MapDef> {
+  const image = get(bin);
+  if (!image) return { ok: false, error: 'no bin loaded' };
+  const current = get(maps).find((m) => m.id === id);
+  if (!current) return { ok: false, error: `no confirmed map with id ${id}` };
+  const key = slot === 'x' ? 'xAxis' : 'yAxis';
+  const next: MapDef = { ...current };
+  if (axis === undefined) delete next[key];
+  else next[key] = { ...axis };
+  const valid = validateMapDef(next, image.size);
+  if (!valid.ok) return valid;
+  maps.update((ms) => ms.map((m) => (m.id === id ? next : m)));
+  return { ok: true, value: next };
+}
+
+export function addAxisLibEntry(name: string, axis: AxisDef, notes?: string): Result<AxisLibEntry> {
+  const image = get(bin);
+  if (!image) return { ok: false, error: 'no bin loaded' };
+  const entry: AxisLibEntry = {
+    id: crypto.randomUUID(),
+    name: name.trim(),
+    axis: libraryAxis(axis),
+    ...(notes !== undefined && notes.trim() !== '' ? { notes: notes.trim() } : {}),
+  };
+  const valid = validateAxisLibEntry(entry, image.size);
+  if (!valid.ok) return valid;
+  axisLibrary.update((es) => [...es, entry]);
+  return { ok: true, value: entry };
+}
+
+export interface AxisLibEntryPatch {
+  name?: string;
+  axis?: AxisDef;
+  notes?: string;
+}
+
+/** Entry-only update; re-stamping attached maps is separate and explicit (spec §4). */
+export function updateAxisLibEntry(id: string, patch: AxisLibEntryPatch): Result<AxisLibEntry> {
+  const image = get(bin);
+  if (!image) return { ok: false, error: 'no bin loaded' };
+  const current = get(axisLibrary).find((e) => e.id === id);
+  if (!current) return { ok: false, error: `no axis library entry with id ${id}` };
+  const next: AxisLibEntry = { ...current };
+  if (patch.name !== undefined && patch.name.trim() !== '') next.name = patch.name.trim();
+  if (patch.axis !== undefined) next.axis = libraryAxis(patch.axis);
+  if (patch.notes !== undefined) {
+    if (patch.notes.trim() === '') delete next.notes;
+    else next.notes = patch.notes.trim();
+  }
+  const valid = validateAxisLibEntry(next, image.size);
+  if (!valid.ok) return valid;
+  axisLibrary.update((es) => es.map((e) => (e.id === id ? next : e)));
+  return { ok: true, value: next };
+}
+
+/** Bulk detach: clears libId on every stamped slot; inline axes survive. */
+export function detachAxisLibEntry(id: string): { detached: number } {
+  let detached = 0;
+  for (const m of get(maps)) {
+    for (const slot of ['x', 'y'] as const) {
+      const ax = slot === 'x' ? m.xAxis : m.yAxis;
+      if (ax?.libId === id) {
+        const r = setMapAxis(m.id, slot, detachedAxis(ax));
+        if (r.ok) detached++;
+      }
+    }
+  }
+  return { detached };
+}
+
+export function removeAxisLibEntry(id: string): { removed: boolean; detached: number } {
+  const exists = get(axisLibrary).some((e) => e.id === id);
+  if (!exists) return { removed: false, detached: 0 };
+  const { detached } = detachAxisLibEntry(id);
+  axisLibrary.update((es) => es.filter((e) => e.id !== id));
+  return { removed: true, detached };
+}
+
+/** Explicit "update N attached maps": per-map re-validate, skip+report (spec §4). */
+export function restampAxisLibEntry(id: string): { updated: number; skipped: string[] } {
+  const entry = get(axisLibrary).find((e) => e.id === id);
+  if (!entry) return { updated: 0, skipped: [`no axis library entry with id ${id}`] };
+  let updated = 0;
+  const skipped: string[] = [];
+  for (const m of get(maps)) {
+    for (const slot of ['x', 'y'] as const) {
+      const ax = slot === 'x' ? m.xAxis : m.yAxis;
+      if (ax?.libId !== id) continue;
+      const r = setMapAxis(m.id, slot, stampAxis(entry));
+      if (r.ok) updated++;
+      else skipped.push(`${m.id} ("${m.name}") ${slot}: ${r.error}`);
+    }
+  }
+  return { updated, skipped };
 }
 
 /** Spec §8: a MapDef in the store is always readable — out-of-range imports are skipped, not stored. */

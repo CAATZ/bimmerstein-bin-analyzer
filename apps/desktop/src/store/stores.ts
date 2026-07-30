@@ -1,5 +1,5 @@
 import { writable, type Writable } from 'svelte/store';
-import type { BinImage, MapDef, ValueFormat } from '@binanalyzer/core';
+import type { AxisLibEntry, BinImage, MapDef, ValueFormat } from '@binanalyzer/core';
 import type { Region, ScanProgress } from '@binanalyzer/engine';
 
 /**
@@ -58,6 +58,8 @@ export const bin: Writable<BinImage | null> = writable(null);
 export const maps: Writable<MapDef[]> = writable([]);
 /** Engine output, provenance 'auto' — ARRAY ORDER IS THE RANKING, never re-sort. */
 export const potentialMaps: Writable<MapDef[]> = writable([]);
+/** Axis Library (2026-07-29 shared-axis-library spec §5): per-project named axes stamped into maps. */
+export const axisLibrary: Writable<AxisLibEntry[]> = writable([]);
 export const regions: Writable<Region[]> = writable([]);
 export const scanStatus: Writable<ScanState> = writable({ state: 'idle' });
 export const viewParams: Writable<ViewParams> = writable({ ...DEFAULT_VIEW_PARAMS });
