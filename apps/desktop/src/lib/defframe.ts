@@ -88,3 +88,22 @@ export const frameDefMaps = (maps: MapDef[]): FrameResult => run(maps, true);
 
 /** RomRaider-export direction: file offsets → definition SAs. Exact inverse of frameDefMaps. */
 export const unframeDefMaps = (maps: MapDef[]): FrameResult => run(maps, false);
+
+/**
+ * True when a file-offset span has an exact RomRaider SA representation on a
+ * full read: the offset is a saToFo fixpoint (inside a mapped cal chunk) and
+ * the span stays in-cal + fo-contiguous — the same per-span rule
+ * unframeDefMaps applies. Drives the Axis Library representability badge
+ * (2026-07-29 shared-axis-library spec §5/§6).
+ */
+export function saRepresentableSpan(fileAddr: number, byteLen: number): boolean {
+  const sa = foToSA(fileAddr);
+  return saToFo(sa) === fileAddr && saSpanOk(sa, byteLen);
+}
+
+/** Badge predicate for an AxisDef: literal/index axes need no SA; referenced
+ *  axes need their whole cell span representable. */
+export function axisSaRepresentable(axis: AxisDef): boolean {
+  if (axis.kind !== 'referenced' || axis.address === undefined) return true;
+  return saRepresentableSpan(axis.address, axisByteLen(axis));
+}

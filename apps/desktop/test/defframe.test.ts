@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MapDef } from '@binanalyzer/core';
-import { frameDefMaps, isMs41FullRead, unframeDefMaps } from '../src/lib/defframe.js';
+import { axisSaRepresentable, frameDefMaps, isMs41FullRead, saRepresentableSpan, unframeDefMaps } from '../src/lib/defframe.js';
 
 const U16LE = { width: 2, signed: false, endianness: 'little' } as const;
 const U8 = { width: 1, signed: false, endianness: 'little' } as const;
@@ -89,5 +89,25 @@ describe('unframeDefMaps (file offset → SA)', () => {
     const r = unframeDefMaps([defMap(0x20)]);
     expect(r.maps).toEqual([]);
     expect(r.skipped).toHaveLength(1);
+  });
+});
+
+describe('saRepresentableSpan / axisSaRepresentable', () => {
+  it('accepts spans inside a mapped cal chunk', () => {
+    expect(saRepresentableSpan(0x14000, 16)).toBe(true); // SA 0x0000
+    expect(saRepresentableSpan(0x10000, 16)).toBe(true); // SA 0x4000
+  });
+  it('rejects offsets outside the mapped cal chunks', () => {
+    expect(saRepresentableSpan(0x0, 16)).toBe(false);
+    expect(saRepresentableSpan(0x20000, 16)).toBe(false);
+  });
+  it('rejects spans crossing the 0x4000 SA seam', () => {
+    expect(saRepresentableSpan(0x17ff8, 16)).toBe(false); // SA 0x3FF8 + 16 crosses 0x4000
+  });
+  it('literal and index axes are always representable; referenced follows the span rule', () => {
+    expect(axisSaRepresentable({ kind: 'literal', count: 2, values: [0, 1] })).toBe(true);
+    expect(axisSaRepresentable({ kind: 'index', count: 4 })).toBe(true);
+    expect(axisSaRepresentable({ kind: 'referenced', address: 0x14000, count: 8, format: { width: 2, signed: false, endianness: 'big' } })).toBe(true);
+    expect(axisSaRepresentable({ kind: 'referenced', address: 0x0, count: 8, format: { width: 2, signed: false, endianness: 'big' } })).toBe(false);
   });
 });
