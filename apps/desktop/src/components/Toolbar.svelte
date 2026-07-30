@@ -8,10 +8,12 @@
   } from '../platform/flows.js';
   import { cancelScan, runScan } from '../worker/controller.js';
   import RomPickerDialog from './RomPickerDialog.svelte';
+  import AxisLibraryDialog from './AxisLibraryDialog.svelte';
 
   const VIEW_MODES: ViewMode[] = ['hex', '2d', '3d', 'map'];
   let exportKind: ExportKind = $state('csv');
   let pendingDef: { xml: string; romIds: string[] } | null = $state(null);
+  let axisLibOpen = $state(false);
 
   async function onOpenBin(): Promise<void> {
     if (await openBinFlow(tauriHost)) runScan(); // locked decision 5: auto-scan on open
@@ -30,6 +32,7 @@
   <button onclick={() => void onImportDef()} disabled={$bin === null}>Import Def</button>
   <button onclick={() => void openProjectFlow(tauriHost)}>Open Project</button>
   <button onclick={() => void saveProjectFlow(tauriHost)} disabled={$bin === null}>Save Project</button>
+  <button onclick={() => (axisLibOpen = true)} disabled={$bin === null}>Axes</button>
   <span class="sep"></span>
   {#if $scanStatus.state === 'running'}
     <button onclick={cancelScan}>Cancel scan</button>
@@ -90,4 +93,8 @@
       pendingDef = null;
     }}
   />
+{/if}
+
+{#if axisLibOpen}
+  <AxisLibraryDialog onclose={() => (axisLibOpen = false)} />
 {/if}
