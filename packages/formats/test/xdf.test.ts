@@ -129,6 +129,24 @@ describe('exportXdf', () => {
     expect(find(z, 'EMBEDDEDDATA')!.attrs['mmedcolcount']).toBeUndefined();
   });
 
+  it('collapses two stamps of one library entry into one linked axis table titled with the entry name', () => {
+    const entryAxis = {
+      kind: 'referenced' as const, address: 0x8b2, count: 4, name: 'RPM (main)', libId: 'lib-rpm',
+      format: { width: 2 as const, signed: false, endianness: 'little' as const },
+      scaling: { factor: 1, offset: 0, units: 'RPM', digits: 0 },
+    };
+    const base = sampleMaps();
+    const maps: MapDef[] = [
+      { ...base[0]!, yAxis: { ...entryAxis } },
+      { ...base[1]!, yAxis: { ...entryAxis } }, // distinct stamped COPIES, not one shared object
+    ];
+    const out = exportOk(maps);
+    expect(out).not.toContain('libId');
+    const doc = (parseXml(out) as { ok: true; value: XmlElement }).value;
+    const axisTables = doc.children.filter((t) => t.name === 'XDFTABLE' && (find(t, 'title')?.text ?? '').startsWith('Axis - '));
+    expect(axisTables.filter((t) => find(t, 'title')!.text.includes('RPM (main)'))).toHaveLength(1);
+  });
+
   it('encodes format flags per the golden sample: 0x02 for 16-bit LE, 0x01 for signed, none for u8', () => {
     const doc = (parseXml(exportOk(sampleMaps())) as { ok: true; value: XmlElement }).value;
     const zOf = (title: string) =>

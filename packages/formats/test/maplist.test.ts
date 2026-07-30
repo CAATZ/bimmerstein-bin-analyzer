@@ -119,3 +119,20 @@ describe('toMapListRecord', () => {
     expect(toMapListRecord(sampleMaps()[2]!).kind).toBe('switch');
   });
 });
+
+describe('axis library stamps', () => {
+  it('never emits libId in CSV or JSON output (stamps are project-file-only)', () => {
+    const maps = sampleMaps();
+    const first = maps[0]!;
+    const stamped: MapDef[] = [{ ...first, xAxis: { ...first.xAxis!, libId: 'lib-x' } }, ...maps.slice(1)];
+    const csv = exportMapListCsv(stamped);
+    const json = exportMapListJson(stamped);
+    expect(csv.ok).toBe(true);
+    expect(json.ok).toBe(true);
+    if (!csv.ok || !json.ok) return;
+    expect(csv.value).not.toContain('libId');
+    expect(json.value).not.toContain('libId');
+    const plain = exportMapListCsv(maps);
+    if (plain.ok) expect(csv.value).toBe(plain.value); // byte-identical to the unstamped export
+  });
+});
