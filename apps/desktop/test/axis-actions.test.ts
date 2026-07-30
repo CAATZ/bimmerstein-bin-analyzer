@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { AxisDef, MapDef, ValueFormat } from '@binanalyzer/core';
+import type { AxisDef, MapDef, Project, ValueFormat } from '@binanalyzer/core';
 import { createBinImage } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
 import { axisLibrary, maps, potentialMaps } from '../src/store/stores.js';
@@ -122,5 +122,48 @@ describe('library lifecycle clears', () => {
     expect(a.addAxisLibEntry('RPM', rpmAxis).ok).toBe(true);
     a.resetStores();
     expect(get(axisLibrary)).toEqual([]);
+  });
+});
+
+describe('project lifecycle', () => {
+  it('snapshot carries the library at schemaVersion 2 and omits it when empty', () => {
+    const snapEmpty = a.projectSnapshot();
+    expect(snapEmpty.ok).toBe(true);
+    if (snapEmpty.ok) {
+      expect(snapEmpty.value.schemaVersion).toBe(2);
+      expect(snapEmpty.value.axisLibrary).toBeUndefined();
+    }
+    expect(a.addAxisLibEntry('RPM', rpmAxis).ok).toBe(true);
+    const snap = a.projectSnapshot();
+    expect(snap.ok).toBe(true);
+    if (snap.ok) expect(snap.value.axisLibrary).toHaveLength(1);
+  });
+
+  it('applyProject restores the library, drops out-of-range entries and clears dangling stamps', () => {
+    const image = testBin(); // 256 bytes — the "wrong smaller bin" of a sha-mismatch load
+    const project: Project = {
+      schemaVersion: 2,
+      bin: { name: 'big.bin', sha256: 'a'.repeat(64), size: 0x2000 },
+      valueDefaults: u8,
+      axisLibrary: [
+        { id: 'lib-ok', name: 'RPM', axis: rpmAxis },
+        { id: 'lib-far', name: 'Far', axis: { kind: 'referenced', address: 0x1000, count: 8, format: u8 } },
+      ],
+      maps: [
+        { ...confirmed('m1'), xAxis: { ...rpmAxis, name: 'RPM', libId: 'lib-ok' } },
+        { ...confirmed('m2'), xAxis: { ...rpmAxis, name: 'Far', libId: 'lib-far' } },
+        { ...confirmed('m3'), xAxis: { ...rpmAxis, name: 'Ghost', libId: 'lib-ghost' } },
+      ],
+      potentialMaps: [],
+    };
+    const report = a.applyProject(image, project);
+    expect(report.droppedAxisEntries).toEqual(['lib-far ("Far")']);
+    expect(report.clearedStamps).toEqual(['m2 ("M m2") x', 'm3 ("M m3") x']);
+    expect(get(axisLibrary).map((e) => e.id)).toEqual(['lib-ok']);
+    const byId = new Map(get(maps).map((m) => [m.id, m]));
+    expect(byId.get('m1')!.xAxis?.libId).toBe('lib-ok');
+    expect(byId.get('m2')!.xAxis?.libId).toBeUndefined();
+    expect(byId.get('m2')!.xAxis?.name).toBe('Far'); // inline copy survives the detach
+    expect(byId.get('m3')!.xAxis?.libId).toBeUndefined();
   });
 });

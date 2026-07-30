@@ -301,7 +301,7 @@ describe('project snapshot / apply', () => {
     expect(snap.value.valueDefaults).toEqual({ width: 2, signed: false, endianness: 'big' });
     a.resetStores();
     const dropped = a.applyProject(testBin(), snap.value);
-    expect(dropped).toEqual({ droppedMaps: [], droppedPotentials: [] });
+    expect(dropped).toEqual({ droppedMaps: [], droppedPotentials: [], droppedAxisEntries: [], clearedStamps: [] });
     expect(get(maps).map((m) => m.id)).toEqual(['auto-1']);
     expect(get(potentialMaps).map((m) => m.id)).toEqual(['auto-2']);
     expect(get(viewParams).format.width).toBe(2);
@@ -340,7 +340,7 @@ describe('project snapshot / apply', () => {
       potentialMaps: [potential('auto-hi', 0x40), potential('auto-lo', 0x10)], // rank order — must NOT be re-sorted
     };
     const dropped = a.applyProject(image, outOfOrder);
-    expect(dropped).toEqual({ droppedMaps: [], droppedPotentials: [] });
+    expect(dropped).toEqual({ droppedMaps: [], droppedPotentials: [], droppedAxisEntries: [], clearedStamps: [] });
     expect(get(maps).map((m) => m.id)).toEqual(['m-lo', 'm-hi']);
     expect(get(potentialMaps).map((m) => m.id)).toEqual(['auto-hi', 'auto-lo']);
   });
