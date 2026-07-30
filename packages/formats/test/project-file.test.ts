@@ -38,7 +38,7 @@ function switchMap(): MapDef {
 
 function sampleProject(): Project {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     bin: { name: 'test.bin', sha256: SHA, size: 0x1000 },
     valueDefaults: { width: 2, signed: false, endianness: 'big' },
     maps: [confirmedMap()],
@@ -69,9 +69,9 @@ describe('serializeProject / parseProject', () => {
   });
 
   it('rejects newer schema versions with an actionable message', () => {
-    const r = parseProject(serializeProject(sampleProject()).replace('"schemaVersion": 1', '"schemaVersion": 2'));
+    const r = parseProject(serializeProject(sampleProject()).replace('"schemaVersion": 2', '"schemaVersion": 3'));
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error).toContain('schemaVersion 2');
+    if (!r.ok) expect(r.error).toContain('schemaVersion 3');
   });
 
   it('rejects invalid JSON, non-objects, bad bin identity and bad valueDefaults', () => {
@@ -234,5 +234,114 @@ describe('serializeProject / parseProject', () => {
     const r = parseProject(bad);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toContain('addressFrame');
+  });
+});
+
+function libraryProject(): Project {
+  const stamped: MapDef = {
+    ...confirmedMap(),
+    xAxis: {
+      kind: 'referenced', address: 0x80, count: 4,
+      format: { width: 1, signed: false, endianness: 'little' },
+      name: 'RPM (main)', libId: 'lib-rpm',
+    },
+  };
+  return {
+    schemaVersion: 2,
+    bin: { name: 'test.bin', sha256: SHA, size: 0x1000 },
+    valueDefaults: { width: 2, signed: false, endianness: 'big' },
+    axisLibrary: [
+      {
+        id: 'lib-rpm', name: 'RPM (main)',
+        axis: { kind: 'referenced', address: 0x80, count: 4, format: { width: 1, signed: false, endianness: 'little' } },
+        notes: 'knock cluster shared axis',
+      },
+      { id: 'lib-volts', name: 'Volts', axis: { kind: 'literal', count: 2, values: [0, 0.02] } },
+    ],
+    maps: [stamped],
+    potentialMaps: [autoMap()],
+  };
+}
+
+describe('axis library (schemaVersion 2)', () => {
+  it('round-trips a non-empty axis library and libId-stamped map axes deep-equal', () => {
+    const json = serializeProject(libraryProject());
+    expect(json).toContain('"schemaVersion": 2');
+    expect(json).toContain('"axisLibrary"');
+    const r = parseProject(json);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value).toEqual(libraryProject());
+  });
+
+  it('omits axisLibrary when absent or empty', () => {
+    expect(serializeProject(sampleProject())).not.toContain('axisLibrary');
+    expect(serializeProject({ ...sampleProject(), axisLibrary: [] })).not.toContain('axisLibrary');
+    const r = parseProject(serializeProject(sampleProject()));
+    expect(r.ok && r.value.axisLibrary === undefined).toBe(true);
+  });
+
+  it('accepts a v1 document and normalizes it to schemaVersion 2', () => {
+    const v1 = serializeProject(sampleProject()).replace('"schemaVersion": 2', '"schemaVersion": 1');
+    const r = parseProject(v1);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value.schemaVersion).toBe(2);
+      expect(r.value.axisLibrary).toBeUndefined();
+    }
+  });
+
+  it('rejects duplicate entry ids with an actionable message', () => {
+    const p = libraryProject();
+    p.axisLibrary = [p.axisLibrary![0]!, { ...p.axisLibrary![1]!, id: 'lib-rpm' }];
+    const r = parseProject(serializeProject(p));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain('duplicate entry id');
+  });
+
+  it('rejects entries that fail core validation, naming the culprit', () => {
+    const p = libraryProject();
+    p.axisLibrary = [{
+      id: 'e1', name: 'TooFar',
+      axis: { kind: 'referenced', address: 0xfff, count: 8, format: { width: 2, signed: false, endianness: 'big' } },
+    }];
+    const r = parseProject(serializeProject(p));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain('TooFar');
+    const q = libraryProject();
+    q.axisLibrary = [{ id: 'e2', name: 'Idx', axis: { kind: 'index', count: 4 } }];
+    expect(parseProject(serializeProject(q)).ok).toBe(false);
+  });
+
+  it('rejects malformed entry shapes with an actionable message', () => {
+    const doc = JSON.parse(serializeProject(libraryProject())) as Record<string, unknown>;
+    const cases: Array<[unknown, string]> = [
+      ['nope', 'axisLibrary must be an array'],
+      [[42], 'entry must be an object'],
+      [[{ id: 7, name: 'x', axis: { kind: 'literal', count: 1, values: [0] } }], 'entry id must be a string'],
+      [[{ id: 'e', name: 8, axis: { kind: 'literal', count: 1, values: [0] } }], 'entry name must be a string'],
+      [[{ id: 'e', name: 'x', notes: 9, axis: { kind: 'literal', count: 1, values: [0] } }], 'entry notes must be a string'],
+      [[{ id: 'e', name: 'x', axis: { kind: 'bogus', count: 1 } }], 'axis has invalid kind'],
+    ];
+    for (const [lib, msg] of cases) {
+      const r = parseProject(JSON.stringify({ ...doc, axisLibrary: lib }));
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.error).toContain(msg);
+    }
+  });
+
+  it('rejects a non-string libId on a map axis (shape gate)', () => {
+    const doc = JSON.parse(serializeProject(libraryProject())) as { maps: Array<{ xAxis: Record<string, unknown> }> };
+    doc.maps[0]!.xAxis['libId'] = 5;
+    const r = parseProject(JSON.stringify(doc));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain('libId must be a string');
+  });
+
+  it('tolerates a dangling libId on a map axis (cleared app-side on load, never rejected here)', () => {
+    const { axisLibrary: _lib, ...rest } = libraryProject();
+    const dangling: Project = { ...rest };
+    const r = parseProject(serializeProject(dangling));
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value.maps[0]!.xAxis!.libId).toBe('lib-rpm');
   });
 });
