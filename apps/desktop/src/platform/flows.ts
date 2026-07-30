@@ -115,7 +115,7 @@ export async function openProjectFlow(host: PlatformHost): Promise<void> {
       return;
     }
   }
-  const { droppedMaps, droppedPotentials } = actions.applyProject(image, project);
+  const { droppedMaps, droppedPotentials, droppedAxisEntries, clearedStamps } = actions.applyProject(image, project);
   const dropped = droppedMaps.length + droppedPotentials.length;
   if (dropped > 0) {
     actions.pushToast(
@@ -126,6 +126,18 @@ export async function openProjectFlow(host: PlatformHost): Promise<void> {
     actions.pushToast(
       'info',
       `Project loaded: ${project.maps.length} maps, ${project.potentialMaps.length} potential — rescan to restore region dimming`
+    );
+  }
+  if (droppedAxisEntries.length > 0) {
+    actions.pushToast(
+      'error',
+      `${droppedAxisEntries.length} axis library entr${droppedAxisEntries.length === 1 ? 'y was' : 'ies were'} out of range for ${image.name} and dropped. First: ${droppedAxisEntries[0] ?? ''}`
+    );
+  }
+  if (clearedStamps.length > 0) {
+    actions.pushToast(
+      'info',
+      `${clearedStamps.length} axis stamp(s) pointed at missing library entries and were detached (inline axes kept)`
     );
   }
 }

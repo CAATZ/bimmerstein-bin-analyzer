@@ -417,25 +417,34 @@ export function projectSnapshot(): Result<Project> {
   if (!image) return { ok: false, error: 'no bin loaded — nothing to save' };
   const vp = get(viewParams);
   const frame = get(addressFrame);
+  const lib = get(axisLibrary);
   return {
     ok: true,
     value: {
-      schemaVersion: 1,
+      schemaVersion: 2,
       bin: { name: image.name, sha256: image.sha256, size: image.size },
       valueDefaults: { ...vp.format },
       ...(frame === 'ms41full' ? { addressFrame: 'ms41full' as const } : {}),
+      ...(lib.length > 0 ? { axisLibrary: lib } : {}),
       maps: get(maps),
       potentialMaps: get(potentialMaps),
     },
   };
 }
 
-export function applyProject(image: BinImage, project: Project): { droppedMaps: string[]; droppedPotentials: string[] } {
+export interface ApplyProjectReport {
+  droppedMaps: string[];
+  droppedPotentials: string[];
+  droppedAxisEntries: string[];
+  clearedStamps: string[];
+}
+
+export function applyProject(image: BinImage, project: Project): ApplyProjectReport {
   // Spec §8: a MapDef in the store is always readable. parseProject validated
   // against the RECORDED bin.size, but the user may have confirmed loading a
   // DIFFERENT (e.g. shorter) bin past the sha-mismatch gate — re-validate every
-  // map against the ACTUAL bytes and drop the unreadable ones before they reach
-  // a view (readGrid/readValue would throw RangeError).
+  // map AND library entry against the ACTUAL bytes, then clear stamps whose
+  // entry is gone (dropped here, or already missing in the file).
   const keep = (list: MapDef[], dropped: string[]): MapDef[] =>
     list.filter((m) => {
       if (validateMapDef(m, image.size).ok) return true;
@@ -444,14 +453,35 @@ export function applyProject(image: BinImage, project: Project): { droppedMaps: 
     });
   const droppedMaps: string[] = [];
   const droppedPotentials: string[] = [];
+  const droppedAxisEntries: string[] = [];
+  const clearedStamps: string[] = [];
+  const lib = (project.axisLibrary ?? []).filter((e) => {
+    if (validateAxisLibEntry(e, image.size).ok) return true;
+    droppedAxisEntries.push(`${e.id} ("${e.name}")`);
+    return false;
+  });
+  const libIds = new Set(lib.map((e) => e.id));
+  const clearDangling = (m: MapDef): MapDef => {
+    let next = m;
+    if (next.xAxis?.libId !== undefined && !libIds.has(next.xAxis.libId)) {
+      clearedStamps.push(`${m.id} ("${m.name}") x`);
+      next = { ...next, xAxis: detachedAxis(next.xAxis) };
+    }
+    if (next.yAxis?.libId !== undefined && !libIds.has(next.yAxis.libId)) {
+      clearedStamps.push(`${m.id} ("${m.name}") y`);
+      next = { ...next, yAxis: detachedAxis(next.yAxis) };
+    }
+    return next;
+  };
   bin.set(image);
-  maps.set(keep(project.maps, droppedMaps).sort(byAddress));
-  potentialMaps.set(keep(project.potentialMaps, droppedPotentials)); // ENGINE RANK ORDER — never re-sort
+  axisLibrary.set(lib);
+  maps.set(keep(project.maps, droppedMaps).map(clearDangling).sort(byAddress));
+  potentialMaps.set(keep(project.potentialMaps, droppedPotentials).map(clearDangling)); // ENGINE RANK ORDER — never re-sort
   regions.set([]); // regions are scan output, not persisted — rescan restores dimming
   scanStatus.set({ state: 'idle' });
   selection.set(null);
   viewParams.set({ ...DEFAULT_VIEW_PARAMS, format: { ...project.valueDefaults } });
   addressFrame.set(project.addressFrame === 'ms41full' ? 'ms41full' : 'none');
   framePromptAnswered.set(false); // a project load brings a new bin — the frame prompt re-arms
-  return { droppedMaps, droppedPotentials };
+  return { droppedMaps, droppedPotentials, droppedAxisEntries, clearedStamps };
 }

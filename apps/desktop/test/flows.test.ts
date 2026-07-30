@@ -175,6 +175,43 @@ describe('project save + open (spec §3 sha gate)', () => {
     expect(get(bin)).toBeNull();
     expect(get(toasts).some((t) => t.kind === 'error')).toBe(true);
   });
+
+  it('toasts dropped axis library entries and cleared stamps on a mismatched-bin load', async () => {
+    const host = new FakeHost();
+    const smallBytes = new Uint8Array(64);
+    const project = {
+      schemaVersion: 2,
+      bin: { name: 'dump.bin', sha256: 'a'.repeat(64), size: 0x1000 },
+      valueDefaults: { width: 1, signed: false, endianness: 'little' },
+      axisLibrary: [
+        { id: 'lib-far', name: 'Far', axis: { kind: 'referenced', address: 0x800, count: 8, format: { width: 1, signed: false, endianness: 'little' } } },
+      ],
+      maps: [{
+        id: 'm1', name: 'M', address: 0x10, rows: 2, cols: 4,
+        format: { width: 1, signed: false, endianness: 'little' },
+        scaling: { factor: 1, offset: 0, units: '', digits: 0 },
+        orientation: 'row-major', provenance: 'manual',
+        xAxis: {
+          kind: 'referenced', address: 0x20, count: 4,
+          format: { width: 1, signed: false, endianness: 'little' },
+          name: 'Far', libId: 'lib-far',
+        },
+      }],
+      potentialMaps: [],
+    };
+    // Use the file's 'C:\\proj\\' convention: dirname of a ROOT-level path drops the
+    // backslash, joinPath then joins with '/', and FakeHost's exact-key Map lookup
+    // misses the sibling bin — the flow would cancel before applyProject.
+    host.files.set('C:\\proj\\p.binproj.json', JSON.stringify(project));
+    host.files.set('C:\\proj\\dump.bin', smallBytes);
+    host.openAnswers = ['C:\\proj\\p.binproj.json'];
+    host.confirmAnswers = [true]; // sha mismatch → load anyway
+    await openProjectFlow(host);
+    expect(get(bin)).not.toBeNull();
+    expect(get(toasts).some((t) => t.text.includes('axis library'))).toBe(true);
+    expect(get(toasts).some((t) => t.text.includes('detached'))).toBe(true);
+    expect(get(maps)[0]!.xAxis?.libId).toBeUndefined();
+  });
 });
 
 describe('exportFlow', () => {
