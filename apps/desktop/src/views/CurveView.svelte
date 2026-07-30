@@ -4,6 +4,8 @@
   import { curveSeries } from '../lib/curvedata.js';
   import { formatPhysical } from '@binanalyzer/core';
   import type { MapDef } from '@binanalyzer/core';
+  import * as actions from '../store/actions.js';
+  import { entryAxisFromCurve } from '../lib/axislib.js';
 
   const map = $derived.by((): MapDef | undefined => {
     const sel = $selection;
@@ -48,12 +50,21 @@
     const axisScaling = s.axis?.scaling;
     return axisScaling ? formatPhysical(xv, axisScaling) : String(xv);
   }
+
+  function saveAsAxis(): void {
+    const m = map;
+    if (!m) return;
+    const r = actions.addAxisLibEntry(m.name, entryAxisFromCurve(m));
+    if (r.ok) actions.pushToast('info', `Saved "${r.value.name}" to the axis library`);
+    else actions.pushToast('error', r.error);
+  }
 </script>
 
 <div class="curvewrap">
   {#if map && series && series.y.length > 0}
     <div class="head">
       {map.name} — {series.y.length} points{series.xIsIndex ? ' (no axis bound — index X)' : ''}
+      <button class="saveaxis" onclick={saveAsAxis} title="Create an axis library entry from this curve's data span (a detected curve is often a shared axis)">Save as axis</button>
     </div>
     <svg viewBox="0 0 {W} {H}" class="chart" role="img" aria-label="curve chart">
       <polyline points={pts} fill="none" stroke="var(--accent)" stroke-width="1.5" />
@@ -97,6 +108,12 @@
     margin-bottom: 6px;
     color: var(--fg-dim);
     font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .saveaxis {
+    margin-left: auto;
   }
   .chart {
     width: 100%;
