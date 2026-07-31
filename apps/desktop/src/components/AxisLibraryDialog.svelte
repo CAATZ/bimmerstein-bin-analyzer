@@ -458,6 +458,14 @@
   h4 {
     margin: 8px 0 0;
   }
+  /* The attach sub-dialog has no .body wrapper, so this list IS its scroll
+     container. Without overflow the list's flex min-height:auto resolves to the
+     full content height (216 fitting slots on a real MS41 bin), the dialog
+     blows past max-height:80vh, and the Cancel/Attach row is pushed off-screen
+     — leaving the modal impossible to submit OR dismiss. */
+  .targets {
+    overflow-y: auto;
+  }
   .targets label {
     justify-content: flex-start;
   }
