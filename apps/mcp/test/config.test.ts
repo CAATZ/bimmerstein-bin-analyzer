@@ -16,7 +16,7 @@ describe('MCP_CONFIG', () => {
     expect(MCP_CONFIG.maxRegionsReturned).toBe(64);
     expect(MCP_CONFIG.maxWarningsReturned).toBe(50);
     expect(MCP_CONFIG.importSampleSize).toBe(5);
-    expect(MCP_CONFIG.exportMaxInlineChars).toBe(200_000);
+    expect(MCP_CONFIG.exportMaxInlineChars).toBe(400_000);
   });
 });
 

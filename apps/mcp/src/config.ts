@@ -25,8 +25,19 @@ export const MCP_CONFIG = {
   maxRegionsReturned: 64,
   maxWarningsReturned: 50,
   importSampleSize: 5,
-  /** ~ a full MS41 RomRaider definition. Over this, demand outPath. */
-  exportMaxInlineChars: 200_000,
+  /**
+   * Inline export ceiling. Over this, demand outPath rather than return a
+   * truncated definition. Sized from MEASURED exports of the real 306-map MS41
+   * definition (2026-08-01): RomRaider 177,298 · JSON 150,420 · CSV 38,728 —
+   * so 400k gives the largest realistic definition ~2.3x headroom. It still
+   * refuses the payloads that would destroy an agent's context: the same 306
+   * maps as XDF are 636,231 chars (XDF is ~3.6x RomRaider — embedded axis data
+   * plus a per-table equation), and a 4,616-map potential-map dump is 442,810
+   * as CSV and 2,099,498 as JSON. Those two ranges OVERLAP, so no single cap
+   * separates "a real definition" from "a firehose" — this one is set by what
+   * fits in a reply, not by intent.
+   */
+  exportMaxInlineChars: 400_000,
   /** Evicted bins remembered (path only) so an unknown-binId error can help. */
   evictionMemory: 16,
 } as const;

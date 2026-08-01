@@ -108,6 +108,33 @@ describe('export_definition', () => {
     expect(errorText(await call(exportDefinitionTool, { binId, format: 'csv', outPath: '/anywhere/x.csv' }, deps))).toContain('--allow-write');
   });
 
+  it('refuses an over-cap inline export instead of truncating the definition', async () => {
+    // Enough 1x1 maps that the JSON export clears exportMaxInlineChars.
+    const COUNT = 2000;
+    const tables = Array.from(
+      { length: COUNT },
+      (_v, i) =>
+        `<table type="3D" name="M${i}" storageaddress="${i.toString(16)}" storagetype="uint8" sizex="1" sizey="1">` +
+        `<scaling units="x" expression="x" to_byte="x" format="0" /></table>`
+    ).join('\n');
+    const bigDef = `<?xml version="1.0" encoding="UTF-8"?>
+<roms><rom>
+  <romid><xmlid>BIG</xmlid><internalidaddress>0</internalidaddress><internalidstring>BIG</internalidstring></romid>
+  ${tables}
+</rom></roms>`;
+
+    const deps = fakeDeps({ bins: { '/b/big.bin': new Uint8Array(0x1000) } });
+    const { binId } = payload<{ binId: string }>(await call(openBinTool, { path: '/b/big.bin' }, deps));
+    const imported = payload(await call(importDefinitionTool, { binId, xml: bigDef }, deps));
+    expect(imported['importedMaps']).toBe(COUNT);
+
+    const text = errorText(await call(exportDefinitionTool, { binId, format: 'json' }, deps));
+    expect(text).toContain('over the 400000 inline cap');
+    expect(text).toContain('outPath');
+    // Never a partial definition — the error carries no content field.
+    expect(text).not.toContain('"name"');
+  });
+
   it('names scan_bin when asked to export unscanned potentials', async () => {
     const { deps, binId } = await withDef();
     expect(errorText(await call(exportDefinitionTool, { binId, format: 'csv', source: 'potential' }, deps))).toContain('scan_bin');
