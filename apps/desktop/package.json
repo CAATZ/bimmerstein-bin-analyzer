@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@binanalyzer/appkit": "workspace:*",
     "@binanalyzer/core": "workspace:*",
     "@binanalyzer/engine": "workspace:*",
     "@binanalyzer/formats": "workspace:*",

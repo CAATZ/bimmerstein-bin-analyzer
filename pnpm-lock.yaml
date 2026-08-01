@@ -10,6 +10,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@binanalyzer/appkit':
+        specifier: workspace:*
+        version: link:../../packages/appkit
       '@binanalyzer/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -53,6 +56,22 @@ importers:
       vite:
         specifier: ^6.0.3
         version: 6.4.3(@types/node@22.20.0)(tsx@4.23.0)
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)(tsx@4.23.0)
+
+  packages/appkit:
+    dependencies:
+      '@binanalyzer/core':
+        specifier: workspace:*
+        version: link:../core
+      '@binanalyzer/engine':
+        specifier: workspace:*
+        version: link:../engine
+    devDependencies:
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
       vitest:
         specifier: ^3.0.0
         version: 3.2.6(@types/node@22.20.0)(tsx@4.23.0)
