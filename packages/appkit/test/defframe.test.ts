@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MapDef } from '@binanalyzer/core';
-import { axisSaRepresentable, frameDefMaps, isMs41FullRead, saRepresentableSpan, unframeDefMaps } from '../src/lib/defframe.js';
+import { axisSaRepresentable, frameDefMaps, isMs41FullRead, saRepresentableSpan, unframeDefMaps } from '../src/defframe.js';
 
 const U16LE = { width: 2, signed: false, endianness: 'little' } as const;
 const U8 = { width: 1, signed: false, endianness: 'little' } as const;

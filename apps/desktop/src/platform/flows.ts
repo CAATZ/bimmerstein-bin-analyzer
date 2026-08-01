@@ -7,7 +7,7 @@ import {
 import * as actions from '../store/actions.js';
 import { listRomIds } from '../lib/romlist.js';
 import { addressFrame, bin, framePromptAnswered, maps, potentialMaps } from '../store/stores.js';
-import { frameDefMaps, isMs41FullRead, unframeDefMaps } from '../lib/defframe.js';
+import { frameDefMaps, isMs41FullRead, unframeDefMaps } from '@binanalyzer/appkit';
 import { basename, dirname, joinPath, stemOf, type FileFilter, type PlatformHost } from './host.js';
 
 /**

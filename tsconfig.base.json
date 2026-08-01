@@ -16,6 +16,7 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
+      "@binanalyzer/appkit": ["packages/appkit/src/index.ts"],
       "@binanalyzer/core": ["packages/core/src/index.ts"],
       "@binanalyzer/engine": ["packages/engine/src/index.ts"],
       "@binanalyzer/formats": ["packages/formats/src/index.ts"]

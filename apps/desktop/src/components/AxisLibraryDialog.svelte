@@ -7,7 +7,7 @@
   import { axisLibrary, bin, maps, potentialMaps } from '../store/stores.js';
   import * as actions from '../store/actions.js';
   import { attachTargets, axisIdentityKey, fanOutCount, stampAxis, type AttachTarget } from '../lib/axislib.js';
-  import { axisSaRepresentable, isMs41FullRead } from '../lib/defframe.js';
+  import { axisSaRepresentable, isMs41FullRead } from '@binanalyzer/appkit';
 
   interface Props {
     onclose: () => void;
