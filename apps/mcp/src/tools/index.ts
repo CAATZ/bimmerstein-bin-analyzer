@@ -4,8 +4,18 @@ import { listBinsTool } from './list-bins.js';
 import { scanBinTool } from './scan-bin.js';
 import { listMapsTool } from './list-maps.js';
 import { getMapTool } from './get-map.js';
+import { readMapTool } from './read-map.js';
+import { readBytesTool } from './read-bytes.js';
 
-export { openBinTool, listBinsTool, scanBinTool, listMapsTool, getMapTool };
+export { openBinTool, listBinsTool, scanBinTool, listMapsTool, getMapTool, readMapTool, readBytesTool };
 
 /** Registration order is the order an agent sees in tools/list. */
-export const TOOLS: ToolSpec[] = [openBinTool, listBinsTool, scanBinTool, listMapsTool, getMapTool];
+export const TOOLS: ToolSpec[] = [
+  openBinTool,
+  listBinsTool,
+  scanBinTool,
+  listMapsTool,
+  getMapTool,
+  readMapTool,
+  readBytesTool,
+];
