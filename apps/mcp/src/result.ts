@@ -2,10 +2,17 @@ import type { SessionStore } from './session.js';
 import type { Scanner } from './scanner.js';
 import type { FileIo } from './fsio.js';
 
-export interface ToolResult {
+/**
+ * A `type` alias, deliberately NOT an interface: the SDK's CallToolResult is a
+ * passthrough object (`[x: string]: unknown`), and TypeScript only grants an
+ * implicit index signature to type aliases, not to interfaces. As an interface
+ * this shape fails to satisfy setRequestHandler's return type even though it is
+ * structurally identical.
+ */
+export type ToolResult = {
   content: Array<{ type: 'text'; text: string }>;
   isError?: true;
-}
+};
 
 /**
  * Success payloads are COMPACT JSON (no indentation): a single list_maps page
