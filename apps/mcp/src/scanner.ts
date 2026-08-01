@@ -46,14 +46,6 @@ export class WorkerScanner implements Scanner {
   private readonly enqueue = serializeScans();
   private current: Worker | undefined;
 
-  /**
-   * @param loaderUrl ESM loader to give the worker thread. The workspace ships
-   *   raw TypeScript, so the worker cannot start without one; the launcher
-   *   resolves tsx's loader and passes it through BINALYZER_TSX_LOADER
-   *   (register() is per-thread and is NOT inherited by workers).
-   */
-  constructor(private readonly loaderUrl: string | undefined = process.env['BINALYZER_TSX_LOADER']) {}
-
   async scan(bytes: Uint8Array): Promise<ScanResult> {
     return this.enqueue(async () => this.runOnce(bytes));
   }
@@ -68,14 +60,16 @@ export class WorkerScanner implements Scanner {
     // A COPY: transferring the session's own buffer would detach it and break
     // every later read_map on that bin.
     const copy = bytes.slice();
-    // NOTE: '.ts', not '.js'. This is a runtime URL, not a module specifier —
-    // tsx rewrites specifiers, not `new URL(...)` strings, so this must name
-    // the file that actually exists on disk.
-    const entry = new URL('./scan-worker.ts', import.meta.url);
+    // A plain-JS bootstrap, NOT scan-worker.ts directly: the worker thread has
+    // no TypeScript loader of its own, register() is per-thread, and passing
+    // the parent's loader down via execArgv is not portable across Node
+    // versions (see scan-worker-boot.mjs). The bootstrap registers tsx inside
+    // the worker and then imports the TS body. This is a runtime URL, not a
+    // module specifier, so it names the file that exists on disk.
+    const entry = new URL('./scan-worker-boot.mjs', import.meta.url);
     const worker = new Worker(entry, {
       workerData: { buffer: copy.buffer },
       transferList: [copy.buffer],
-      ...(this.loaderUrl !== undefined ? { execArgv: ['--import', this.loaderUrl] } : {}),
     });
     this.current = worker;
     try {
