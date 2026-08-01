@@ -6,8 +6,9 @@ import { listMapsTool } from './list-maps.js';
 import { getMapTool } from './get-map.js';
 import { readMapTool } from './read-map.js';
 import { readBytesTool } from './read-bytes.js';
+import { listDetectedAxesTool } from './list-detected-axes.js';
 
-export { openBinTool, listBinsTool, scanBinTool, listMapsTool, getMapTool, readMapTool, readBytesTool };
+export { openBinTool, listBinsTool, scanBinTool, listMapsTool, getMapTool, readMapTool, readBytesTool, listDetectedAxesTool };
 
 /** Registration order is the order an agent sees in tools/list. */
 export const TOOLS: ToolSpec[] = [
@@ -18,4 +19,5 @@ export const TOOLS: ToolSpec[] = [
   getMapTool,
   readMapTool,
   readBytesTool,
+  listDetectedAxesTool,
 ];
