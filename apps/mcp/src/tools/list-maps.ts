@@ -23,7 +23,10 @@ export const listMapsTool: ToolSpec = {
     required: ['binId'],
     properties: {
       binId: { type: 'string', description: 'sha256 handle from open_bin.' },
-      source: { enum: ['potential', 'imported', 'all'], default: 'all', description: 'potential = auto-detected by scan_bin; imported = from import_definition.' },
+      source: {
+        enum: ['potential', 'imported', 'confirmed', 'all'], default: 'all',
+        description: "potential = this server's own detections from scan_bin; confirmed = maps the user has authored in the app (co-pilot mode); imported = maps from import_definition (headless mode).",
+      },
       kind: { enum: [...KINDS], description: 'Shape class: grid, curve (1D), switch (named byte states), param (1x1 scalar).' },
       detector: { enum: [...DETECTORS], description: 'Evidence tier, strongest first: family (code-proven) > structural > pool > generic (byte smoothness).' },
       minConfidence: { type: 'number', minimum: 0, maximum: 1 },
@@ -41,7 +44,7 @@ export const listMapsTool: ToolSpec = {
     const a = asArgs(raw);
     const id = reqString(a, 'binId');
     if (!id.ok) return err(id.error);
-    const source = optEnum(a, 'source', ['potential', 'imported', 'all'] as const, 'all');
+    const source = optEnum(a, 'source', ['potential', 'imported', 'confirmed', 'all'] as const, 'all');
     if (!source.ok) return err(source.error);
     const kind = optOneOf(a, 'kind', KINDS);
     if (!kind.ok) return err(kind.error);
