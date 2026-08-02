@@ -9,6 +9,7 @@ import { readBytesTool } from './read-bytes.js';
 import { listDetectedAxesTool } from './list-detected-axes.js';
 import { importDefinitionTool } from './import-definition.js';
 import { exportDefinitionTool } from './export-definition.js';
+import { getSessionTool } from './get-session.js';
 
 export {
   openBinTool,
@@ -21,6 +22,7 @@ export {
   listDetectedAxesTool,
   importDefinitionTool,
   exportDefinitionTool,
+  getSessionTool,
 };
 
 /** Registration order is the order an agent sees in tools/list. */
@@ -43,6 +45,7 @@ export const HEADLESS_TOOLS: ToolSpec[] = [
  * either mode (P7). Session-aware tools are appended here as they land.
  */
 export const COPILOT_TOOLS: ToolSpec[] = [
+  getSessionTool,
   scanBinTool,
   listMapsTool,
   getMapTool,

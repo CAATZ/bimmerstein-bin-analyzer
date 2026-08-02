@@ -104,6 +104,9 @@ export class LiveSessionStore implements SessionStore {
 
     const answer = await this.link.request<{ base64: string }>('getBinBytes', { sha256: sha });
     if (!answer.ok) throw new Error(`cannot obtain the bin bytes: ${answer.error}`);
+    if (typeof answer.value?.base64 !== 'string') {
+      throw new Error('the app answered getBinBytes without base64 bytes — refusing to analyse an empty payload');
+    }
     const bytes = new Uint8Array(Buffer.from(answer.value.base64, 'base64'));
     const got = sha256Hex(bytes);
     if (got !== sha) {

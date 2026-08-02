@@ -1,6 +1,7 @@
 import type { Result } from '@binanalyzer/core';
 import { InlineScanner } from '../src/scanner.js';
 import { MemorySessionStore } from '../src/session.js';
+import { LiveSessionStore } from '../src/live-session.js';
 import type { BinRead, FileIo } from '../src/fsio.js';
 import type { Deps, ToolResult, ToolSpec } from '../src/result.js';
 
@@ -31,11 +32,16 @@ export class FakeFileIo implements FileIo {
 
 export function fakeDeps(over: Partial<Deps> & { bins?: Record<string, Uint8Array>; texts?: Record<string, string> } = {}): Deps & { io: FakeFileIo } {
   const io = (over.io as FakeFileIo | undefined) ?? new FakeFileIo(over.bins ?? {}, over.texts ?? {});
+  const link = over.link;
   return {
-    store: over.store ?? new MemorySessionStore(4),
+    // A link implies co-pilot mode, so the store is the live one unless a test
+    // supplies its own.
+    store: over.store ?? (link !== undefined ? new LiveSessionStore(link, io) : new MemorySessionStore(4)),
     scanner: over.scanner ?? new InlineScanner(),
     io,
     ...(over.writeRoot !== undefined ? { writeRoot: over.writeRoot } : {}),
+    ...(link !== undefined ? { link } : {}),
+    ...(over.requests !== undefined ? { requests: over.requests } : {}),
   };
 }
 
