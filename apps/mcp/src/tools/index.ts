@@ -10,6 +10,7 @@ import { listDetectedAxesTool } from './list-detected-axes.js';
 import { importDefinitionTool } from './import-definition.js';
 import { exportDefinitionTool } from './export-definition.js';
 import { getSessionTool } from './get-session.js';
+import { openMapTool, selectTool, showTool } from './point.js';
 
 export {
   openBinTool,
@@ -23,6 +24,9 @@ export {
   importDefinitionTool,
   exportDefinitionTool,
   getSessionTool,
+  selectTool,
+  showTool,
+  openMapTool,
 };
 
 /** Registration order is the order an agent sees in tools/list. */
@@ -46,6 +50,9 @@ export const HEADLESS_TOOLS: ToolSpec[] = [
  */
 export const COPILOT_TOOLS: ToolSpec[] = [
   getSessionTool,
+  selectTool,
+  showTool,
+  openMapTool,
   scanBinTool,
   listMapsTool,
   getMapTool,
