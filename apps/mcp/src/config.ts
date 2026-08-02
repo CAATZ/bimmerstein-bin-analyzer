@@ -40,6 +40,13 @@ export const MCP_CONFIG = {
   exportMaxInlineChars: 400_000,
   /** Evicted bins remembered (path only) so an unknown-binId error can help. */
   evictionMemory: 16,
+  /**
+   * Co-pilot mode: how long a Point/Change op may wait for the app before it is
+   * reported as unanswered. Deliberately short — these are local, synchronous UI
+   * actions (measured link RTT p50 0.2 ms). Deferred USER decisions do not use
+   * this path; they go through the RequestTable and never block a tool call.
+   */
+  linkRequestTimeoutMs: 5_000,
 } as const;
 
 /**
