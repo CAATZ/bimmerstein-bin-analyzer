@@ -32,6 +32,12 @@ export interface OpenBin {
   scan?: CachedScan;
   imported?: ImportedDefs;
   detectedAxes?: PrefixedAxis[];
+  /**
+   * The app's CONFIRMED maps, co-pilot mode only (spec §5.3). Headless mode
+   * never sets it — there is no "confirmed" set in a private sandbox — and
+   * headless list_maps does not offer that source.
+   */
+  confirmed?: MapDef[];
 }
 
 export interface OpenResult {
