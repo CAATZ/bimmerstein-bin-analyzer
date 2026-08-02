@@ -1,6 +1,7 @@
 import { get } from 'svelte/store';
 import type { AxisDef, MapDef, Scaling } from '@binanalyzer/core';
 import * as actions from '../store/actions.js';
+import { pushToast } from '../store/actions.js';
 import { undoTransaction } from '../store/undo.js';
 import {
   bin, maps, potentialMaps, proposals, selection, viewParams,
@@ -120,7 +121,13 @@ export async function dispatchOp(op: string, rawArgs: unknown): Promise<Dispatch
         });
         return okv({ escalated: true, requestId });
       }
-      return applyChange(op, args);
+      const result = applyChange(op, args);
+      // Spec §7.1: a single Change is "applied directly, snapshotted, toasted".
+      // Without the toast the user learns about a co-pilot edit only by
+      // noticing it. An accepted proposal is NOT toasted here — the user
+      // decided that one themselves, and 306 toasts would bury the app.
+      if (result.ok) pushToast('info', changeToastText(op, args, result.value));
+      return result;
     }
 
     case 'propose': {
@@ -157,6 +164,25 @@ export async function dispatchOp(op: string, rawArgs: unknown): Promise<Dispatch
     default:
       return fail(`unknown co-pilot op "${op}"`);
   }
+}
+
+/** Names what the co-pilot just did, in the same words the sidebar uses. */
+function changeToastText(
+  op: string,
+  args: Record<string, unknown>,
+  value: Record<string, unknown>
+): string {
+  if (op === 'change_map') {
+    if (args['remove'] === true) return `Co-pilot removed map ${String(args['mapId'])}`;
+    const map = value['map'] as MapDef | undefined;
+    return `Co-pilot changed "${map?.name ?? String(args['mapId'])}"`;
+  }
+  if (args['remove'] === true) return `Co-pilot removed axis entry ${String(args['entryId'])}`;
+  if (args['restamp'] === true) {
+    return `Co-pilot re-stamped ${String(value['updated'] ?? 0)} maps from an axis entry`;
+  }
+  const entry = value['entry'] as { name?: string } | undefined;
+  return `Co-pilot changed axis "${entry?.name ?? String(args['entryId'])}"`;
 }
 
 /** Applies ONE change through the matching actions.ts mutator. */

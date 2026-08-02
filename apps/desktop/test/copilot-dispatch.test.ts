@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapDef } from '@binanalyzer/core';
 import { createBinImage } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
-import { SINGLE_CHANGE_BURST, dispatchOp, resetBurstWindow } from '../src/copilot/dispatch.js';
-import { axisLibrary, maps, potentialMaps, proposals, selection, viewParams } from '../src/store/stores.js';
+import { SINGLE_CHANGE_BURST, applyProposal, dispatchOp, resetBurstWindow } from '../src/copilot/dispatch.js';
+import { axisLibrary, maps, potentialMaps, proposals, selection, toasts, viewParams } from '../src/store/stores.js';
 
 function testBin() {
   return createBinImage(Uint8Array.from({ length: 4096 }, (_, i) => i & 0xff), 'live.bin');
@@ -96,6 +96,57 @@ describe('single Change ops', () => {
     const id = get(axisLibrary)[0]!.id;
     expect((await dispatchOp('change_axis_entry', { entryId: id, remove: true })).ok).toBe(true);
     expect(get(axisLibrary)).toHaveLength(0);
+  });
+});
+
+describe('single Changes are toasted (spec §7.1)', () => {
+  it('a rename toasts, naming the map the co-pilot touched', async () => {
+    a.addImportedMaps([mapAt('m1', 0x100)]);
+    await dispatchOp('change_map', { mapId: 'm1', name: 'Dwell' });
+    expect(get(toasts)).toHaveLength(1);
+    expect(get(toasts)[0]!.text).toContain('Dwell');
+    expect(get(toasts)[0]!.text.toLowerCase()).toContain('co-pilot');
+  });
+
+  it('a removal toasts too', async () => {
+    a.addImportedMaps([mapAt('m1', 0x100)]);
+    await dispatchOp('change_map', { mapId: 'm1', remove: true });
+    expect(get(toasts)).toHaveLength(1);
+    expect(get(toasts)[0]!.text).toContain('m1');
+  });
+
+  it('an axis-library change toasts', async () => {
+    await dispatchOp('change_axis_entry', {
+      create: {
+        name: 'RPM',
+        axis: { kind: 'referenced', address: 0x800, count: 4, format: { width: 1, signed: false, endianness: 'little' } },
+      },
+    });
+    expect(get(toasts)).toHaveLength(1);
+    expect(get(toasts)[0]!.text).toContain('RPM');
+  });
+
+  it('a rejected change says nothing — there is nothing to report', async () => {
+    const r = await dispatchOp('change_map', { mapId: 'ghost', name: 'x' });
+    expect(r.ok).toBe(false);
+    expect(get(toasts)).toHaveLength(0);
+  });
+
+  it('an escalated change does not toast — the panel is the surface', async () => {
+    a.addImportedMaps([mapAt('m1', 0x100)]);
+    for (let i = 0; i < SINGLE_CHANGE_BURST; i++) await dispatchOp('change_map', { mapId: 'm1', name: `n${i}` });
+    toasts.set([]);
+    await dispatchOp('change_map', { mapId: 'm1', name: 'escalated' });
+    expect(get(proposals)).toHaveLength(1);
+    expect(get(toasts)).toHaveLength(0);
+  });
+
+  it('an accepted proposal does NOT toast per row — 306 toasts would bury the app', () => {
+    const changes = Array.from({ length: 12 }, (_, i) => ({ id: `c${i}`, addMap: mapAt(`p${i}`, 0x200 + i * 8) }));
+    proposals.set([{ requestId: 'r1', title: 'Import 12 maps', changes }]);
+    applyProposal('r1', changes.map((c) => c.id));
+    expect(get(maps)).toHaveLength(12);
+    expect(get(toasts).length).toBeLessThanOrEqual(1);
   });
 });
 
