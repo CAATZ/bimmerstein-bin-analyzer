@@ -3,24 +3,34 @@ import type { Result } from '@binanalyzer/core';
 export interface CliOptions {
   /** Only set by --allow-write; without it no write is ever attempted. */
   writeRoot?: string;
+  /** --copilot: listen on loopback for the desktop app instead of owning bins. */
+  copilot: boolean;
 }
 
 export const USAGE = `bimmerstein-mcp — BimmerStein Bin Analyzer MCP server (stdio)
 
-Usage: node apps/mcp/bin/bimmerstein-mcp.mjs [--allow-write <dir>]
+Usage: node apps/mcp/bin/bimmerstein-mcp.mjs [--copilot] [--allow-write <dir>]
+
+  --copilot             Attach to a running BimmerStein Bin Analyzer window
+                        instead of opening bins directly. The app must have
+                        "Share session with co-pilot" enabled. Loopback only.
 
   --allow-write <dir>   Permit export_definition to write inside <dir> (and only
                         there, symlinks resolved). Without it, exports are
                         returned as text. Bin files are NEVER written.`;
 
 export function parseArgv(argv: string[]): Result<CliOptions> {
-  const options: CliOptions = {};
+  const options: CliOptions = { copilot: false };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i] ?? '';
     if (arg.startsWith('--allow-write=')) {
       const value = arg.slice('--allow-write='.length);
       if (value.length === 0) return { ok: false, error: `--allow-write needs a directory\n\n${USAGE}` };
       options.writeRoot = value;
+      continue;
+    }
+    if (arg === '--copilot') {
+      options.copilot = true;
       continue;
     }
     if (arg === '--allow-write') {
