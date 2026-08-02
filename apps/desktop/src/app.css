@@ -133,6 +133,17 @@ button.active { border-color: var(--accent); background: #2a3f63; }
 }
 .status .grow { flex: 1; }
 .status .err { color: var(--err); }
+/* Co-pilot link state. Only rendered while the user has consent switched on. */
+.status .chip {
+  font-size: 0.9em;
+  padding: 0 6px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  opacity: 0.9;
+}
+.status .chip-connected { color: var(--chip); }
+.status .chip-waiting { color: var(--fg-dim); }
+.status .chip-disconnected { color: var(--warn); }
 .toasts { position: fixed; top: 46px; right: 12px; display: flex; flex-direction: column; gap: 6px; z-index: 40; }
 .toast {
   display: flex;

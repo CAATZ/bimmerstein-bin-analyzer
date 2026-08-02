@@ -51,3 +51,15 @@ export function makeReadLink(
     }
   };
 }
+
+/**
+ * OS kind from the webview's own user agent. Deliberately NOT
+ * @tauri-apps/plugin-os: that is a new Tauri plugin, needing a Rust
+ * registration and a capability entry, for one string this string already
+ * carries. WebView2 / WKWebView / WebKitGTK all identify their platform here.
+ */
+export function detectOsKind(userAgent: string): OsKind {
+  if (/Windows/i.test(userAgent)) return 'windows';
+  if (/Macintosh|Mac OS X/i.test(userAgent)) return 'macos';
+  return 'linux';
+}
