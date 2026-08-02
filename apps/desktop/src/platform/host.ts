@@ -17,6 +17,8 @@ export interface PlatformHost {
   readText(path: string): Promise<string>;
   writeText(path: string, contents: string): Promise<void>;
   exists(path: string): Promise<boolean>;
+  /** Read a text file, or null when it is absent/unreadable. Never throws. */
+  readTextIfExists(path: string): Promise<string | null>;
   /** Modal yes/no; the spec §3 sha-mismatch gate. */
   confirm(message: string, title: string): Promise<boolean>;
   /** OS file drops onto the window; resolves to an unsubscribe fn. */
