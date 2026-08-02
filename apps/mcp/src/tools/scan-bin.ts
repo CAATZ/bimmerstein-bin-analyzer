@@ -39,8 +39,8 @@ export const scanBinTool: ToolSpec = {
     const force = optBool(a, 'force', false);
     if (!force.ok) return err(force.error);
 
-    const entry = deps.store.get(id.value);
-    if (entry === undefined) return unknownBin(deps, id.value);
+    const entry = await deps.store.get(id.value);
+    if (entry === undefined) return await unknownBin(deps, id.value);
 
     let cached = true;
     let record = entry.scan;
@@ -53,7 +53,7 @@ export const scanBinTool: ToolSpec = {
         return err(`scan failed for "${entry.name}": ${e instanceof Error ? e.message : String(e)}`);
       }
       record = { configVersion: CONFIG_VERSION, result, durationMs: Date.now() - started };
-      deps.store.setScan(entry.binId, record);
+      await deps.store.setScan(entry.binId, record);
       cached = false;
     }
 

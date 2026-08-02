@@ -49,9 +49,9 @@ export interface ToolSpec {
 }
 
 /** Uniform unknown-binId error that names the evicted path when we have it. */
-export function unknownBin(deps: Deps, binId: string): ToolResult {
-  const path = deps.store.evictedPath(binId);
-  const open = deps.store.list().map((e) => e.binId);
+export async function unknownBin(deps: Deps, binId: string): Promise<ToolResult> {
+  const path = await deps.store.evictedPath(binId);
+  const open = (await deps.store.list()).map((e) => e.binId);
   return err(
     path !== undefined
       ? `unknown binId "${binId}" — it was evicted (bounded LRU). Call open_bin again with path "${path}".`

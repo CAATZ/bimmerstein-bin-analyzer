@@ -66,8 +66,8 @@ export const listMapsTool: ToolSpec = {
     const limit = optInt(a, 'limit', MCP_CONFIG.listMapsDefaultLimit, 1, MCP_CONFIG.listMapsMaxLimit);
     if (!limit.ok) return err(limit.error);
 
-    const entry = deps.store.get(id.value);
-    if (entry === undefined) return unknownBin(deps, id.value);
+    const entry = await deps.store.get(id.value);
+    if (entry === undefined) return await unknownBin(deps, id.value);
     const all = sourcedMaps(entry, source.value);
     if (!all.ok) return err(all.error);
 

@@ -41,19 +41,21 @@ export interface OpenResult {
 }
 
 /**
- * The Phase-2 seam (decision record D6). Phase 1 owns bins in memory; a future
- * sidecar implementation proxies to the live desktop store. Tool schemas are
- * identical in both, so only this interface is implemented twice.
+ * The Phase-2 seam. Phase 1 owns bins in memory; the co-pilot implementation
+ * (spec 2026-08-01-mcp-copilot-design.md) proxies to the live desktop store
+ * over a loopback link, so every method is a round trip and the interface is
+ * asynchronous. Tool surfaces DIFFER by mode — see that spec §8; the shared
+ * contract is this interface plus binId === sha256.
  */
 export interface SessionStore {
-  open(entry: OpenBin): OpenResult;
-  get(binId: string): OpenBin | undefined;
-  list(): OpenBin[];
-  setScan(binId: string, scan: CachedScan): void;
-  setImported(binId: string, imported: ImportedDefs): void;
-  setDetectedAxes(binId: string, axes: PrefixedAxis[]): void;
+  open(entry: OpenBin): Promise<OpenResult>;
+  get(binId: string): Promise<OpenBin | undefined>;
+  list(): Promise<OpenBin[]>;
+  setScan(binId: string, scan: CachedScan): Promise<void>;
+  setImported(binId: string, imported: ImportedDefs): Promise<void>;
+  setDetectedAxes(binId: string, axes: PrefixedAxis[]): Promise<void>;
   /** Path of a recently-evicted bin, so an unknown-id error can name it. */
-  evictedPath(binId: string): string | undefined;
+  evictedPath(binId: string): Promise<string | undefined>;
 }
 
 export class MemorySessionStore implements SessionStore {
@@ -63,7 +65,7 @@ export class MemorySessionStore implements SessionStore {
 
   constructor(private readonly maxOpen: number = MCP_CONFIG.maxOpenBins) {}
 
-  open(entry: OpenBin): OpenResult {
+  async open(entry: OpenBin): Promise<OpenResult> {
     const existing = this.entries.get(entry.binId);
     if (existing !== undefined) {
       this.touch(entry.binId);
@@ -84,33 +86,33 @@ export class MemorySessionStore implements SessionStore {
     return { entry, alreadyOpen: false, evicted };
   }
 
-  get(binId: string): OpenBin | undefined {
+  async get(binId: string): Promise<OpenBin | undefined> {
     const e = this.entries.get(binId);
     if (e === undefined) return undefined;
     this.touch(binId);
     return e;
   }
 
-  list(): OpenBin[] {
+  async list(): Promise<OpenBin[]> {
     return [...this.entries.values()].reverse();
   }
 
-  setScan(binId: string, scan: CachedScan): void {
+  async setScan(binId: string, scan: CachedScan): Promise<void> {
     const e = this.entries.get(binId);
     if (e !== undefined) e.scan = scan;
   }
 
-  setImported(binId: string, imported: ImportedDefs): void {
+  async setImported(binId: string, imported: ImportedDefs): Promise<void> {
     const e = this.entries.get(binId);
     if (e !== undefined) e.imported = imported;
   }
 
-  setDetectedAxes(binId: string, axes: PrefixedAxis[]): void {
+  async setDetectedAxes(binId: string, axes: PrefixedAxis[]): Promise<void> {
     const e = this.entries.get(binId);
     if (e !== undefined) e.detectedAxes = axes;
   }
 
-  evictedPath(binId: string): string | undefined {
+  async evictedPath(binId: string): Promise<string | undefined> {
     return this.evicted.get(binId);
   }
 

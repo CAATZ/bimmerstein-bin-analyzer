@@ -27,8 +27,8 @@ export const getMapTool: ToolSpec = {
     const mapId = reqString(a, 'mapId');
     if (!mapId.ok) return err(mapId.error);
 
-    const entry = deps.store.get(id.value);
-    if (entry === undefined) return unknownBin(deps, id.value);
+    const entry = await deps.store.get(id.value);
+    if (entry === undefined) return await unknownBin(deps, id.value);
 
     const found = findMap(entry, mapId.value);
     if (found === undefined) {
