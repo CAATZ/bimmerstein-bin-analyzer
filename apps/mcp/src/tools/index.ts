@@ -11,6 +11,7 @@ import { importDefinitionTool } from './import-definition.js';
 import { exportDefinitionTool } from './export-definition.js';
 import { getSessionTool } from './get-session.js';
 import { openMapTool, selectTool, showTool } from './point.js';
+import { changeAxisEntryTool, changeMapTool } from './change.js';
 
 export {
   openBinTool,
@@ -27,6 +28,8 @@ export {
   selectTool,
   showTool,
   openMapTool,
+  changeMapTool,
+  changeAxisEntryTool,
 };
 
 /** Registration order is the order an agent sees in tools/list. */
@@ -53,6 +56,8 @@ export const COPILOT_TOOLS: ToolSpec[] = [
   selectTool,
   showTool,
   openMapTool,
+  changeMapTool,
+  changeAxisEntryTool,
   scanBinTool,
   listMapsTool,
   getMapTool,
