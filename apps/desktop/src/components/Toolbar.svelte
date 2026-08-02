@@ -1,6 +1,6 @@
 <!-- apps/desktop/src/components/Toolbar.svelte -->
 <script lang="ts">
-  import { bin, maps, scanStatus, viewParams, type ViewMode } from '../store/stores.js';
+  import { bin, coPilotEnabled, maps, scanStatus, viewParams, type ViewMode } from '../store/stores.js';
   import * as actions from '../store/actions.js';
   import { tauriHost } from '../platform/tauri.js';
   import {
@@ -33,6 +33,10 @@
   <button onclick={() => void openProjectFlow(tauriHost)}>Open Project</button>
   <button onclick={() => void saveProjectFlow(tauriHost)} disabled={$bin === null}>Save Project</button>
   <button onclick={() => (axisLibOpen = true)} disabled={$bin === null}>Axes</button>
+  <label class="copilot-toggle" title="Let a connected agent see this session, point at things, and propose changes. Off by default.">
+    <input type="checkbox" bind:checked={$coPilotEnabled} />
+    Share session with co-pilot
+  </label>
   <span class="sep"></span>
   {#if $scanStatus.state === 'running'}
     <button onclick={cancelScan}>Cancel scan</button>
@@ -98,3 +102,14 @@
 {#if axisLibOpen}
   <AxisLibraryDialog onclose={() => (axisLibOpen = false)} />
 {/if}
+
+<style>
+  .copilot-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    white-space: nowrap;
+    color: var(--fg-dim);
+  }
+</style>

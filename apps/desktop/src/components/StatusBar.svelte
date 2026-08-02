@@ -1,6 +1,6 @@
 <!-- apps/desktop/src/components/StatusBar.svelte -->
 <script lang="ts">
-  import { bin, scanStatus, selection, viewParams } from '../store/stores.js';
+  import { bin, coPilotStatus, scanStatus, selection, viewParams } from '../store/stores.js';
 </script>
 
 <footer class="status">
@@ -13,6 +13,14 @@
     <span>
       sel 0x{$selection.start.toString(16).toUpperCase()}–0x{$selection.end.toString(16).toUpperCase()}
       ({$selection.end - $selection.start} B{#if $selection.cols !== undefined}, {$selection.cols} cols{/if})
+    </span>
+  {/if}
+  {#if $coPilotStatus !== 'off'}
+    <span class="chip chip-{$coPilotStatus}">
+      {#if $coPilotStatus === 'waiting'}Co-pilot: waiting…
+      {:else if $coPilotStatus === 'connected'}Co-pilot: connected
+      {:else}Co-pilot: disconnected — retrying
+      {/if}
     </span>
   {/if}
   <span class="grow"></span>

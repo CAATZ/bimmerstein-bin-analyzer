@@ -1,6 +1,6 @@
 <!-- apps/desktop/src/App.svelte -->
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import Toolbar from './components/Toolbar.svelte';
   import Sidebar from './components/Sidebar.svelte';
   import StatusBar from './components/StatusBar.svelte';
@@ -19,8 +19,13 @@
   import * as actions from './store/actions.js';
   import { bin, maps, modalOpen, potentialMaps, selection, viewParams } from './store/stores.js';
   import { tauriHost } from './platform/tauri.js';
-  import { loadBinFromPath } from './platform/flows.js';
+  import { loadBinFromPath, saveProjectFlow } from './platform/flows.js';
   import { runScan } from './worker/controller.js';
+  import ProposalPanel from './components/ProposalPanel.svelte';
+  import { CoPilotClient, type SocketLike } from './copilot/client.js';
+  import { detectOsKind, linkFilePathFor, makeReadLink, type OsPaths } from './copilot/link-file.js';
+  import { mountCoPilot, type CoPilotMount } from './copilot/mount.js';
+  import { homeDir, localDataDir } from '@tauri-apps/api/path';
 
   function isEditable(target: EventTarget | null): boolean {
     return (
@@ -84,9 +89,34 @@
       void subscription.then((unlisten) => unlisten());
     };
   });
+  let coPilot: CoPilotMount | null = null;
+
+  onMount(() => {
+    // Resolve the OS paths ONCE; the handshake location never moves at runtime.
+    let linkPath = '';
+    void (async () => {
+      const paths: OsPaths = { home: await homeDir(), localAppData: await localDataDir() };
+      linkPath = linkFilePathFor(detectOsKind(navigator.userAgent), paths);
+    })();
+
+    coPilot = mountCoPilot(
+      () =>
+        new CoPilotClient({
+          connect: (url) => new WebSocket(url) as unknown as SocketLike,
+          readLink: makeReadLink(tauriHost, () => linkPath),
+          schedule: (fn, ms) => setTimeout(fn, ms),
+          cancel: (h) => clearTimeout(h as ReturnType<typeof setTimeout>),
+          saveProject: () => saveProjectFlow(tauriHost),
+        })
+    );
+  });
+
+  onDestroy(() => coPilot?.stop());
 </script>
 
 <svelte:window onkeydown={onKeydown} />
+
+<ProposalPanel onDecide={(id, ids) => coPilot?.current()?.decideProposal(id, ids)} />
 
 <div class="app">
   <Toolbar />
