@@ -21,7 +21,10 @@ class FakeSocket implements SocketLike {
   frames(): Array<Record<string, unknown>> { return this.sent.map((s) => JSON.parse(s)); }
 }
 
-function harness(link: { port: number; token: string } | null = { port: 51733, token: 'tok' }) {
+function harness(
+  link: { port: number; token: string } | null = { port: 51733, token: 'tok' },
+  saveOutcome = true
+) {
   const sockets: FakeSocket[] = [];
   const timers: Array<{ fn: () => void; ms: number }> = [];
   const saves: number[] = [];
@@ -30,7 +33,7 @@ function harness(link: { port: number; token: string } | null = { port: 51733, t
     readLink: async () => link,
     schedule: (fn, ms) => { timers.push({ fn, ms }); return timers.length - 1; },
     cancel: () => {},
-    saveProject: async () => { saves.push(1); },
+    saveProject: async () => { saves.push(1); return saveOutcome; },
   };
   return {
     deps, sockets, timers, saves,
@@ -140,6 +143,21 @@ describe('CoPilotClient', () => {
     expect(h.saves).toHaveLength(1);
     expect(s.frames().find((f) => f['id'] === 'q4')).toMatchObject({ type: 'response', ok: true });
     expect(s.frames().find((f) => f['type'] === 'decision')).toMatchObject({ id: 'r7', accepted: ['r7'] });
+  });
+
+  it('reports a CANCELLED save as rejected — the agent must not be told it saved', async () => {
+    const h = harness({ port: 51733, token: 'tok' }, false);
+    new CoPilotClient(h.deps).start();
+    await tick();
+    const s = h.sockets[0]!;
+    s.open();
+    s.deliver({ v: 1, type: 'request', id: 'q5', op: 'save_project', args: { requestId: 'r8' } });
+    await tick();
+    await tick();
+    expect(h.saves).toHaveLength(1);
+    expect(s.frames().find((f) => f['type'] === 'decision')).toMatchObject({
+      id: 'r8', accepted: [], rejected: ['r8'],
+    });
   });
 
   it('reconnects with backoff after a close, and reports disconnected', async () => {

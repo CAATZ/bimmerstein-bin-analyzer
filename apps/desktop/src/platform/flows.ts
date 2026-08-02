@@ -48,19 +48,26 @@ export async function loadBinFromPath(host: PlatformHost, path: string): Promise
   }
 }
 
-export async function saveProjectFlow(host: PlatformHost): Promise<void> {
+/**
+ * Resolves TRUE only when a project file was actually written. The co-pilot
+ * link reports this verbatim (spec §7.3): a cancelled dialog or a failed write
+ * must reach the agent as `rejected`, never as a save that happened.
+ */
+export async function saveProjectFlow(host: PlatformHost): Promise<boolean> {
   const snap = actions.projectSnapshot();
   if (!snap.ok) {
     actions.pushToast('error', snap.error);
-    return;
+    return false;
   }
   const path = await host.saveFile('Save project', `${stemOf(snap.value.bin.name)}.binproj.json`, PROJECT_FILTERS);
-  if (path === null) return;
+  if (path === null) return false;
   try {
     await host.writeText(path, serializeProject(snap.value));
     actions.pushToast('info', `Project saved to ${basename(path)}`);
+    return true;
   } catch (e) {
     actions.pushToast('error', `Save failed: ${errText(e)}`);
+    return false;
   }
 }
 

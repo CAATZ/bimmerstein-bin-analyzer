@@ -22,8 +22,8 @@ export interface ClientDeps {
   readLink(): Promise<{ port: number; token: string } | null>;
   schedule(fn: () => void, ms: number): unknown;
   cancel(handle: unknown): void;
-  /** Runs the app's own Save flow. Resolves when the user is done or cancels. */
-  saveProject(): Promise<void>;
+  /** Runs the app's own Save flow. Resolves TRUE only if a file was written. */
+  saveProject(): Promise<boolean>;
 }
 
 const OPEN = 1;
@@ -144,8 +144,17 @@ export class CoPilotClient {
       // and report the outcome with a decision frame afterwards.
       this.send({ v: PROTOCOL_VERSION, type: 'response', id: frame.id, ok: true, value: { started: true } });
       const requestId = String((frame.args as Record<string, unknown> | null)?.['requestId'] ?? frame.id);
-      await this.deps.saveProject();
-      this.send({ v: PROTOCOL_VERSION, type: 'decision', id: requestId, accepted: [requestId], rejected: [] });
+      // The app is the authority (spec §11): a cancelled dialog or a failed
+      // write is a rejection, not a save. Reporting it as accepted would tell
+      // the agent the user's work is on disk when it is not.
+      const saved = await this.deps.saveProject();
+      this.send({
+        v: PROTOCOL_VERSION,
+        type: 'decision',
+        id: requestId,
+        accepted: saved ? [requestId] : [],
+        rejected: saved ? [] : [requestId],
+      });
       return;
     }
 
