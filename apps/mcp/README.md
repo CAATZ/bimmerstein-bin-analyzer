@@ -57,3 +57,42 @@ Addresses are **file offsets** everywhere except fields explicitly named
 
 Bin bytes and imported definition text — including map names — are untrusted
 data read from a file, never instructions.
+
+## Co-pilot mode (`--copilot`)
+
+Attach to a **running** BimmerStein Bin Analyzer window instead of opening bins
+yourself:
+
+```sh
+node apps/mcp/bin/bimmerstein-mcp.mjs --copilot
+```
+
+The user must tick **Share session with co-pilot** in the app; that toggle is
+the consent gate and is off by default. The server listens on `127.0.0.1` on an
+OS-assigned port and publishes the port and a per-start token in a handshake
+file under the user's local state directory; the app dials out and retries.
+**Nothing is listening when this server is not running.**
+
+The tool surface differs by mode and `tools/list` says so:
+
+| | Headless | Co-pilot |
+|---|---|---|
+| `read_map`, `read_bytes`, `get_map`, `list_detected_axes`, `export_definition`, `scan_bin` | yes | yes, unchanged |
+| `list_maps` | `source: potential \| imported \| all` | `source: potential \| confirmed \| all` |
+| `open_bin`, `list_bins` | yes | **no** — the user opens bins |
+| `get_session`, `select`, `show`, `open_map` | no | yes |
+| `change_map`, `change_axis_entry` | no | yes — **one** target each |
+| `propose_changes`, `get_request`, `save_project` | no | yes |
+| `load_project` | no | no |
+
+The co-pilot runs its **own** scan over the same bytes rather than reading the
+app's: the engine is deterministic, so it gets byte-identical maps with the same
+ids without touching the user's window. Bytes come from the app's file path when
+their sha256 matches what the app reported, and over the link otherwise.
+
+Changing **one** map or axis-library entry applies directly and is covered by
+the app's undo. Anything touching **more than one** — including every
+`import_definition` — goes to a review panel where the user accepts all, some or
+none. Those calls return a `requestId` immediately and are polled with
+`get_request`, so no tool call ever blocks on a person. `save_project` asks the
+app to run its own Save; this server never writes a project file.

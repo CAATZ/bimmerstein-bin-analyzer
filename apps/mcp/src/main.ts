@@ -1,7 +1,10 @@
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { parseArgv } from './argv.js';
 import { NodeFileIo } from './fsio.js';
-import { MemorySessionStore } from './session.js';
+import { MemorySessionStore, type SessionStore } from './session.js';
+import { LiveSessionStore } from './live-session.js';
+import { WsCoPilotLink } from './link/server.js';
+import { RequestTable } from './requests.js';
 import { WorkerScanner } from './scanner.js';
 import { createMcpServer } from './server.js';
 import type { Deps } from './result.js';
@@ -13,21 +16,48 @@ if (!parsed.ok) {
 }
 
 const scanner = new WorkerScanner();
+const io = new NodeFileIo();
+
+let link: WsCoPilotLink | undefined;
+let requests: RequestTable | undefined;
+let store: SessionStore;
+
+if (parsed.value.copilot) {
+  link = await WsCoPilotLink.listen();
+  requests = new RequestTable();
+  const table = requests;
+  // A dropped link means nothing pending can ever be answered by the person
+  // who was looking at that window.
+  link.onDisconnect(() => table.cancelAll('the co-pilot link disconnected'));
+  link.onDecision((id, accepted, rejected) =>
+    table.settle(id, {
+      status: accepted.length > 0 ? 'accepted' : 'rejected',
+      acceptedIds: accepted,
+      rejectedIds: rejected,
+    })
+  );
+  store = new LiveSessionStore(link, io);
+} else {
+  store = new MemorySessionStore();
+}
+
 const deps: Deps = {
-  store: new MemorySessionStore(),
+  store,
   scanner,
-  io: new NodeFileIo(),
+  io,
   ...(parsed.value.writeRoot !== undefined ? { writeRoot: parsed.value.writeRoot } : {}),
+  ...(link !== undefined ? { link } : {}),
+  ...(requests !== undefined ? { requests } : {}),
 };
 
-const server = createMcpServer(deps);
+const server = createMcpServer(deps, parsed.value.copilot ? 'copilot' : 'headless');
 const transport = new StdioServerTransport();
 
 let shuttingDown = false;
 const shutdown = (code: number): void => {
   if (shuttingDown) return;
   shuttingDown = true;
-  void scanner.dispose().finally(() => process.exit(code));
+  void Promise.allSettled([scanner.dispose(), link?.close()]).finally(() => process.exit(code));
 };
 transport.onclose = (): void => shutdown(0);
 process.on('SIGINT', () => shutdown(0));
