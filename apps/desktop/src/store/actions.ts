@@ -3,7 +3,8 @@ import type { AxisDef, AxisLibEntry, BinImage, MapDef, Project, Result, Scaling,
 import { readValue, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
 import {
-  DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, framePromptAnswered, maps, modalOpen, potentialMaps, regions,
+  DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, framePromptAnswered, maps, modalOpen, potentialMaps,
+  proposals, regions,
   scanStatus, scrollRequest, selection, toasts, viewParams,
   type Selection, type Toast, type ViewMode,
 } from './stores.js';
@@ -66,6 +67,7 @@ export function resetStores(): void {
   viewParams.set({ ...DEFAULT_VIEW_PARAMS });
   addressFrame.set('none');
   framePromptAnswered.set(false);
+  proposals.set([]);
   modalDepth = 0;
   modalOpen.set(false);
   clearUndo();
@@ -83,6 +85,7 @@ export function setBin(image: BinImage): void {
   viewParams.set({ ...DEFAULT_VIEW_PARAMS });
   addressFrame.set('none'); // a new bin is a new frame decision
   framePromptAnswered.set(false);
+  proposals.set([]); // a proposal is about maps in the bin that just went away
   clearUndo();
 }
 
