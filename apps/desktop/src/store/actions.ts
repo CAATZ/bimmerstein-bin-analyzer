@@ -3,7 +3,7 @@ import type { AxisDef, AxisLibEntry, BinImage, MapDef, Project, Result, Scaling,
 import { readValue, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
 import {
-  DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, framePromptAnswered, maps, modalOpen, potentialMaps, regions,
+  DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, framePromptAnswered, maps, modalOpen, potentialMaps, regions,
   scanStatus, scrollRequest, selection, toasts, viewParams,
   type Selection, type Toast, type ViewMode,
 } from './stores.js';
@@ -53,6 +53,7 @@ export function requestScroll(offset: number): void {
 /** Test/reset hook — also the app-quit-to-blank state. */
 export function resetStores(): void {
   bin.set(null);
+  binPath.set(null);
   maps.set([]);
   potentialMaps.set([]);
   axisLibrary.set([]);
@@ -70,6 +71,7 @@ export function resetStores(): void {
 
 export function setBin(image: BinImage): void {
   bin.set(image);
+  binPath.set(null); // a new bin: the caller records its path right after
   maps.set([]);
   potentialMaps.set([]);
   axisLibrary.set([]); // a new bin is a new address space — stale library entries would silently mis-decode
@@ -79,6 +81,11 @@ export function setBin(image: BinImage): void {
   viewParams.set({ ...DEFAULT_VIEW_PARAMS });
   addressFrame.set('none'); // a new bin is a new frame decision
   framePromptAnswered.set(false);
+}
+
+/** Records where the loaded bin came from. Call AFTER setBin, which clears it. */
+export function setBinPath(path: string | null): void {
+  binPath.set(path);
 }
 
 export function setScanRunning(): void {

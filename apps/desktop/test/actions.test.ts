@@ -4,7 +4,7 @@ import type { MapDef, Project } from '@binanalyzer/core';
 import { createBinImage } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
 import {
-  bin, maps, modalOpen, potentialMaps, regions, scanStatus, scrollRequest, selection, toasts, viewParams,
+  bin, binPath, maps, modalOpen, potentialMaps, regions, scanStatus, scrollRequest, selection, toasts, viewParams,
 } from '../src/store/stores.js';
 
 /** 256-byte bin: bytes[i] = i & 0xff — deterministic values for range math. */
@@ -343,5 +343,25 @@ describe('project snapshot / apply', () => {
     expect(dropped).toEqual({ droppedMaps: [], droppedPotentials: [], droppedAxisEntries: [], clearedStamps: [] });
     expect(get(maps).map((m) => m.id)).toEqual(['m-lo', 'm-hi']);
     expect(get(potentialMaps).map((m) => m.id)).toEqual(['auto-hi', 'auto-lo']);
+  });
+});
+
+describe('binPath', () => {
+  it('starts null and is set by setBinPath', () => {
+    expect(get(binPath)).toBeNull();
+    a.setBinPath('C:/bins/x.bin');
+    expect(get(binPath)).toBe('C:/bins/x.bin');
+  });
+
+  it('a new bin clears the previous path', () => {
+    a.setBinPath('C:/bins/x.bin');
+    a.setBin(testBin());
+    expect(get(binPath)).toBeNull();
+  });
+
+  it('resetStores clears it', () => {
+    a.setBinPath('C:/bins/x.bin');
+    a.resetStores();
+    expect(get(binPath)).toBeNull();
   });
 });

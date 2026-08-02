@@ -4,7 +4,7 @@ import { createBinImage } from '@binanalyzer/core';
 import type { MapDef } from '@binanalyzer/core';
 import { importRomRaiderXml } from '@binanalyzer/formats';
 import * as a from '../src/store/actions.js';
-import { addressFrame, bin, maps, potentialMaps, toasts } from '../src/store/stores.js';
+import { addressFrame, bin, binPath, maps, potentialMaps, toasts } from '../src/store/stores.js';
 import { basename, dirname, joinPath, stemOf, type PlatformHost } from '../src/platform/host.js';
 import {
   exportFlow, importDef, loadBinFromPath, openBinFlow, openProjectFlow, saveProjectFlow,
@@ -469,5 +469,20 @@ describe('RomRaider export inverts the frame (fo → SA)', () => {
     await exportFlow(host, 'csv');
     const csv = host.files.get('C:\\out.csv') as string;
     expect(csv).toContain('14670'); // fo-space address, NOT 670
+  });
+});
+
+describe('binPath provenance (2026-08-01 co-pilot spec §5.2)', () => {
+  it('loadBinFromPath records the path the bytes came from', async () => {
+    const host = new FakeHost();
+    host.files.set('C:\\bins\\real.bin', Uint8Array.from({ length: 256 }, (_, i) => (i % 251) + 1));
+    expect(await loadBinFromPath(host, 'C:\\bins\\real.bin')).toBe(true);
+    expect(get(binPath)).toBe('C:\\bins\\real.bin');
+  });
+
+  it('a failed load leaves no stale path behind', async () => {
+    const host = new FakeHost();
+    expect(await loadBinFromPath(host, 'C:\\missing.bin')).toBe(false);
+    expect(get(binPath)).toBeNull();
   });
 });
