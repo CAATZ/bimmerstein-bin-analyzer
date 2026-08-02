@@ -13,6 +13,7 @@
   import SwitchView from './views/SwitchView.svelte';
   import PreviewPanel from './views/PreviewPanel.svelte';
   import { resolveKey } from './lib/keymap.js';
+  import { redo, undo } from './store/undo.js';
   import { isCurveShaped } from './lib/curvedata.js';
   import { isSwitch } from './lib/switchdata.js';
   import * as actions from './store/actions.js';
@@ -52,6 +53,8 @@
       case 'view-next': actions.cycleViewMode(1); break;
       case 'view-prev': actions.cycleViewMode(-1); break;
       case 'toggle-preview': actions.togglePreview(); break;
+      case 'undo': undo(); break;
+      case 'redo': redo(); break;
     }
   }
 

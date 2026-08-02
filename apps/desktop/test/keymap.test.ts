@@ -61,3 +61,18 @@ describe('resolveKey — the frozen v1 map (spec §7)', () => {
     expect(resolveKey(key({ key: 'k', ctrl: true }))).toBeUndefined();
   });
 });
+
+describe('undo bindings (spec §7, added 2026-08-01)', () => {
+  it('Ctrl+Z undoes, Ctrl+Shift+Z redoes', () => {
+    expect(resolveKey(key({ key: 'z', ctrl: true }))).toBe('undo');
+    expect(resolveKey(key({ key: 'Z', ctrl: true, shift: true }))).toBe('redo');
+  });
+
+  it('plain z stays unbound', () => {
+    expect(resolveKey(key({ key: 'z' }))).toBeUndefined();
+  });
+
+  it('an editable target still swallows them', () => {
+    expect(resolveKey(key({ key: 'z', ctrl: true, inEditable: true }))).toBeUndefined();
+  });
+});
