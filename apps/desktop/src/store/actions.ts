@@ -8,6 +8,7 @@ import {
   type Selection, type Toast, type ViewMode,
 } from './stores.js';
 import { detachedAxis, libraryAxis, stampAxis } from '../lib/axislib.js';
+import { clearUndo, pushUndo, undoTransaction } from './undo.js';
 
 /**
  * Every store mutation in the app lives here.
@@ -67,6 +68,7 @@ export function resetStores(): void {
   framePromptAnswered.set(false);
   modalDepth = 0;
   modalOpen.set(false);
+  clearUndo();
 }
 
 export function setBin(image: BinImage): void {
@@ -81,6 +83,7 @@ export function setBin(image: BinImage): void {
   viewParams.set({ ...DEFAULT_VIEW_PARAMS });
   addressFrame.set('none'); // a new bin is a new frame decision
   framePromptAnswered.set(false);
+  clearUndo();
 }
 
 /** Records where the loaded bin came from. Call AFTER setBin, which clears it. */
@@ -142,6 +145,7 @@ export function promoteMap(id: string): boolean {
   // both are valid only on 'auto' maps (core validateMapDef), never set undefined.
   const { confidence: _confidence, detector: _detector, ...rest } = found;
   const promoted: MapDef = { ...rest, provenance: 'manual' };
+  pushUndo('promote map');
   potentialMaps.set(pots.filter((m) => m.id !== id));
   maps.update((ms) => [...ms, promoted].sort(byAddress));
   return true;
@@ -170,6 +174,7 @@ export function addMapFromSelection(): Result<MapDef> {
   };
   const valid = validateMapDef(map, image.size);
   if (!valid.ok) return valid;
+  pushUndo('create map');
   maps.update((ms) => [...ms, map].sort(byAddress));
   selection.set({ start: map.address, end: byteSpanOf(map).end, cols, mapId: map.id });
   return { ok: true, value: map };
@@ -195,6 +200,8 @@ export function confirmSelection(): void {
 }
 
 export function removeMap(id: string): void {
+  if (!get(maps).some((m) => m.id === id)) return;
+  pushUndo('remove map');
   maps.update((ms) => ms.filter((m) => m.id !== id));
   selection.update((sel) => (sel?.mapId === id ? null : sel));
 }
@@ -219,6 +226,7 @@ export function updateMapMeta(id: string, patch: MapMetaPatch): Result<MapDef> {
   if (patch.scaling !== undefined) next.scaling = { ...patch.scaling };
   const valid = validateMapDef(next, image.size);
   if (!valid.ok) return valid;
+  pushUndo('edit map properties');
   maps.update((ms) => ms.map((m) => (m.id === id ? next : m)));
   return { ok: true, value: next };
 }
@@ -239,6 +247,7 @@ export function setMapAxis(id: string, slot: 'x' | 'y', axis: AxisDef | undefine
   else next[key] = { ...axis };
   const valid = validateMapDef(next, image.size);
   if (!valid.ok) return valid;
+  pushUndo('change axis');
   maps.update((ms) => ms.map((m) => (m.id === id ? next : m)));
   return { ok: true, value: next };
 }
@@ -254,6 +263,7 @@ export function addAxisLibEntry(name: string, axis: AxisDef, notes?: string): Re
   };
   const valid = validateAxisLibEntry(entry, image.size);
   if (!valid.ok) return valid;
+  pushUndo('add axis library entry');
   axisLibrary.update((es) => [...es, entry]);
   return { ok: true, value: entry };
 }
@@ -279,49 +289,56 @@ export function updateAxisLibEntry(id: string, patch: AxisLibEntryPatch): Result
   }
   const valid = validateAxisLibEntry(next, image.size);
   if (!valid.ok) return valid;
+  pushUndo('edit axis library entry');
   axisLibrary.update((es) => es.map((e) => (e.id === id ? next : e)));
   return { ok: true, value: next };
 }
 
 /** Bulk detach: clears libId on every stamped slot; inline axes survive. */
 export function detachAxisLibEntry(id: string): { detached: number } {
-  let detached = 0;
-  for (const m of get(maps)) {
-    for (const slot of ['x', 'y'] as const) {
-      const ax = slot === 'x' ? m.xAxis : m.yAxis;
-      if (ax?.libId === id) {
-        const r = setMapAxis(m.id, slot, detachedAxis(ax));
-        if (r.ok) detached++;
+  return undoTransaction('detach axis library entry', () => {
+    let detached = 0;
+    for (const m of get(maps)) {
+      for (const slot of ['x', 'y'] as const) {
+        const ax = slot === 'x' ? m.xAxis : m.yAxis;
+        if (ax?.libId === id) {
+          const r = setMapAxis(m.id, slot, detachedAxis(ax));
+          if (r.ok) detached++;
+        }
       }
     }
-  }
-  return { detached };
+    return { detached };
+  });
 }
 
 export function removeAxisLibEntry(id: string): { removed: boolean; detached: number } {
   const exists = get(axisLibrary).some((e) => e.id === id);
   if (!exists) return { removed: false, detached: 0 };
-  const { detached } = detachAxisLibEntry(id);
-  axisLibrary.update((es) => es.filter((e) => e.id !== id));
-  return { removed: true, detached };
+  return undoTransaction('remove axis library entry', () => {
+    const { detached } = detachAxisLibEntry(id);
+    axisLibrary.update((es) => es.filter((e) => e.id !== id));
+    return { removed: true, detached };
+  });
 }
 
 /** Explicit "update N attached maps": per-map re-validate, skip+report (spec §4). */
 export function restampAxisLibEntry(id: string): { updated: number; skipped: string[] } {
   const entry = get(axisLibrary).find((e) => e.id === id);
   if (!entry) return { updated: 0, skipped: [`no axis library entry with id ${id}`] };
-  let updated = 0;
-  const skipped: string[] = [];
-  for (const m of get(maps)) {
-    for (const slot of ['x', 'y'] as const) {
-      const ax = slot === 'x' ? m.xAxis : m.yAxis;
-      if (ax?.libId !== id) continue;
-      const r = setMapAxis(m.id, slot, stampAxis(entry));
-      if (r.ok) updated++;
-      else skipped.push(`${m.id} ("${m.name}") ${slot}: ${r.error}`);
+  return undoTransaction('re-stamp axis library entry', () => {
+    let updated = 0;
+    const skipped: string[] = [];
+    for (const m of get(maps)) {
+      for (const slot of ['x', 'y'] as const) {
+        const ax = slot === 'x' ? m.xAxis : m.yAxis;
+        if (ax?.libId !== id) continue;
+        const r = setMapAxis(m.id, slot, stampAxis(entry));
+        if (r.ok) updated++;
+        else skipped.push(`${m.id} ("${m.name}") ${slot}: ${r.error}`);
+      }
     }
-  }
-  return { updated, skipped };
+    return { updated, skipped };
+  });
 }
 
 /** Spec §8: a MapDef in the store is always readable — out-of-range imports are skipped, not stored. */
@@ -344,7 +361,10 @@ export function addImportedMaps(imported: MapDef[]): { added: number; skipped: s
     ids.add(m.id);
     good.push(m);
   }
-  if (good.length > 0) maps.update((ms) => [...ms, ...good].sort(byAddress));
+  if (good.length > 0) {
+    pushUndo('import maps');
+    maps.update((ms) => [...ms, ...good].sort(byAddress));
+  }
   return { added: good.length, skipped };
 }
 
