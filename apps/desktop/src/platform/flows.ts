@@ -40,6 +40,7 @@ export async function loadBinFromPath(host: PlatformHost, path: string): Promise
       return false;
     }
     actions.setBin(createBinImage(bytes, basename(path)));
+    actions.setBinPath(path); // AFTER setBin — setBin clears it
     return true;
   } catch (e) {
     actions.pushToast('error', `Cannot read ${basename(path)}: ${errText(e)}`);

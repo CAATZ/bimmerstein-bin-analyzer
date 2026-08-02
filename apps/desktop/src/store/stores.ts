@@ -54,6 +54,14 @@ export const DEFAULT_VIEW_PARAMS: ViewParams = {
 };
 
 export const bin: Writable<BinImage | null> = writable(null);
+/**
+ * Absolute path the loaded bin was read from, or null when it is unknown.
+ * Session state, NOT identity: deliberately absent from BinImage and from the
+ * project file (2026-08-01-mcp-copilot-design.md §5.2). The co-pilot uses it to
+ * re-derive detections from the same bytes, and verifies the sha256 before
+ * trusting it.
+ */
+export const binPath: Writable<string | null> = writable(null);
 /** User-confirmed maps (sorted by address). */
 export const maps: Writable<MapDef[]> = writable([]);
 /** Engine output, provenance 'auto' — ARRAY ORDER IS THE RANKING, never re-sort. */
