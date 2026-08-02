@@ -77,6 +77,37 @@ export const importDefinitionTool: ToolSpec = {
     }
 
     const previous = entry.imported?.maps.length ?? 0;
+
+    // Co-pilot mode: an import is bulk by construction (306 maps on a real MS41
+    // definition), so it goes to the user as a proposal instead of landing in
+    // their unsaved work (spec §8.4). Parsing and framing above are identical.
+    if (deps.link !== undefined && deps.requests !== undefined) {
+      const row = deps.requests.create('proposal', kept.length);
+      const sent = await deps.link.request('propose', {
+        requestId: row.requestId,
+        title: `Import ${kept.length} maps from ${parsed.value.romId}`,
+        reason: 'definition import',
+        changes: kept.map((m, i) => ({ id: `import-${i}`, addMap: m })),
+      });
+      if (!sent.ok) {
+        deps.requests.settle(row.requestId, { status: 'cancelled', reason: sent.error });
+        return err(sent.error);
+      }
+      return ok({
+        requestId: row.requestId,
+        status: row.status,
+        count: kept.length,
+        binId: entry.binId,
+        romId: parsed.value.romId,
+        frameApplied,
+        definitionMaps,
+        skippedFraming,
+        skippedValidation,
+        warningCount: parsed.value.warnings.length,
+        warnings: parsed.value.warnings.slice(0, MCP_CONFIG.maxWarningsReturned),
+      });
+    }
+
     await deps.store.setImported(entry.binId, {
       romId: parsed.value.romId,
       maps: kept,
