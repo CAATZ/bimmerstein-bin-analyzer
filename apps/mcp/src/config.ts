@@ -47,6 +47,13 @@ export const MCP_CONFIG = {
    * this path; they go through the RequestTable and never block a tool call.
    */
   linkRequestTimeoutMs: 5_000,
+  /** Deferred user decisions remembered, so an agent can still poll an old one. */
+  maxTrackedRequests: 32,
+  /**
+   * Ceiling on one proposal. A guard, not a target: the real MS41 definition is
+   * 306 maps. Past this, something has gone wrong upstream.
+   */
+  maxProposedChanges: 2_000,
 } as const;
 
 /**
