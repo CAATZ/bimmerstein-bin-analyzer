@@ -1,6 +1,9 @@
+import type { Result } from '@binanalyzer/core';
 import type { SessionStore } from './session.js';
 import type { Scanner } from './scanner.js';
 import type { FileIo } from './fsio.js';
+import type { CoPilotLink } from './link/server.js';
+import type { RequestTable } from './requests.js';
 
 /**
  * A `type` alias, deliberately NOT an interface: the SDK's CallToolResult is a
@@ -34,6 +37,27 @@ export interface Deps {
   io: FileIo;
   /** Set only when the server was started with --allow-write <dir>. */
   writeRoot?: string;
+  /** Co-pilot mode only (--copilot). */
+  link?: CoPilotLink;
+  /** Co-pilot mode only (--copilot). */
+  requests?: RequestTable;
+}
+
+/** Uniform "we are not attached" error for every co-pilot-only tool. */
+export function requireLink(deps: Deps): Result<CoPilotLink> {
+  if (deps.link === undefined) {
+    return {
+      ok: false,
+      error: 'this server is running in headless mode — restart it with --copilot to attach to the app',
+    };
+  }
+  if (!deps.link.connected()) {
+    return {
+      ok: false,
+      error: 'the desktop app is not connected — ask the user to enable "Share session with co-pilot" in the app',
+    };
+  }
+  return { ok: true, value: deps.link };
 }
 
 export interface ToolSpec {

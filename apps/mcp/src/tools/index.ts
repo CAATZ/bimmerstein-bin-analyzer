@@ -24,7 +24,7 @@ export {
 };
 
 /** Registration order is the order an agent sees in tools/list. */
-export const TOOLS: ToolSpec[] = [
+export const HEADLESS_TOOLS: ToolSpec[] = [
   openBinTool,
   listBinsTool,
   scanBinTool,
@@ -36,3 +36,22 @@ export const TOOLS: ToolSpec[] = [
   importDefinitionTool,
   exportDefinitionTool,
 ];
+
+/**
+ * Co-pilot mode (2026-08-01-mcp-copilot-design.md §8). open_bin and list_bins
+ * are withheld — the user opens bins — and load_project is not shipped in
+ * either mode (P7). Session-aware tools are appended here as they land.
+ */
+export const COPILOT_TOOLS: ToolSpec[] = [
+  scanBinTool,
+  listMapsTool,
+  getMapTool,
+  readMapTool,
+  readBytesTool,
+  listDetectedAxesTool,
+  importDefinitionTool,
+  exportDefinitionTool,
+];
+
+/** @deprecated Headless registry under its Phase-1 name; prefer HEADLESS_TOOLS. */
+export const TOOLS = HEADLESS_TOOLS;
