@@ -23,6 +23,18 @@ export const tauriHost: PlatformHost = {
   readText: (path: string) => readTextFile(path),
   writeText: (path: string, contents: string) => writeTextFile(path, contents),
   exists: (path: string) => exists(path),
+  /**
+   * Uses the fs scope the app already has (`fs:scope **` plus
+   * `fs:allow-read-text-file`) — no new Tauri capability. Absent, unreadable
+   * and malformed all collapse to null so the co-pilot dial just retries.
+   */
+  readTextIfExists: async (path: string): Promise<string | null> => {
+    try {
+      return (await exists(path)) ? await readTextFile(path) : null;
+    } catch {
+      return null;
+    }
+  },
 
   confirm: (message: string, title: string) => dialogConfirm(message, { title, kind: 'warning' }),
 

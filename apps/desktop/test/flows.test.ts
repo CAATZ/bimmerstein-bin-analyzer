@@ -42,6 +42,10 @@ class FakeHost implements PlatformHost {
     if (this.existsError) throw this.existsError;
     return this.files.has(path);
   }
+  async readTextIfExists(path: string): Promise<string | null> {
+    const f = this.files.get(path);
+    return typeof f === 'string' ? f : null;
+  }
   async confirm(message: string): Promise<boolean> {
     this.confirmMessages.push(message);
     return this.confirmAnswers.shift() ?? false;
