@@ -3,7 +3,8 @@
  * The v1 map is FROZEN in spec §7:
  *   M/W columns ± · Ctrl+←/→ origin · K selection→map / promote ·
  *   Ctrl+B optimize value range · F/Shift+F next/prev potential ·
- *   T/Shift+T cycle view · P preview.
+ *   T/Shift+T cycle view · P preview · Ctrl+Z/Ctrl+Shift+Z undo/redo
+ *   (undo added 2026-08-01 with the undo stack; spec §7 amended in the same task).
  * RESERVED for v2 (must stay unbound): '+', '-', 'F11'.
  * Pure: KeyInput in, action name out; the App shell maps names to store actions.
  */
@@ -19,7 +20,9 @@ export type UiAction =
   | 'prev-potential'
   | 'view-next'
   | 'view-prev'
-  | 'toggle-preview';
+  | 'toggle-preview'
+  | 'undo'
+  | 'redo';
 
 export interface KeyInput {
   key: string;
@@ -37,6 +40,7 @@ export function resolveKey(k: KeyInput): UiAction | undefined {
     if (k.key === 'ArrowLeft') return 'origin-left';
     if (k.key === 'ArrowRight') return 'origin-right';
     if (k.key === 'b' || k.key === 'B') return 'optimize-range';
+    if (k.key === 'z' || k.key === 'Z') return k.shift ? 'redo' : 'undo';
     return undefined;
   }
   const key = k.key.length === 1 ? k.key.toLowerCase() : k.key;
