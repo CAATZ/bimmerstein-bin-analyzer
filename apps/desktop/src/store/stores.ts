@@ -78,6 +78,33 @@ export const toasts: Writable<Toast[]> = writable([]);
 /** True while any modal dialog is open — App.svelte's keydown dispatcher checks this. */
 export const modalOpen: Writable<boolean> = writable(false);
 
+/** One change inside a proposal; `id` is the agent's, echoed back in the decision. */
+export interface ProposedChange {
+  id: string;
+  /** change_map / change_axis_entry payload, or { addMap } for a definition import. */
+  [field: string]: unknown;
+}
+
+export interface Proposal {
+  requestId: string;
+  title: string;
+  reason?: string;
+  changes: ProposedChange[];
+}
+
+/** Queued co-pilot proposals; the panel renders the head of this list. */
+export const proposals: Writable<Proposal[]> = writable([]);
+
+/**
+ * The user's consent to share the session. OFF by default — this toggle IS the
+ * consent gate (2026-08-01-mcp-copilot-design.md §4.5). It is a user
+ * preference, so it deliberately survives a bin change.
+ */
+export const coPilotEnabled: Writable<boolean> = writable(false);
+
+export type CoPilotStatus = 'off' | 'waiting' | 'connected' | 'disconnected';
+export const coPilotStatus: Writable<CoPilotStatus> = writable('off');
+
 export type AddressFrame = 'none' | 'ms41full';
 /** How imported definition addresses were mapped into file offsets (2026-07-14 full-read def-frame spec). */
 export const addressFrame: Writable<AddressFrame> = writable('none');
