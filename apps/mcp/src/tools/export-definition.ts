@@ -49,8 +49,8 @@ export const exportDefinitionTool: ToolSpec = {
     const outPath = optString(a, 'outPath');
     if (!outPath.ok) return err(outPath.error);
 
-    const entry = deps.store.get(id.value);
-    if (entry === undefined) return unknownBin(deps, id.value);
+    const entry = await deps.store.get(id.value);
+    if (entry === undefined) return await unknownBin(deps, id.value);
 
     const skipped: string[] = [];
     let maps: MapDef[];

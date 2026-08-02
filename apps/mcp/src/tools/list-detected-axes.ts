@@ -45,8 +45,8 @@ export const listDetectedAxesTool: ToolSpec = {
     const limit = optInt(a, 'limit', MCP_CONFIG.listAxesDefaultLimit, 1, MCP_CONFIG.listAxesMaxLimit);
     if (!limit.ok) return err(limit.error);
 
-    const entry = deps.store.get(id.value);
-    if (entry === undefined) return unknownBin(deps, id.value);
+    const entry = await deps.store.get(id.value);
+    if (entry === undefined) return await unknownBin(deps, id.value);
 
     // Synthetic full-range data region — the AxisLibraryDialog precedent. A
     // single bounded main-thread pass (the lib/snap.ts precedent); memoized
@@ -54,7 +54,7 @@ export const listDetectedAxesTool: ToolSpec = {
     let pool = entry.detectedAxes;
     if (pool === undefined) {
       pool = scanPrefixedAxes(entry.bytes, [{ start: 0, end: entry.size, kind: 'data' }], DEFAULT_SCAN_CONFIG);
-      deps.store.setDetectedAxes(entry.binId, pool);
+      await deps.store.setDetectedAxes(entry.binId, pool);
     }
 
     const filtered = pool

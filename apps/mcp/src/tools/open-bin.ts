@@ -24,7 +24,7 @@ export const openBinTool: ToolSpec = {
     if (!read.ok) return err(read.error);
 
     const image = createBinImage(read.value.bytes, read.value.name);
-    const opened = deps.store.open({
+    const opened = await deps.store.open({
       binId: image.sha256,
       sha256: image.sha256,
       name: image.name,

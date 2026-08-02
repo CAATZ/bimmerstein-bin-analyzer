@@ -145,8 +145,8 @@ export const readMapTool: ToolSpec = {
     const hasAdhoc = a['map'] !== undefined;
     if (hasMapId === hasAdhoc) return err('provide exactly one of "mapId" (a detected/imported map) or "map" (an ad-hoc definition)');
 
-    const entry = deps.store.get(id.value);
-    if (entry === undefined) return unknownBin(deps, id.value);
+    const entry = await deps.store.get(id.value);
+    if (entry === undefined) return await unknownBin(deps, id.value);
 
     let map: MapDef;
     let source: string;

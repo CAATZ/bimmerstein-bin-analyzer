@@ -42,8 +42,8 @@ export const importDefinitionTool: ToolSpec = {
       return err('provide exactly one of "path" (read the definition from disk) or "xml" (inline definition text)');
     }
 
-    const entry = deps.store.get(id.value);
-    if (entry === undefined) return unknownBin(deps, id.value);
+    const entry = await deps.store.get(id.value);
+    if (entry === undefined) return await unknownBin(deps, id.value);
 
     let xml: string;
     if (path.value !== undefined) {
@@ -77,7 +77,7 @@ export const importDefinitionTool: ToolSpec = {
     }
 
     const previous = entry.imported?.maps.length ?? 0;
-    deps.store.setImported(entry.binId, {
+    await deps.store.setImported(entry.binId, {
       romId: parsed.value.romId,
       maps: kept,
       warnings: parsed.value.warnings,

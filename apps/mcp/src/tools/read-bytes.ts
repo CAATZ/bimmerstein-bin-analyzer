@@ -66,8 +66,8 @@ export const readBytesTool: ToolSpec = {
     const format = parseFormat(a['format']);
     if (!format.ok) return err(format.error);
 
-    const entry = deps.store.get(id.value);
-    if (entry === undefined) return unknownBin(deps, id.value);
+    const entry = await deps.store.get(id.value);
+    if (entry === undefined) return await unknownBin(deps, id.value);
     if (address.value >= entry.size) {
       return err(`address 0x${address.value.toString(16)} is at or past the end of "${entry.name}" (${entry.size} bytes)`);
     }

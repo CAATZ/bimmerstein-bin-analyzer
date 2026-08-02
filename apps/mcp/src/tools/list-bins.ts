@@ -9,7 +9,7 @@ export const listBinsTool: ToolSpec = {
   async handle(_raw, deps) {
     return ok({
       maxOpenBins: MCP_CONFIG.maxOpenBins,
-      bins: deps.store.list().map((e) => ({
+      bins: (await deps.store.list()).map((e) => ({
         binId: e.binId,
         sha256: e.sha256,
         name: e.name,
