@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapDef } from '@binanalyzer/core';
 import { createBinImage } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
-import { SINGLE_CHANGE_BURST, applyProposal, dispatchOp, resetBurstWindow } from '../src/copilot/dispatch.js';
+import {
+  NO_BIN_OPEN, SINGLE_CHANGE_BURST, applyProposal, dispatchOp, resetBurstWindow,
+} from '../src/copilot/dispatch.js';
 import { axisLibrary, maps, potentialMaps, proposals, selection, toasts, viewParams } from '../src/store/stores.js';
 
 function testBin() {
@@ -220,6 +222,18 @@ describe('guards', () => {
       const r = await dispatchOp(op, { mapId: 'm', address: 0, name: 'x', sha256: 'a' });
       expect(r.ok, `${op} must guard`).toBe(false);
       if (!r.ok) expect(r.error).toContain('no bin');
+    }
+  });
+
+  // Spec §5.4: the no-bin error must tell the agent to ASK THE USER, because
+  // opening a bin is the user's action by design — open_bin is not in this
+  // mode's tool set. GUI acceptance D8 checks exactly this sentence.
+  it('the no-bin error names the recovery action the user has to take', async () => {
+    a.resetStores();
+    for (const op of ['select', 'show', 'open_map', 'change_map', 'getBinBytes']) {
+      const r = await dispatchOp(op, { mapId: 'm', address: 0, name: 'x', sha256: 'a' });
+      expect(r.ok, `${op} must guard`).toBe(false);
+      if (!r.ok) expect(r.error, `${op} message`).toBe(NO_BIN_OPEN);
     }
   });
 

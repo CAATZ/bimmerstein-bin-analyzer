@@ -25,6 +25,7 @@
   import { CoPilotClient, type SocketLike } from './copilot/client.js';
   import { detectOsKind, linkFilePathFor, makeReadLink, type OsPaths } from './copilot/link-file.js';
   import { mountCoPilot, type CoPilotMount } from './copilot/mount.js';
+  import { persistCoPilotConsent } from './store/consent.js';
   import { homeDir, localDataDir } from '@tauri-apps/api/path';
 
   function isEditable(target: EventTarget | null): boolean {
@@ -90,6 +91,7 @@
     };
   });
   let coPilot: CoPilotMount | null = null;
+  let stopConsentPersistence: (() => void) | null = null;
 
   onMount(() => {
     // Resolve the OS paths ONCE; the handshake location never moves at runtime.
@@ -98,6 +100,11 @@
       const paths: OsPaths = { home: await homeDir(), localAppData: await localDataDir() };
       linkPath = linkFilePathFor(detectOsKind(navigator.userAgent), paths);
     })();
+
+    // Hydrate consent BEFORE mounting: mountCoPilot's subscription fires with
+    // the current value, so a user who left the toggle on last session gets
+    // their link back without re-ticking it (spec §4.5).
+    stopConsentPersistence = persistCoPilotConsent(localStorage);
 
     coPilot = mountCoPilot(
       () =>
@@ -111,7 +118,10 @@
     );
   });
 
-  onDestroy(() => coPilot?.stop());
+  onDestroy(() => {
+    coPilot?.stop();
+    stopConsentPersistence?.();
+  });
 </script>
 
 <svelte:window onkeydown={onKeydown} />

@@ -16,6 +16,16 @@ const okv = (value: Record<string, unknown> = {}): DispatchResult => ({ ok: true
 const fail = (error: string): DispatchResult => ({ ok: false, error });
 
 /**
+ * The uniform no-bin error (2026-08-01-mcp-copilot-design.md §5.4). It names
+ * the recovery action deliberately: opening a bin is the USER's action in
+ * co-pilot mode — open_bin is not in this mode's tool set — so an agent that
+ * only hears "no bin" has nothing to do next. The control is the toolbar's
+ * "Open Bin" button; this app has no menu bar.
+ */
+export const NO_BIN_OPEN =
+  'no bin is open in the app — ask the user to open one (Open Bin in the toolbar), then retry.';
+
+/**
  * Burst escalation (2026-08-01-mcp-copilot-design.md §7.1). The split rule is
  * "more than one map -> he proposes"; without this an agent could decompose a
  * bulk change into N single calls and never show the user a panel.
@@ -61,7 +71,7 @@ export async function dispatchOp(op: string, rawArgs: unknown): Promise<Dispatch
 
   switch (op) {
     case 'select': {
-      if (image === null) return fail('no bin is open in the app');
+      if (image === null) return fail(NO_BIN_OPEN);
       const mapId = args['mapId'];
       if (typeof mapId === 'string') {
         const map = findAnyMap(mapId);
@@ -81,7 +91,7 @@ export async function dispatchOp(op: string, rawArgs: unknown): Promise<Dispatch
     }
 
     case 'show': {
-      if (image === null) return fail('no bin is open in the app');
+      if (image === null) return fail(NO_BIN_OPEN);
       const mode = args['viewMode'];
       if (typeof mode === 'string') {
         if (!VIEW_MODES.includes(mode as ViewMode)) return fail(`viewMode must be one of ${VIEW_MODES.join(', ')}`);
@@ -98,7 +108,7 @@ export async function dispatchOp(op: string, rawArgs: unknown): Promise<Dispatch
     }
 
     case 'open_map': {
-      if (image === null) return fail('no bin is open in the app');
+      if (image === null) return fail(NO_BIN_OPEN);
       const mapId = args['mapId'];
       if (typeof mapId !== 'string') return fail('"mapId" is required');
       const map = findAnyMap(mapId);
@@ -110,7 +120,7 @@ export async function dispatchOp(op: string, rawArgs: unknown): Promise<Dispatch
 
     case 'change_map':
     case 'change_axis_entry': {
-      if (image === null) return fail('no bin is open in the app');
+      if (image === null) return fail(NO_BIN_OPEN);
       if (wouldEscalate()) {
         const requestId = `burst-${get(proposals).length}-${op}`;
         queueProposal({
@@ -151,7 +161,7 @@ export async function dispatchOp(op: string, rawArgs: unknown): Promise<Dispatch
       return fail('save_project is handled by the client, not the dispatcher');
 
     case 'getBinBytes': {
-      if (image === null) return fail('no bin is open in the app');
+      if (image === null) return fail(NO_BIN_OPEN);
       const want = args['sha256'];
       if (typeof want === 'string' && want !== image.sha256) {
         return fail('the app has a different bin open now — call get_session again');
