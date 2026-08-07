@@ -5,9 +5,11 @@
  *   gen-synthetic        (re)generate committed synthetic fixtures
  *   holdout              score unseen synthetic seeds (anti-overfitting check;
  *                        tuning-time only, NOT part of the committed-fixture gate)
- *   accept               enforce MS41_CURVE_GATE on real full reads (1D-curve
- *                        truth class). Binds only where the gitignored local
- *                        fixtures exist; skips and exits 0 otherwise (CI-safe)
+ *   accept               enforce the real-bin gates the fixture table cannot:
+ *                        MS41_CURVE_GATE on full reads (1D-curve truth class)
+ *                        and MS41_PARTIAL_GATE on 24KB partials (both classes).
+ *                        Binds only where the gitignored local fixtures exist;
+ *                        skips and exits 0 otherwise (CI-safe)
  *   gt-from-romraider    build groundtruth.json from a RomRaider def XML + bin:
  *                        <def.xml> <bin> --fixture <n> --id-prefix <p> [--rom <xmlid>] [--fo] [--out <path>]
  * Exit code 1 when synthetic-fixture scores fall below targets (CI gate).
@@ -15,7 +17,7 @@
 import { readdirSync, readFileSync, writeFileSync, statSync, existsSync, realpathSync } from 'node:fs';
 import { join, basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createBinImage } from '@binanalyzer/core';
+import { createBinImage, type MapDef } from '@binanalyzer/core';
 import { DEFAULT_SCAN_CONFIG, scan } from '@binanalyzer/engine';
 import { buildGroundTruth, type GtBuildOptions } from './gt-from-romraider.js';
 import { parseGroundTruth } from './groundtruth.js';
@@ -152,6 +154,46 @@ export function gateFor(fixture: string): Gate | undefined {
 }
 
 /**
+ * Real-MS41 PARTIAL acceptance gate (spec Phase-3 addendum + P3.1-S1).
+ *
+ * A 24 KB cal partial contains no code, so the code-xref family analyzer is
+ * structurally inactive and detection runs entirely through the pool /
+ * structural / partial-curve tiers. Those tiers are exercised on real data
+ * ONLY here: no partial fixture carries a committed groundtruth.json, so
+ * `runEval` never scores one, and NEITHER truth class is covered by MS41_GATE.
+ * Both floors therefore bind in this command or they bind nowhere — which is
+ * exactly the state these values were in before, existing only as prose in a
+ * doc comment and in a gitignored controller script.
+ *
+ * Values are the ALREADY-AGREED controller floors, transcribed unchanged, not
+ * re-derived: curve e36m3 >= 0.90/0.90, s52 >= 0.80/0.80, axis >= 0.95; grid
+ * >= 0.95/0.85. The grid AXIS floor is the one number the prose left implicit;
+ * it is pinned at 0.95 to match the curve axis floor, which is below the
+ * measured 0.981/0.983 and consistent with the round-DOWN convention used by
+ * PARTIAL_GATE and CURVE_GATE.
+ *
+ * As-measured when pinned (P3.1-S1 as-wired, matches the recorded as-executed
+ * numbers exactly): e36m3 grid 0.968/0.887/0.981 curve 0.906/0.906/0.983
+ * (det 396); s52 grid 0.956/0.882/0.983 curve 0.845/0.845/0.983 (det 432).
+ * Two margins are deliberately thin — e36m3 curve loc/struct and s52 grid loc
+ * both clear by 0.006 — which is safe because a real bin scanned by a
+ * deterministic engine has no run-to-run variance (the PARTIAL_GATE precedent:
+ * a tight gate is exact, not brittle). Raising s52's curve floor toward its
+ * measured 0.845 stays an open user-adjudicated option, deliberately NOT taken
+ * here: a ratchet moves up only on a decision, never as a side effect.
+ */
+export const MS41_PARTIAL_GATE = {
+  e36m3: {
+    curve: { locationRecall: 0.9, structureRecall: 0.9, axisRecall: 0.95 },
+    grid: { locationRecall: 0.95, structureRecall: 0.85, axisRecall: 0.95 },
+  },
+  s52: {
+    curve: { locationRecall: 0.8, structureRecall: 0.8, axisRecall: 0.95 },
+    grid: { locationRecall: 0.95, structureRecall: 0.85, axisRecall: 0.95 },
+  },
+};
+
+/**
  * One real-bin acceptance case: a local (gitignored) firmware fixture, the
  * definition rom it is scored against, and the gate its 1D-curve scores must
  * meet. Kept here rather than discovered, because the rom id cannot be
@@ -171,6 +213,38 @@ export interface AcceptanceCase {
 export const MS41_ACCEPTANCE_CASES: AcceptanceCase[] = [
   { key: 'e36m3', bin: 'E36 M3 Stock Full Read.bin', romId: '12', gate: MS41_CURVE_GATE.e36m3 },
   { key: 's52', bin: 'MS41.3 S52 Stock Full Read.bin', romId: 'SS1v2', gate: MS41_CURVE_GATE.s52 },
+];
+
+/**
+ * A real 24 KB cal PARTIAL acceptance case. Scored against BOTH truth classes
+ * (see MS41_PARTIAL_GATE) with applyFo FALSE — on a direct-SA partial a
+ * storageaddress already IS the file offset, so the full read's flash-bus
+ * descramble must not be applied.
+ */
+export interface PartialAcceptanceCase {
+  key: keyof typeof MS41_PARTIAL_GATE;
+  /** Filename inside fixtures/ms41/partial/ (gitignored — real firmware). */
+  bin: string;
+  romId: string;
+  curveGate: Gate;
+  gridGate: Gate;
+}
+
+export const MS41_PARTIAL_ACCEPTANCE_CASES: PartialAcceptanceCase[] = [
+  {
+    key: 'e36m3',
+    bin: 'E36 M3 Stock partial.bin',
+    romId: '12',
+    curveGate: MS41_PARTIAL_GATE.e36m3.curve,
+    gridGate: MS41_PARTIAL_GATE.e36m3.grid,
+  },
+  {
+    key: 's52',
+    bin: 'MS41.3 S52 Stock partial.bin',
+    romId: 'SS1v2',
+    curveGate: MS41_PARTIAL_GATE.s52.curve,
+    gridGate: MS41_PARTIAL_GATE.s52.grid,
+  },
 ];
 
 /** Source definition for the acceptance ground truth (gitignored, third-party). */
@@ -439,32 +513,85 @@ function runEval(repoRoot: string, fixturesRoot: string): number {
   return passed ? 0 : 1;
 }
 
+const f3 = (v: number): string => v.toFixed(3);
+
 /**
- * Real-bin 1D-CURVE acceptance (`pnpm eval accept`).
+ * Score one already-scanned bin against one truth class and report the verdict.
+ * Returns undefined when the ground truth could not be built (a hard error, not
+ * a skip — the bin is present, so the definition should describe it).
+ */
+function checkAgainstClass(
+  defXml: string,
+  bytes: Uint8Array,
+  maps: MapDef[],
+  dataBytes: number,
+  label: string,
+  cls: '2d' | 'curve',
+  applyFo: boolean,
+  romId: string,
+  gate: Gate
+): boolean | undefined {
+  const built = buildGroundTruth(defXml, createBinImage(bytes, label), {
+    romId,
+    fixture: label,
+    idPrefix: label,
+    applyFo,
+    class: cls,
+  });
+  if (!built.ok) {
+    console.error(`accept: ${label}: ${cls} ground truth failed to build: ${built.error}`);
+    return undefined;
+  }
+  const s = scoreDetections(maps, built.value.truth.maps, dataBytes);
+  const ok = meetsGate(s, gate);
+  console.log(
+    `${ok ? 'PASS' : 'FAIL'} ${label.padEnd(14)} ${cls === 'curve' ? 'curve' : 'grid '} ` +
+      `${f3(s.locationRecall)}/${f3(s.structureRecall)}/${f3(s.axisRecall)}` +
+      `  gate ${f3(gate.locationRecall)}/${f3(gate.structureRecall)}/${f3(gate.axisRecall)}` +
+      `  (truth ${s.truthCount}, det ${s.detectedCount})`
+  );
+  return ok;
+}
+
+/** Scan a bin once and return the emissions plus its data-region size. */
+function scanForAcceptance(bytes: Uint8Array): { maps: MapDef[]; dataBytes: number } {
+  const result = scan(bytes, DEFAULT_SCAN_CONFIG);
+  return {
+    maps: result.potentialMaps,
+    dataBytes: result.regions.filter((r) => r.kind === 'data').reduce((s, r) => s + (r.end - r.start), 0),
+  };
+}
+
+/**
+ * Real-bin acceptance (`pnpm eval accept`) — the gates that bind only where
+ * the gitignored firmware exists.
  *
- * WHY THIS IS A SEPARATE COMMAND, not a `gateFor` entry: the `ms41-*` fixture
- * rows in `runEval` score against the committed 2-axis GRID ground truth via
- * MS41_GATE. Curve truth is a different, mutually exclusive truth class
- * (`buildGroundTruth({ class: 'curve' })`), so folding it into the same row
- * would change what those numbers mean. It gets its own command and its own
- * gate instead.
+ * Covers two surfaces that `runEval` cannot:
+ *  - FULL READS, 1D-curve class (MS41_CURVE_GATE). The `ms41-*` fixture rows
+ *    already score against the committed 2-axis GRID truth via MS41_GATE, so
+ *    only the curve class is missing there.
+ *  - PARTIALS, both grid and curve classes (MS41_PARTIAL_GATE). No partial
+ *    carries a committed groundtruth.json, so `runEval` never scores one at
+ *    all and NEITHER class is otherwise guarded.
  *
- * WHY IT EXISTS AT ALL: MS41_CURVE_GATE previously had zero consumers. The
- * real-bin curve numbers behind five shipped phases were verified by a human
- * reading `console.log` output from a gitignored script, which meant a curve
- * regression passed every automated check in the repository.
+ * WHY A SEPARATE COMMAND, not `gateFor` entries: curve truth and grid truth
+ * are mutually exclusive classes, so folding curve scores into the existing
+ * `ms41-*` rows would silently change what those published numbers mean.
  *
- * CI-SAFE BY CONSTRUCTION: real firmware and the source definition are
- * gitignored, so every case is absent on CI and the command reports skips and
- * exits 0 — the same posture MS41_GATE already takes in `runEval`. It binds
- * only where the local fixtures exist. Exit 1 means a gate was genuinely
+ * WHY IT EXISTS AT ALL: MS41_CURVE_GATE had zero consumers and the partial
+ * floors existed only as prose. The real-bin numbers behind five shipped
+ * phases were verified by a human reading `console.log` output from gitignored
+ * scripts, so a regression passed every automated check in the repository.
+ *
+ * CI-SAFE BY CONSTRUCTION: firmware and the source definition are gitignored,
+ * so every case is absent on CI and the command reports skips and exits 0 —
+ * the same posture MS41_GATE already takes. Exit 1 means a gate was genuinely
  * missed; exit 0 with skips means there was nothing local to check.
  */
 export function runAcceptance(repoRoot: string): number {
-  const defPath = join(repoRoot, MS41_ACCEPTANCE_DEF);
-  let defXml: string | undefined;
+  let defXml: string;
   try {
-    defXml = readFileSync(defPath, 'utf8');
+    defXml = readFileSync(join(repoRoot, MS41_ACCEPTANCE_DEF), 'utf8');
   } catch {
     console.log(`accept: no local definition at ${MS41_ACCEPTANCE_DEF} — nothing to check (skipped)`);
     return 0;
@@ -472,43 +599,43 @@ export function runAcceptance(repoRoot: string): number {
   let passed = true;
   let checked = 0;
   const skipped: string[] = [];
+  const record = (v: boolean | undefined): void => {
+    if (v === undefined) passed = false;
+    else {
+      checked++;
+      if (!v) passed = false;
+    }
+  };
+
+  // Full reads — curve class only (grid is covered by MS41_GATE in runEval).
   for (const c of MS41_ACCEPTANCE_CASES) {
-    const binPath = join(repoRoot, 'fixtures', 'ms41', c.bin);
     let bytes: Uint8Array;
     try {
-      bytes = new Uint8Array(readFileSync(binPath));
+      bytes = new Uint8Array(readFileSync(join(repoRoot, 'fixtures', 'ms41', c.bin)));
     } catch {
-      skipped.push(c.key);
+      skipped.push(`${c.key} (full)`);
       continue;
     }
-    const bin = createBinImage(bytes, c.key);
-    const built = buildGroundTruth(defXml, bin, {
-      romId: c.romId,
-      fixture: c.key,
-      idPrefix: c.key,
-      applyFo: true,
-      class: 'curve',
-    });
-    if (!built.ok) {
-      console.error(`accept: ${c.key}: curve ground truth failed to build: ${built.error}`);
-      passed = false;
-      continue;
-    }
-    const result = scan(bytes, DEFAULT_SCAN_CONFIG);
-    const dataBytes = result.regions
-      .filter((r) => r.kind === 'data')
-      .reduce((s, r) => s + (r.end - r.start), 0);
-    const scores = scoreDetections(result.potentialMaps, built.value.truth.maps, dataBytes);
-    const ok = meetsGate(scores, c.gate);
-    if (!ok) passed = false;
-    checked++;
-    const f = (v: number): string => v.toFixed(3);
-    console.log(
-      `${ok ? 'PASS' : 'FAIL'} ${c.key.padEnd(6)} curve ${f(scores.locationRecall)}/${f(scores.structureRecall)}/${f(scores.axisRecall)}` +
-        `  gate ${f(c.gate.locationRecall)}/${f(c.gate.structureRecall)}/${f(c.gate.axisRecall)}` +
-        `  (truth ${scores.truthCount}, det ${scores.detectedCount})`
-    );
+    const { maps, dataBytes } = scanForAcceptance(bytes);
+    record(checkAgainstClass(defXml, bytes, maps, dataBytes, c.key, 'curve', true, c.romId, c.gate));
   }
+
+  // Partials — BOTH classes, applyFo false (a direct-SA storageaddress already
+  // IS the file offset). One scan per bin, scored twice.
+  for (const c of MS41_PARTIAL_ACCEPTANCE_CASES) {
+    let bytes: Uint8Array;
+    try {
+      bytes = new Uint8Array(readFileSync(join(repoRoot, 'fixtures', 'ms41', 'partial', c.bin)));
+    } catch {
+      skipped.push(`${c.key} (partial)`);
+      continue;
+    }
+    const label = `${c.key}-partial`;
+    const { maps, dataBytes } = scanForAcceptance(bytes);
+    record(checkAgainstClass(defXml, bytes, maps, dataBytes, label, '2d', false, c.romId, c.gridGate));
+    record(checkAgainstClass(defXml, bytes, maps, dataBytes, label, 'curve', false, c.romId, c.curveGate));
+  }
+
   if (skipped.length > 0) console.log(`accept: skipped (no local bin): ${skipped.join(', ')}`);
   if (checked === 0) {
     console.log('accept: no local real-bin fixtures — nothing to check (skipped)');

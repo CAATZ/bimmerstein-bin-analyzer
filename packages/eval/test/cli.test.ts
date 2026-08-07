@@ -4,6 +4,7 @@ import { gateFor, SYNTH_GATE, POOL_GATE, MS41_GATE, CURVE_GATE, PARTIAL_GATE, PA
 import { runHoldoutPoolSeed, HOLDOUT_POOL_SPECS } from '../src/cli.js';
 import { runHoldoutPartialSeed, HOLDOUT_PCURVE_SPECS } from '../src/cli.js';
 import { MS41_CURVE_GATE, MS41_ACCEPTANCE_CASES, meetsGate, runAcceptance } from '../src/cli.js';
+import { MS41_PARTIAL_GATE, MS41_PARTIAL_ACCEPTANCE_CASES } from '../src/cli.js';
 import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -46,6 +47,28 @@ describe('real-bin acceptance (pnpm eval accept)', () => {
     const root = mkdtempSync(join(tmpdir(), 'binacc-'));
     mkdirSync(join(root, 'fixtures', 'ms41'), { recursive: true });
     expect(runAcceptance(root)).toBe(0);
+  });
+
+  it('binds EVERY MS41_PARTIAL_GATE entry to a partial acceptance case', () => {
+    // Same anti-orphan guard as the full-read case above. The partial floors
+    // previously existed ONLY as prose in a doc comment and in a gitignored
+    // controller script — never as constants, so nothing could evaluate them.
+    expect(MS41_PARTIAL_ACCEPTANCE_CASES.map((c) => c.key).sort()).toEqual(Object.keys(MS41_PARTIAL_GATE).sort());
+  });
+
+  it('gates partials on BOTH truth classes — a grid regression must not hide behind curve recall', () => {
+    // Partials are scored against grid AND curve truth. Unlike full reads,
+    // neither class is covered by runEval (no groundtruth.json is committed
+    // for them), so both floors have to bind here or one is unguarded.
+    const g = MS41_PARTIAL_GATE.e36m3;
+    const ok = { falsePositiveDensity: 0, truthCount: 62, detectedCount: 396 };
+    // as-measured e36m3 partial: grid 0.968/0.887/0.981, curve 0.906/0.906/0.983
+    expect(meetsGate({ locationRecall: 0.968, structureRecall: 0.887, axisRecall: 0.981, ...ok }, g.grid)).toBe(true);
+    expect(meetsGate({ locationRecall: 0.906, structureRecall: 0.906, axisRecall: 0.983, ...ok }, g.curve)).toBe(true);
+    // a grid structure regression below the 0.85 floor must fail
+    expect(meetsGate({ locationRecall: 0.968, structureRecall: 0.84, axisRecall: 0.981, ...ok }, g.grid)).toBe(false);
+    // and a curve regression below the 0.90 floor must fail
+    expect(meetsGate({ locationRecall: 0.89, structureRecall: 0.906, axisRecall: 0.983, ...ok }, g.curve)).toBe(false);
   });
 });
 

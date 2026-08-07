@@ -19,11 +19,19 @@ pnpm eval accept         # real-bin 1D-curve gate (skips without local firmware)
 pnpm dev                 # desktop app (first run compiles Rust — minutes)
 ```
 
-`pnpm eval accept` scores real firmware against the 1D-curve truth class, which
-is separate from the 2D-grid truth the main `pnpm eval` rows use. Real bins are
-gitignored, so it skips and exits 0 for anyone without them — but if you have
-them locally and you touch detection, it is the check that catches a curve
-regression.
+`pnpm eval accept` covers the two things the main `pnpm eval` table cannot:
+
+- **Full reads, 1D-curve class.** The `ms41-*` rows score against 2D-grid truth;
+  curve truth is a separate, mutually exclusive class.
+- **24 KB cal partials, both classes.** No partial carries a committed
+  ground truth, so `pnpm eval` never scores one at all — and a partial has no
+  code, so it exercises the pool/structural/partial-curve tiers that a full
+  read never reaches.
+
+It reads firmware from `fixtures/ms41/` (full reads) and
+`fixtures/ms41/partial/`, both gitignored, so it skips and exits 0 for anyone
+without them. If you have them and you touch detection, this is the check that
+catches a regression those tiers would otherwise hide.
 
 Building an installer needs the Rust toolchain and the
 [Tauri 2 prerequisites](https://tauri.app/start/prerequisites/); see the README.

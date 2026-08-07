@@ -58,5 +58,5 @@ jobs:
       # enforces previously had no consumer at all, and a runner that silently
       # stopped executing would recreate exactly that defect. It binds for real
       # only on a machine holding the local fixtures.
-      - name: Real-bin curve acceptance (skips without local firmware)
+      - name: Real-bin acceptance — curve + partial gates (skips without local firmware)
         run: pnpm eval accept
