@@ -56,11 +56,41 @@ describe('buildGroundTruth', () => {
     expect(truth.binSha256).toBe(testBin().sha256);
     expect(truth.maps).toHaveLength(1);
     expect(truth.maps[0]).toMatchObject({
-      id: 'p-0x10', name: 'A', address: 0x10, rows: 4, cols: 4, provenance: 'imported',
+      id: 'p-0x10', address: 0x10, rows: 4, cols: 4, provenance: 'imported',
     });
     expect(truth.maps[0]!.xAxis).toMatchObject({ kind: 'referenced', address: 0x0, count: 4 });
-    expect(warnings.some((w) => w.includes('alias'))).toBe(true);
+    // Stored ground truth carries no def names, so WHICH of two same-address
+    // aliases won is asserted on the build warning instead (warnings are
+    // build-time diagnostics, never persisted).
+    expect(warnings.some((w) => w.includes('"A alias" is an alias of "A"'))).toBe(true);
     expect(warnings.some((w) => w.includes('dead table'))).toBe(true);
+  });
+
+  it('carries ONLY structural fields — no authored content from the source definition', () => {
+    // The committed groundtruth.json files ship in a PUBLIC repo while the
+    // definition XML they are built from is deliberately gitignored for
+    // third-party licensing (fixtures/README.md, .gitignore). Ground truth
+    // must therefore be structure the harness actually consumes — addresses,
+    // dims, formats, axis bindings — and must never republish the definition
+    // author's naming, taxonomy, prose or reverse-engineered scaling.
+    const r = buildGroundTruth(DEF, testBin(), { fixture: 'fx', idPrefix: 'p', applyFo: false });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const m = r.value.truth.maps[0]!;
+    expect(m.name).toBe(m.id); // neutral, derived from address — never the def's name
+    expect(m).not.toHaveProperty('category');
+    expect(m).not.toHaveProperty('notes');
+    // MapDef requires `scaling`, so it is neutralized to identity rather than
+    // dropped — no factor, no offset, and crucially no `units` string (the
+    // real def's units carry the author's own annotations, e.g.
+    // "mg/stroke *Limit = 1389*").
+    expect(m.scaling).toEqual({ factor: 1, offset: 0, units: '', digits: 0 });
+    for (const ax of [m.xAxis, m.yAxis]) {
+      expect(ax).toBeDefined();
+      expect(ax).not.toHaveProperty('name');
+      expect(ax).not.toHaveProperty('scaling');
+      expect(ax).toMatchObject({ kind: 'referenced' }); // structure survives
+    }
   });
 
   it('applies fo() to table and axis addresses and keeps the ORIGINAL sa in the id', () => {
@@ -94,7 +124,9 @@ describe('buildGroundTruth', () => {
     const r = buildGroundTruth(def, createBinImage(bytes, 'b.bin'), { fixture: 'fx', idPrefix: 'p', applyFo: true });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value.truth.maps.map((m) => m.name)).toEqual(['A alias', 'Dead']);
+    // ids carry the original storageaddress, so they identify the survivors
+    // ("A alias" @0x10, "Dead" @0x100) without republishing the def's names.
+    expect(r.value.truth.maps.map((m) => m.id)).toEqual(['p-0x10', 'p-0x100']);
     expect(r.value.truth.maps[0]!.address).toBe(fo(0x10));
     expect(r.value.warnings.some((w) => w.includes('outside the 24KB CAL window'))).toBe(true);
   });
@@ -154,10 +186,11 @@ describe('buildGroundTruth (class: curve)', () => {
     const { truth, warnings } = r.value;
     expect(truth.maps).toHaveLength(1);
     const m = truth.maps[0]!;
-    expect(m).toMatchObject({ id: 'p-0x40', name: 'RealCurve', address: 0x40, rows: 6, cols: 1, provenance: 'imported' });
+    expect(m).toMatchObject({ id: 'p-0x40', address: 0x40, rows: 6, cols: 1, provenance: 'imported' });
     expect(m.xAxis).toBeUndefined();
     expect(m.yAxis).toMatchObject({ kind: 'referenced', address: 0x50, count: 6 });
-    expect(warnings.some((w) => w.includes('curve alias'))).toBe(true);
+    // As above: the kept-vs-dropped alias identity lives in the warning.
+    expect(warnings.some((w) => w.includes('"RealCurveAlias" is a curve alias of "RealCurve"'))).toBe(true);
   });
 
   it('canonicalizes the sizex/X-Axis convention (1×N + xAxis) to N×1 + yAxis (PINNING: green pre-refactor)', () => {
@@ -171,7 +204,7 @@ describe('buildGroundTruth (class: curve)', () => {
     if (!r.ok) return;
     expect(r.value.truth.maps).toHaveLength(1);
     const m = r.value.truth.maps[0]!;
-    expect(m).toMatchObject({ id: 'p-0x40', name: 'MirrorCurve', address: 0x40, rows: 6, cols: 1, provenance: 'imported' });
+    expect(m).toMatchObject({ id: 'p-0x40', address: 0x40, rows: 6, cols: 1, provenance: 'imported' });
     expect(m.xAxis).toBeUndefined();
     expect(m.yAxis).toMatchObject({ kind: 'referenced', address: 0x50, count: 6 });
   });
@@ -205,7 +238,7 @@ describe('buildGroundTruth (class: curve)', () => {
     if (!r.ok) return;
     expect(r.value.truth.maps).toHaveLength(1);
     const m = r.value.truth.maps[0]!;
-    expect(m).toMatchObject({ id: 'p-0x40', name: 'Degenerate', address: 0x40, rows: 16, cols: 1 });
+    expect(m).toMatchObject({ id: 'p-0x40', address: 0x40, rows: 16, cols: 1 });
     expect(m.yAxis).toMatchObject({ kind: 'referenced', address: 0x50, count: 1 }); // declared (mismatched) count preserved
     expect(r.value.warnings.some((w) => w.includes('p-0x40') && w.includes('Degenerate'))).toBe(true);
   });
@@ -217,7 +250,7 @@ describe('buildGroundTruth (class: curve)', () => {
     expect(withDefault.ok).toBe(true);
     if (!withDefault.ok) return;
     expect(withDefault.value.truth.maps).toHaveLength(1);
-    expect(withDefault.value.truth.maps[0]!.name).toBe('A');
+    expect(withDefault.value.truth.maps[0]!.id).toBe('p-0x10');
   });
 });
 

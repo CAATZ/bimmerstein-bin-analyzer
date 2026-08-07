@@ -14,8 +14,16 @@ fixtures/
 
 - **Never commit real ECU firmware.** It is copyrighted. `.gitignore` blocks
   `fixtures/**/*.bin` except `fixtures/synthetic/`.
-- Ground-truth JSONs contain only structure (addresses, sizes, formats) — they
-  are original work and are committed, keyed to the bin by sha256.
+- **Ground-truth JSONs contain only structure** — addresses, dimensions,
+  formats and axis bindings, keyed to the bin by sha256. This is enforced by
+  the generator, not by convention: `gt-from-romraider` reduces every row to
+  the fields the eval harness actually consumes. Map and axis **names**, the
+  **category** taxonomy, free-text **notes** and the reverse-engineered
+  **scaling** are dropped (`name` becomes the structural id and `scaling`
+  becomes identity, since `MapDef` requires both).
+  That matters because these files are committed while the definition XML they
+  are built from is not (see below) — ground truth must not become a back door
+  that republishes the definition author's work.
 - MS41 ground truth is generated from the user's RomRaider definition XML:
   `pnpm eval gt-from-romraider <def.xml> <bin> --fixture <name> --id-prefix <prefix> --rom <xmlid> --fo`
   (`--fo` applies the MS41 256KB full-read bus descramble; omit it for 24KB CAL

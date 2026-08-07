@@ -1,4 +1,4 @@
-import type { AxisDef, BinImage, MapDef, Result } from '@binanalyzer/core';
+import type { AxisDef, BinImage, MapDef, Result, Scaling } from '@binanalyzer/core';
 import { validateMapDef } from '@binanalyzer/core';
 import { importRomRaiderXml, isCurveShaped, toCanonicalCurve } from '@binanalyzer/formats';
 import type { GroundTruth } from './groundtruth.js';
@@ -15,6 +15,40 @@ export function fo(storageAddress: number): number {
 
 /** 24KB CAL window: the valid storageaddress domain of fo(). */
 const FO_WINDOW = 0x6000;
+
+/**
+ * Reduce an imported map to STRUCTURE ONLY (spec §5).
+ *
+ * Committed `groundtruth.json` files are public; the RomRaider definition XML
+ * they are built from is deliberately gitignored for third-party licensing
+ * (`.gitignore`, `fixtures/README.md`). A ground-truth row must therefore
+ * carry only what the eval harness consumes — address, dims, format, axis
+ * bindings — and must never republish the definition author's work: map and
+ * axis NAMES, the CATEGORY taxonomy, free-text NOTES, or the reverse-engineered
+ * SCALING (whose `units` strings carry the author's own annotations).
+ *
+ * `MapDef` requires `name` and `scaling`, so those are neutralized rather than
+ * dropped: `name` becomes the structural id, `scaling` becomes identity (raw
+ * values, no units). `AxisDef.name`/`scaling` are optional and are removed
+ * outright. Nothing changed here is read by `scoreDetections` or
+ * `parseGroundTruth`, so scores are unaffected by construction.
+ */
+const RAW_SCALING: Scaling = { factor: 1, offset: 0, units: '', digits: 0 };
+
+function structuralOnly(map: MapDef): MapDef {
+  const strip = (a: AxisDef): AxisDef => {
+    const { name: _name, scaling: _scaling, ...rest } = a;
+    return rest;
+  };
+  const { category: _category, notes: _notes, xAxis, yAxis, ...rest } = map;
+  return {
+    ...rest,
+    name: map.id,
+    scaling: RAW_SCALING,
+    ...(xAxis !== undefined ? { xAxis: strip(xAxis) } : {}),
+    ...(yAxis !== undefined ? { yAxis: strip(yAxis) } : {}),
+  };
+}
 
 export interface GtBuildOptions {
   /** CAL-ID xmlid inside the def; required for multi-rom defs. */
@@ -94,7 +128,9 @@ export function buildGroundTruth(
     }
     byAddress.set(address, truthMap);
   }
-  const maps = [...byAddress.values()].sort((a, b) => a.address - b.address);
+  // Reduce to structure ONLY at the end: the full maps stay available above so
+  // alias warnings can still name the definition entries they deduped.
+  const maps = [...byAddress.values()].sort((a, b) => a.address - b.address).map(structuralOnly);
   if (maps.length === 0) return { ok: false, error: 'no eligible truth maps (need rows ≥ 2, cols ≥ 2, both axes)' };
   return { ok: true, value: { truth: { fixture: opts.fixture, binSha256: bin.sha256, maps }, warnings } };
 }
@@ -188,7 +224,8 @@ function buildCurveGroundTruth(
     }
     byAddress.set(address, truthMap);
   }
-  const outMaps = [...byAddress.values()].sort((a, b) => a.address - b.address);
+  // See the 2D path: strip last, so warnings above keep the definition's names.
+  const outMaps = [...byAddress.values()].sort((a, b) => a.address - b.address).map(structuralOnly);
   if (outMaps.length === 0) {
     return { ok: false, error: 'no eligible truth maps (need a 1D curve shape with one referenced axis)' };
   }
