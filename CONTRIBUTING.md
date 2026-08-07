@@ -15,8 +15,15 @@ pnpm test                # all package tests (Vitest)
 pnpm typecheck
 pnpm eval                # detection-quality gate against committed fixtures
 pnpm eval holdout        # anti-overfit gate against held-out fixtures
+pnpm eval accept         # real-bin 1D-curve gate (skips without local firmware)
 pnpm dev                 # desktop app (first run compiles Rust — minutes)
 ```
+
+`pnpm eval accept` scores real firmware against the 1D-curve truth class, which
+is separate from the 2D-grid truth the main `pnpm eval` rows use. Real bins are
+gitignored, so it skips and exits 0 for anyone without them — but if you have
+them locally and you touch detection, it is the check that catches a curve
+regression.
 
 Building an installer needs the Rust toolchain and the
 [Tauri 2 prerequisites](https://tauri.app/start/prerequisites/); see the README.
@@ -102,7 +109,7 @@ run against the committed fixtures.
 Run the whole ladder and make sure it is green:
 
 ```sh
-pnpm test && pnpm typecheck && pnpm eval && pnpm eval holdout
+pnpm test && pnpm typecheck && pnpm eval && pnpm eval holdout && pnpm eval accept
 ```
 
 Then check `git status` — only the files your change intends to touch should

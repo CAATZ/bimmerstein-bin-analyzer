@@ -5,6 +5,9 @@
  *   gen-synthetic        (re)generate committed synthetic fixtures
  *   holdout              score unseen synthetic seeds (anti-overfitting check;
  *                        tuning-time only, NOT part of the committed-fixture gate)
+ *   accept               enforce MS41_CURVE_GATE on real full reads (1D-curve
+ *                        truth class). Binds only where the gitignored local
+ *                        fixtures exist; skips and exits 0 otherwise (CI-safe)
  *   gt-from-romraider    build groundtruth.json from a RomRaider def XML + bin:
  *                        <def.xml> <bin> --fixture <n> --id-prefix <p> [--rom <xmlid>] [--fo] [--out <path>]
  * Exit code 1 when synthetic-fixture scores fall below targets (CI gate).
@@ -148,7 +151,32 @@ export function gateFor(fixture: string): Gate | undefined {
   return undefined;
 }
 
-function meetsGate(s: EvalScores, g: Gate): boolean {
+/**
+ * One real-bin acceptance case: a local (gitignored) firmware fixture, the
+ * definition rom it is scored against, and the gate its 1D-curve scores must
+ * meet. Kept here rather than discovered, because the rom id cannot be
+ * inferred from the filesystem.
+ *
+ * The `key` is checked against MS41_CURVE_GATE's own keys by a unit test, so a
+ * gate entry can never again exist with nothing evaluating it.
+ */
+export interface AcceptanceCase {
+  key: keyof typeof MS41_CURVE_GATE;
+  /** Filename inside fixtures/ms41/ (gitignored — real firmware). */
+  bin: string;
+  romId: string;
+  gate: Gate;
+}
+
+export const MS41_ACCEPTANCE_CASES: AcceptanceCase[] = [
+  { key: 'e36m3', bin: 'E36 M3 Stock Full Read.bin', romId: '12', gate: MS41_CURVE_GATE.e36m3 },
+  { key: 's52', bin: 'MS41.3 S52 Stock Full Read.bin', romId: 'SS1v2', gate: MS41_CURVE_GATE.s52 },
+];
+
+/** Source definition for the acceptance ground truth (gitignored, third-party). */
+const MS41_ACCEPTANCE_DEF = 'fixtures/ms41/defs/2023 MS41 ECU Definitions.xml';
+
+export function meetsGate(s: EvalScores, g: Gate): boolean {
   return (
     s.locationRecall >= g.locationRecall &&
     s.structureRecall >= g.structureRecall &&
@@ -411,6 +439,85 @@ function runEval(repoRoot: string, fixturesRoot: string): number {
   return passed ? 0 : 1;
 }
 
+/**
+ * Real-bin 1D-CURVE acceptance (`pnpm eval accept`).
+ *
+ * WHY THIS IS A SEPARATE COMMAND, not a `gateFor` entry: the `ms41-*` fixture
+ * rows in `runEval` score against the committed 2-axis GRID ground truth via
+ * MS41_GATE. Curve truth is a different, mutually exclusive truth class
+ * (`buildGroundTruth({ class: 'curve' })`), so folding it into the same row
+ * would change what those numbers mean. It gets its own command and its own
+ * gate instead.
+ *
+ * WHY IT EXISTS AT ALL: MS41_CURVE_GATE previously had zero consumers. The
+ * real-bin curve numbers behind five shipped phases were verified by a human
+ * reading `console.log` output from a gitignored script, which meant a curve
+ * regression passed every automated check in the repository.
+ *
+ * CI-SAFE BY CONSTRUCTION: real firmware and the source definition are
+ * gitignored, so every case is absent on CI and the command reports skips and
+ * exits 0 — the same posture MS41_GATE already takes in `runEval`. It binds
+ * only where the local fixtures exist. Exit 1 means a gate was genuinely
+ * missed; exit 0 with skips means there was nothing local to check.
+ */
+export function runAcceptance(repoRoot: string): number {
+  const defPath = join(repoRoot, MS41_ACCEPTANCE_DEF);
+  let defXml: string | undefined;
+  try {
+    defXml = readFileSync(defPath, 'utf8');
+  } catch {
+    console.log(`accept: no local definition at ${MS41_ACCEPTANCE_DEF} — nothing to check (skipped)`);
+    return 0;
+  }
+  let passed = true;
+  let checked = 0;
+  const skipped: string[] = [];
+  for (const c of MS41_ACCEPTANCE_CASES) {
+    const binPath = join(repoRoot, 'fixtures', 'ms41', c.bin);
+    let bytes: Uint8Array;
+    try {
+      bytes = new Uint8Array(readFileSync(binPath));
+    } catch {
+      skipped.push(c.key);
+      continue;
+    }
+    const bin = createBinImage(bytes, c.key);
+    const built = buildGroundTruth(defXml, bin, {
+      romId: c.romId,
+      fixture: c.key,
+      idPrefix: c.key,
+      applyFo: true,
+      class: 'curve',
+    });
+    if (!built.ok) {
+      console.error(`accept: ${c.key}: curve ground truth failed to build: ${built.error}`);
+      passed = false;
+      continue;
+    }
+    const result = scan(bytes, DEFAULT_SCAN_CONFIG);
+    const dataBytes = result.regions
+      .filter((r) => r.kind === 'data')
+      .reduce((s, r) => s + (r.end - r.start), 0);
+    const scores = scoreDetections(result.potentialMaps, built.value.truth.maps, dataBytes);
+    const ok = meetsGate(scores, c.gate);
+    if (!ok) passed = false;
+    checked++;
+    const f = (v: number): string => v.toFixed(3);
+    console.log(
+      `${ok ? 'PASS' : 'FAIL'} ${c.key.padEnd(6)} curve ${f(scores.locationRecall)}/${f(scores.structureRecall)}/${f(scores.axisRecall)}` +
+        `  gate ${f(c.gate.locationRecall)}/${f(c.gate.structureRecall)}/${f(c.gate.axisRecall)}` +
+        `  (truth ${scores.truthCount}, det ${scores.detectedCount})`
+    );
+  }
+  if (skipped.length > 0) console.log(`accept: skipped (no local bin): ${skipped.join(', ')}`);
+  if (checked === 0) {
+    console.log('accept: no local real-bin fixtures — nothing to check (skipped)');
+    return passed ? 0 : 1;
+  }
+  console.log(passed ? `ACCEPT PASS (${checked} checked)` : `ACCEPT FAIL (${checked} checked)`);
+  return passed ? 0 : 1;
+}
+
 export function runGtFromRomraider(argv: string[]): number {
   const positional: string[] = [];
   const flags = new Map<string, string | boolean>();
@@ -484,6 +591,7 @@ if (isMain()) {
   const fixturesRoot = join(repoRoot, 'fixtures');
   if (cmd === 'gen-synthetic') genSynthetic(fixturesRoot);
   else if (cmd === 'holdout') process.exit(runHoldout());
+  else if (cmd === 'accept') process.exit(runAcceptance(repoRoot));
   else if (cmd === 'gt-from-romraider') process.exit(runGtFromRomraider(process.argv.slice(3)));
   else process.exit(runEval(repoRoot, fixturesRoot));
 }

@@ -3,6 +3,7 @@ import { discoverFixtures, runHoldoutSeed, HOLDOUT_SPECS } from '../src/cli.js';
 import { gateFor, SYNTH_GATE, POOL_GATE, MS41_GATE, CURVE_GATE, PARTIAL_GATE, PARTIAL_CURVE_GATE } from '../src/cli.js';
 import { runHoldoutPoolSeed, HOLDOUT_POOL_SPECS } from '../src/cli.js';
 import { runHoldoutPartialSeed, HOLDOUT_PCURVE_SPECS } from '../src/cli.js';
+import { MS41_CURVE_GATE, MS41_ACCEPTANCE_CASES, meetsGate, runAcceptance } from '../src/cli.js';
 import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -17,6 +18,34 @@ describe('discoverFixtures', () => {
     writeFileSync(join(dir, 'orphan.bin'), Buffer.from([1]));
     const found = discoverFixtures(root);
     expect(found).toEqual([{ bin: join(dir, 'a.bin'), truth: join(dir, 'a.groundtruth.json') }]);
+  });
+});
+
+describe('real-bin acceptance (pnpm eval accept)', () => {
+  it('binds EVERY MS41_CURVE_GATE entry to an acceptance case', () => {
+    // Regression guard for the defect this command exists to fix:
+    // MS41_CURVE_GATE shipped with ZERO consumers anywhere in the tracked
+    // tree — its own declaration was the only occurrence. Real-bin 1D-curve
+    // recall was therefore checked by a human reading printed numbers out of
+    // a gitignored script, so a curve regression passed `pnpm test`,
+    // `pnpm eval`, `pnpm eval holdout` and CI in silence. A gate nobody
+    // evaluates is not a gate. Adding a bin to the gate without adding its
+    // acceptance case must fail here.
+    expect(MS41_ACCEPTANCE_CASES.map((c) => c.key).sort()).toEqual(Object.keys(MS41_CURVE_GATE).sort());
+  });
+
+  it('enforces the gate rather than merely reporting it — a below-floor score FAILS', () => {
+    // s52's floor is 0.95/0.95/0.95; 0.94 location must not pass.
+    expect(meetsGate({ locationRecall: 0.958, structureRecall: 0.958, axisRecall: 0.971,
+      falsePositiveDensity: 0, truthCount: 71, detectedCount: 4616 }, MS41_CURVE_GATE.s52)).toBe(true);
+    expect(meetsGate({ locationRecall: 0.94, structureRecall: 0.958, axisRecall: 0.971,
+      falsePositiveDensity: 0, truthCount: 71, detectedCount: 4616 }, MS41_CURVE_GATE.s52)).toBe(false);
+  });
+
+  it('skips cleanly (exit 0) when the gitignored real fixtures are absent — CI must stay green', () => {
+    const root = mkdtempSync(join(tmpdir(), 'binacc-'));
+    mkdirSync(join(root, 'fixtures', 'ms41'), { recursive: true });
+    expect(runAcceptance(root)).toBe(0);
   });
 });
 

@@ -51,3 +51,12 @@ jobs:
 
       - name: Detection-quality eval — holdout (anti-overfitting check)
         run: pnpm eval holdout
+
+      # Real-bin 1D-curve acceptance. Every case is gitignored firmware, so
+      # this necessarily SKIPS here and exits 0 — it is not a quality check on
+      # CI. It runs so that the command itself stays working: the gate it
+      # enforces previously had no consumer at all, and a runner that silently
+      # stopped executing would recreate exactly that defect. It binds for real
+      # only on a machine holding the local fixtures.
+      - name: Real-bin curve acceptance (skips without local firmware)
+        run: pnpm eval accept
