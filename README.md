@@ -4,9 +4,9 @@
 
 An open-source desktop app for **ECU bin file tuning-table analysis**: load a raw ECU firmware dump, view it as hexdump / 2D / 3D, automatically detect tuning tables ("maps") and their axes, refine them manually, and export RomRaider XML / TunerPro XDF / CSV / JSON definitions.
 
-**Status: v0.1.0 — first public preview, under active development.** v1 is
-analysis-only (read-only): it never modifies bin bytes. Editing and checksum
-tooling come later.
+**Status: v0.1.1 — preview, under active development.** v1 is analysis-only
+(read-only): it never modifies bin bytes. Editing and checksum tooling come
+later.
 
 Currently targets Windows. macOS/Linux builds are untested (Tauri supports
 them, but nothing here has been verified on those platforms yet).

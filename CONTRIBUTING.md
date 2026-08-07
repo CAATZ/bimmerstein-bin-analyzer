@@ -77,6 +77,26 @@ support are a deliberate future scope, not something to add incrementally.
 **New runtime dependencies need justification.** The dependency surface is
 small on purpose. Build and test tooling is less restricted.
 
+## Reading the comments
+
+Detection code cites its evidence in two forms you will not find in this
+repository:
+
+- `spec §4.3` — sections of an internal design document.
+- `docs/notes/…-spike.md`, `scratch/…` — measurement records and the throwaway
+  scripts that produced them.
+
+These are development records, kept out of the distributed source. **They are
+provenance, not the explanation**: wherever a constant, threshold or tier
+placement is cited this way, the measured justification is stated inline in the
+same comment — what was measured, on which fixtures, and what moved. If you
+ever find a value whose reasoning exists *only* behind such a citation, that is
+a documentation bug worth reporting; the comment should stand on its own.
+
+The authoritative, reproducible statement of detection quality is not a
+document at all — it is `pnpm eval` and `pnpm eval holdout`, which anyone can
+run against the committed fixtures.
+
 ## Before you open a pull request
 
 Run the whole ladder and make sure it is green:
