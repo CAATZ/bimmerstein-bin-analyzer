@@ -13,7 +13,11 @@ them, but nothing here has been verified on those platforms yet).
 
 ## Try it (Windows)
 
-No published installer yet — build one from source:
+Download an installer from [Releases](https://github.com/CAATZ/bimmerstein-bin-analyzer/releases):
+`.msi` (Windows Installer) or `-setup.exe` (NSIS). Both are unsigned — see the
+SmartScreen note below.
+
+Or build from source:
 
 1. Install the prerequisites below (Node.js, pnpm, Rust + Tauri prerequisites).
 2. Clone this repo, then double-click **`build-installer.cmd`** at the repo
@@ -45,8 +49,13 @@ Tauri 2 desktop shell, all logic in TypeScript (pnpm monorepo):
 | `packages/core` | Types, value codecs, scaling, project model. Depends on nothing. |
 | `packages/engine` | Map-detection pipeline. Pure (no fs/DOM); runs in a Web Worker. |
 | `packages/formats` | RomRaider XML, TunerPro XDF, CSV/JSON, project file. Pure. |
+| `packages/appkit` | Adapter helpers shared by the two apps (definition address framing). Pure. |
 | `packages/eval` | Detection-quality harness (Node CLI) with ground-truth fixtures. |
-| `apps/desktop` | Tauri 2 + Vite + Svelte 5 UI. All file I/O lives here. |
+| `apps/desktop` | Tauri 2 + Vite + Svelte 5 UI. |
+| `apps/mcp` | Stdio server exposing the engine to external tooling — see [apps/mcp/README.md](apps/mcp/README.md). |
+
+File I/O lives only in `apps/*` and `packages/eval`; the four `packages/*`
+libraries above them are pure and import nothing from an app.
 
 ## Prerequisites
 
@@ -83,8 +92,21 @@ acceptance gate only runs locally, on a machine with the (gitignored) real
 firmware fixtures in `fixtures/ms41/` — CI never has them, and both eval
 commands are designed to pass cleanly without them.
 
+## Contributing
+
+Bug reports and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md)
+covers the setup, the package boundaries, and the invariants that keep
+detection quality honest — most importantly that the quality gates are
+ratchets and are never relaxed to make a change fit.
+
+Security issues: please follow [SECURITY.md](SECURITY.md) rather than opening a
+public issue.
+
 ## Legal
 
-Independent, original work.
+Independent, original work. Not affiliated with, endorsed by, or sponsored by
+any vehicle or ECU manufacturer.
+
+Third-party components bundled in the installers are attributed in [NOTICE](NOTICE).
 
 Copyright © 2026 BimmerStein Bin Analyzer contributors. License: [GPL-3.0-or-later](LICENSE).

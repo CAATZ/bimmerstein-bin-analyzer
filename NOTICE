@@ -1,0 +1,97 @@
+BimmerStein Bin Analyzer
+Copyright (C) 2026 BimmerStein Bin Analyzer contributors
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. The full license text is in the LICENSE file.
+
+================================================================================
+THIRD-PARTY COMPONENTS
+================================================================================
+
+The distributed Windows installers (.msi / -setup.exe) and the standalone
+executable bundle third-party components. All of them are under permissive,
+GPL-compatible licenses that require attribution in binary distributions; this
+file provides that attribution. No third-party component listed here imposes
+terms beyond attribution, and none is copyleft.
+
+Licenses in use across the bundled set:
+
+    MIT, Apache-2.0 OR MIT, MIT OR Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC
+
+--------------------------------------------------------------------------------
+Application shell (Rust)
+--------------------------------------------------------------------------------
+
+The desktop shell is built on Tauri. Direct crate dependencies:
+
+    tauri                   Apache-2.0 OR MIT
+    tauri-plugin-dialog     Apache-2.0 OR MIT
+    tauri-plugin-fs         Apache-2.0 OR MIT
+    serde                   Apache-2.0 OR MIT
+    serde_json              Apache-2.0 OR MIT
+
+These pull in a transitive graph of 432 crates (the full, exact set is recorded
+in apps/desktop/src-tauri/Cargo.lock), overwhelmingly Apache-2.0 OR MIT with a
+small number of BSD-2-Clause, BSD-3-Clause and ISC entries.
+
+--------------------------------------------------------------------------------
+User interface and runtime (JavaScript/TypeScript)
+--------------------------------------------------------------------------------
+
+    @tauri-apps/api                 Apache-2.0 OR MIT
+    @tauri-apps/plugin-dialog       MIT OR Apache-2.0
+    @tauri-apps/plugin-fs           MIT OR Apache-2.0
+    three                           MIT
+    @noble/hashes                   MIT
+
+Svelte, Vite and TypeScript are build-time tooling; their output is compiled
+into the bundle but the tools themselves are not redistributed.
+
+--------------------------------------------------------------------------------
+Companion server (not part of the installer)
+--------------------------------------------------------------------------------
+
+apps/mcp runs from a source checkout and is not included in the installers. Its
+runtime dependencies are:
+
+    @modelcontextprotocol/sdk       MIT
+    ws                              MIT
+    zod                             MIT
+    json-schema-typed               BSD-2-Clause
+
+--------------------------------------------------------------------------------
+Microsoft WebView2
+--------------------------------------------------------------------------------
+
+The application renders through the Microsoft Edge WebView2 Runtime, which is
+NOT bundled or redistributed here — it ships with Windows 11 and is installed
+separately on Windows 10. Its use is governed by Microsoft's own terms.
+
+--------------------------------------------------------------------------------
+Reproducing this list
+--------------------------------------------------------------------------------
+
+    pnpm licenses list --prod                 # JavaScript dependencies
+    apps/desktop/src-tauri/Cargo.lock         # exact Rust crate set and versions
+
+Full license texts for each component are distributed inside the corresponding
+package in node_modules and in the crate sources fetched by Cargo.
+
+================================================================================
+FIRMWARE, DEFINITIONS AND TRADEMARKS
+================================================================================
+
+This project contains no ECU firmware. Firmware images are copyrighted by their
+respective manufacturers and are never committed to this repository; the eval
+fixtures for real hardware are structural ground truth only, generated locally
+(see fixtures/README.md).
+
+Definition files used to build that ground truth are third-party work and are
+likewise not distributed here.
+
+BMW is a trademark of Bayerische Motoren Werke AG. Siemens is a trademark of
+Siemens AG. This project is independent and is not affiliated with, endorsed by,
+or sponsored by any vehicle or ECU manufacturer. Product and format names are
+used only to describe what this software reads.
