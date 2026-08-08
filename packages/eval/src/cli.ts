@@ -187,9 +187,27 @@ export function gateFor(fixture: string): Gate | undefined {
  * tolerates none. Losing one drops to 59/71 = 0.831 and fails, which is the
  * point — the gain is now locked in rather than absorbed by slack. A unit test
  * pins that map-granularity intent so the floor cannot be read as an arbitrary
- * decimal. The axis floor is untouched at 0.95 (measured 0.983); ratcheting it
- * is a separate decision. Ratchets move up only on an explicit decision, never
- * as a side effect of unrelated work, and never down without sign-off.
+ * decimal.
+ *
+ * SECOND RATCHET, same day (user decision): s52 curve AXIS 0.95 -> 0.98.
+ * Axis recall divides by axis-ELIGIBLE STRUCTURE HITS, not by truth count, so
+ * its denominator is 60 rather than 71 — every structure hit here carries a
+ * referenced axis. Measured 59/60 = 0.9833, granularity 1/60 ~ 0.0167: the old
+ * 0.95 tolerated TWO axes going wrong, 0.98 tolerates none. 0.97 would be
+ * identical in effect (both demand >= 59/60) and 0.99 would demand 60/60,
+ * i.e. ABOVE the honest measurement, which the round-DOWN rule forbids.
+ *
+ * Consequence worth knowing before touching curve detection: because the
+ * denominator MOVES with structure recall, recovering a 61st curve whose axis
+ * is wrong would drop axis to 59/61 = 0.967 and FAIL this gate even though
+ * location and structure improved. That is the intended reading — a curve
+ * attached to the wrong axis is not a win — but it means a net-positive change
+ * can be blocked here and must be argued, not silently absorbed.
+ *
+ * e36m3's curve axis floor stays 0.95 against a measured 57/58 = 0.9828
+ * (tolerance one axis); ratcheting it is a separate, still-open decision.
+ * Ratchets move up only on an explicit decision, never as a side effect of
+ * unrelated work, and never down without sign-off.
  */
 export const MS41_PARTIAL_GATE = {
   e36m3: {
@@ -197,9 +215,9 @@ export const MS41_PARTIAL_GATE = {
     grid: { locationRecall: 0.95, structureRecall: 0.85, axisRecall: 0.95 },
   },
   s52: {
-    // RATCHETED 2026-08-07 (user decision): 0.80 -> 0.84 on loc/struct, to
-    // lock in what P3.1-S1 actually delivered. See the ratchet note below.
-    curve: { locationRecall: 0.84, structureRecall: 0.84, axisRecall: 0.95 },
+    // RATCHETED 2026-08-07 (user decisions): loc/struct 0.80 -> 0.84 to lock
+    // in what P3.1-S1 delivered, then axis 0.95 -> 0.98. See the ratchet note.
+    curve: { locationRecall: 0.84, structureRecall: 0.84, axisRecall: 0.98 },
     grid: { locationRecall: 0.95, structureRecall: 0.85, axisRecall: 0.95 },
   },
 };

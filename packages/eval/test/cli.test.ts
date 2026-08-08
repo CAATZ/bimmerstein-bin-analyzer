@@ -70,6 +70,18 @@ describe('real-bin acceptance (pnpm eval accept)', () => {
     expect(meetsGate({ locationRecall: recall(60), structureRecall: recall(59), ...base }, g)).toBe(false);
   });
 
+  it('holds the s52 partial curve AXIS floor at zero tolerance — one wrong axis fails', () => {
+    // Axis recall divides by axis-ELIGIBLE structure hits, not by truth count:
+    // measured 59/60 = 0.9833 (all 60 structure hits carry a referenced axis,
+    // so the denominator is 60, not 71). Granularity is therefore 1/60 ≈
+    // 0.0167 and the floor is a whole-axis count: 0.95 tolerated TWO axes
+    // going wrong, 0.98 tolerates none.
+    const g = MS41_PARTIAL_GATE.s52.curve;
+    const base = { locationRecall: 60 / 71, structureRecall: 60 / 71, falsePositiveDensity: 0, truthCount: 71, detectedCount: 432 };
+    expect(meetsGate({ ...base, axisRecall: 59 / 60 }, g)).toBe(true);
+    expect(meetsGate({ ...base, axisRecall: 58 / 60 }, g)).toBe(false);
+  });
+
   it('gates partials on BOTH truth classes — a grid regression must not hide behind curve recall', () => {
     // Partials are scored against grid AND curve truth. Unlike full reads,
     // neither class is covered by runEval (no groundtruth.json is committed
