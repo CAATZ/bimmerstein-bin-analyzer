@@ -82,6 +82,16 @@ describe('real-bin acceptance (pnpm eval accept)', () => {
     expect(meetsGate({ ...base, axisRecall: 58 / 60 }, g)).toBe(false);
   });
 
+  it('holds the e36m3 partial curve AXIS floor at zero tolerance too', () => {
+    // e36m3's denominator differs from s52's: 58 axis-eligible structure hits
+    // (58/64 struct) vs s52's 60. Measured 57/58 = 0.9828, granularity
+    // 1/58 ≈ 0.0172 — 0.95 tolerated one wrong axis, 0.98 tolerates none.
+    const g = MS41_PARTIAL_GATE.e36m3.curve;
+    const base = { locationRecall: 58 / 64, structureRecall: 58 / 64, falsePositiveDensity: 0, truthCount: 64, detectedCount: 396 };
+    expect(meetsGate({ ...base, axisRecall: 57 / 58 }, g)).toBe(true);
+    expect(meetsGate({ ...base, axisRecall: 56 / 58 }, g)).toBe(false);
+  });
+
   it('gates partials on BOTH truth classes — a grid regression must not hide behind curve recall', () => {
     // Partials are scored against grid AND curve truth. Unlike full reads,
     // neither class is covered by runEval (no groundtruth.json is committed

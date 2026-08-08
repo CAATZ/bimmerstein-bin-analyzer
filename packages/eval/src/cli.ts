@@ -204,14 +204,23 @@ export function gateFor(fixture: string): Gate | undefined {
  * attached to the wrong axis is not a win — but it means a net-positive change
  * can be blocked here and must be argued, not silently absorbed.
  *
- * e36m3's curve axis floor stays 0.95 against a measured 57/58 = 0.9828
- * (tolerance one axis); ratcheting it is a separate, still-open decision.
- * Ratchets move up only on an explicit decision, never as a side effect of
- * unrelated work, and never down without sign-off.
+ * THIRD RATCHET, same day (user decision): e36m3 curve AXIS 0.95 -> 0.98, so
+ * both bins now hold their curve axes at zero tolerance. Its denominator is 58
+ * (58/64 structure hits), not s52's 60, and the measurement is 57/58 = 0.9828 —
+ * the same 0.98 floor therefore lands on the same zero-tolerance point from a
+ * different arithmetic, and 0.99 would again demand a perfect 58/58, above the
+ * measurement. The moving-denominator consequence described above applies here
+ * equally.
+ *
+ * Both partial GRID axis floors remain 0.95 against measured 0.981/0.983 —
+ * a separate, still-open decision, deliberately not swept in with the curve
+ * ones. Ratchets move up only on an explicit decision, never as a side effect
+ * of unrelated work, and never down without sign-off.
  */
 export const MS41_PARTIAL_GATE = {
   e36m3: {
-    curve: { locationRecall: 0.9, structureRecall: 0.9, axisRecall: 0.95 },
+    // RATCHETED 2026-08-07 (user decision): axis 0.95 -> 0.98, matching s52.
+    curve: { locationRecall: 0.9, structureRecall: 0.9, axisRecall: 0.98 },
     grid: { locationRecall: 0.95, structureRecall: 0.85, axisRecall: 0.95 },
   },
   s52: {
