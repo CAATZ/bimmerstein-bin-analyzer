@@ -175,12 +175,21 @@ export function gateFor(fixture: string): Gate | undefined {
  * As-measured when pinned (P3.1-S1 as-wired, matches the recorded as-executed
  * numbers exactly): e36m3 grid 0.968/0.887/0.981 curve 0.906/0.906/0.983
  * (det 396); s52 grid 0.956/0.882/0.983 curve 0.845/0.845/0.983 (det 432).
- * Two margins are deliberately thin — e36m3 curve loc/struct and s52 grid loc
- * both clear by 0.006 — which is safe because a real bin scanned by a
- * deterministic engine has no run-to-run variance (the PARTIAL_GATE precedent:
- * a tight gate is exact, not brittle). Raising s52's curve floor toward its
- * measured 0.845 stays an open user-adjudicated option, deliberately NOT taken
- * here: a ratchet moves up only on a decision, never as a side effect.
+ * Several margins are deliberately thin — e36m3 curve loc/struct and s52 grid
+ * loc clear by 0.006, s52 curve loc/struct by 0.005 — which is safe because a
+ * real bin scanned by a deterministic engine has no run-to-run variance (the
+ * PARTIAL_GATE precedent: a tight gate is exact, not brittle).
+ *
+ * RATCHET, 2026-08-07 (user decision): s52 curve loc/struct 0.80 -> 0.84.
+ * Recall over 71 truth curves moves in whole maps of 1/71 ~ 0.0141, so a floor
+ * is really a map count: 0.80 admitted 57/71 and therefore tolerated losing
+ * THREE of the curves P3.1-S1 recovered, while 0.84 admits exactly 60/71 and
+ * tolerates none. Losing one drops to 59/71 = 0.831 and fails, which is the
+ * point — the gain is now locked in rather than absorbed by slack. A unit test
+ * pins that map-granularity intent so the floor cannot be read as an arbitrary
+ * decimal. The axis floor is untouched at 0.95 (measured 0.983); ratcheting it
+ * is a separate decision. Ratchets move up only on an explicit decision, never
+ * as a side effect of unrelated work, and never down without sign-off.
  */
 export const MS41_PARTIAL_GATE = {
   e36m3: {
@@ -188,7 +197,9 @@ export const MS41_PARTIAL_GATE = {
     grid: { locationRecall: 0.95, structureRecall: 0.85, axisRecall: 0.95 },
   },
   s52: {
-    curve: { locationRecall: 0.8, structureRecall: 0.8, axisRecall: 0.95 },
+    // RATCHETED 2026-08-07 (user decision): 0.80 -> 0.84 on loc/struct, to
+    // lock in what P3.1-S1 actually delivered. See the ratchet note below.
+    curve: { locationRecall: 0.84, structureRecall: 0.84, axisRecall: 0.95 },
     grid: { locationRecall: 0.95, structureRecall: 0.85, axisRecall: 0.95 },
   },
 };

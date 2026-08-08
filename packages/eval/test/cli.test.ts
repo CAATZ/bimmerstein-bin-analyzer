@@ -56,6 +56,20 @@ describe('real-bin acceptance (pnpm eval accept)', () => {
     expect(MS41_PARTIAL_ACCEPTANCE_CASES.map((c) => c.key).sort()).toEqual(Object.keys(MS41_PARTIAL_GATE).sort());
   });
 
+  it('holds the s52 partial curve floor at ZERO tolerance — losing one of the 60 curves fails', () => {
+    // s52 partial curve truth is 71 maps, so recall moves in whole maps of
+    // 1/71 ≈ 0.0141 — there is no such thing as a fractional regression here.
+    // P3.1-S1 delivered 60/71 = 0.845; the floor is ratcheted to admit exactly
+    // that and nothing less, so any lost curve fails rather than being absorbed
+    // by slack. (The pre-ratchet 0.80 floor tolerated losing three.)
+    const g = MS41_PARTIAL_GATE.s52.curve;
+    const base = { axisRecall: 0.983, falsePositiveDensity: 0, truthCount: 71, detectedCount: 432 };
+    const recall = (maps: number): number => maps / 71;
+    expect(meetsGate({ locationRecall: recall(60), structureRecall: recall(60), ...base }, g)).toBe(true);
+    expect(meetsGate({ locationRecall: recall(59), structureRecall: recall(60), ...base }, g)).toBe(false);
+    expect(meetsGate({ locationRecall: recall(60), structureRecall: recall(59), ...base }, g)).toBe(false);
+  });
+
   it('gates partials on BOTH truth classes — a grid regression must not hide behind curve recall', () => {
     // Partials are scored against grid AND curve truth. Unlike full reads,
     // neither class is covered by runEval (no groundtruth.json is committed
