@@ -212,22 +212,35 @@ export function gateFor(fixture: string): Gate | undefined {
  * measurement. The moving-denominator consequence described above applies here
  * equally.
  *
- * Both partial GRID axis floors remain 0.95 against measured 0.981/0.983 —
- * a separate, still-open decision, deliberately not swept in with the curve
- * ones. Ratchets move up only on an explicit decision, never as a side effect
- * of unrelated work, and never down without sign-off.
+ * FOURTH RATCHET, same day (user decision): both GRID axis floors 0.95 -> 0.98,
+ * so every axis binding on both partials is now held at zero tolerance.
+ *
+ * The grid denominators are NOT the structure-hit counts, and this is the trap
+ * to remember: on each bin exactly one truth map takes a structure hit while
+ * carrying no REFERENCED axis, so it is excluded from axis scoring. Measured
+ * e36m3 53/54 = 0.9815 (structure hits 55) and s52 58/59 = 0.9831 (structure
+ * hits 60). Deriving the denominator from structure recall would have pinned
+ * these one map too high. Both were measured, not inferred — the printed 3-dp
+ * value hides which denominator is in play, and 0.981 alone is consistent with
+ * several. 0.99 would demand a perfect score on both, above the measurement.
+ *
+ * Every partial floor is now zero-tolerance, which is the point of a ratchet
+ * but also its cost: the next change to touch this surface must hold ALL of
+ * loc, struct and axis on BOTH classes, or argue its case. Ratchets move up
+ * only on an explicit decision, never as a side effect of unrelated work, and
+ * never down without sign-off.
  */
 export const MS41_PARTIAL_GATE = {
   e36m3: {
     // RATCHETED 2026-08-07 (user decision): axis 0.95 -> 0.98, matching s52.
     curve: { locationRecall: 0.9, structureRecall: 0.9, axisRecall: 0.98 },
-    grid: { locationRecall: 0.95, structureRecall: 0.85, axisRecall: 0.95 },
+    grid: { locationRecall: 0.95, structureRecall: 0.85, axisRecall: 0.98 },
   },
   s52: {
     // RATCHETED 2026-08-07 (user decisions): loc/struct 0.80 -> 0.84 to lock
     // in what P3.1-S1 delivered, then axis 0.95 -> 0.98. See the ratchet note.
     curve: { locationRecall: 0.84, structureRecall: 0.84, axisRecall: 0.98 },
-    grid: { locationRecall: 0.95, structureRecall: 0.85, axisRecall: 0.95 },
+    grid: { locationRecall: 0.95, structureRecall: 0.85, axisRecall: 0.98 },
   },
 };
 

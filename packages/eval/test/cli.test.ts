@@ -92,6 +92,22 @@ describe('real-bin acceptance (pnpm eval accept)', () => {
     expect(meetsGate({ ...base, axisRecall: 56 / 58 }, g)).toBe(false);
   });
 
+  it('holds both partial GRID axis floors at zero tolerance', () => {
+    // Measured denominators are NOT the structure-hit counts: one truth map
+    // per bin takes a structure hit while carrying no referenced axis, so
+    // axis-eligible is 54 (e36m3, struct 55) and 59 (s52, struct 60). Hence
+    // 53/54 = 0.9815 and 58/59 = 0.9831 — never infer these from the 3-dp
+    // printed value, which hides which denominator is in play.
+    const e = MS41_PARTIAL_GATE.e36m3.grid;
+    const s = MS41_PARTIAL_GATE.s52.grid;
+    const eBase = { locationRecall: 60 / 62, structureRecall: 55 / 62, falsePositiveDensity: 0, truthCount: 62, detectedCount: 396 };
+    const sBase = { locationRecall: 65 / 68, structureRecall: 60 / 68, falsePositiveDensity: 0, truthCount: 68, detectedCount: 432 };
+    expect(meetsGate({ ...eBase, axisRecall: 53 / 54 }, e)).toBe(true);
+    expect(meetsGate({ ...eBase, axisRecall: 52 / 54 }, e)).toBe(false);
+    expect(meetsGate({ ...sBase, axisRecall: 58 / 59 }, s)).toBe(true);
+    expect(meetsGate({ ...sBase, axisRecall: 57 / 59 }, s)).toBe(false);
+  });
+
   it('gates partials on BOTH truth classes — a grid regression must not hide behind curve recall', () => {
     // Partials are scored against grid AND curve truth. Unlike full reads,
     // neither class is covered by runEval (no groundtruth.json is committed
