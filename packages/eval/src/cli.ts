@@ -544,11 +544,17 @@ function checkAgainstClass(
   }
   const s = scoreDetections(maps, built.value.truth.maps, dataBytes);
   const ok = meetsGate(s, gate);
+  // fpD and the 1D-emission count are DIAGNOSTIC, never gated (fpD is soft on
+  // real bins — they contain unlabelled true maps, so the trend matters, not
+  // the value). They are reported because this command replaced the gitignored
+  // controller scripts that used to print them, and partials appear in no
+  // other report: `runEval` never scores one.
+  const oneD = maps.filter((m) => (m.rows === 1) !== (m.cols === 1)).length;
   console.log(
     `${ok ? 'PASS' : 'FAIL'} ${label.padEnd(14)} ${cls === 'curve' ? 'curve' : 'grid '} ` +
       `${f3(s.locationRecall)}/${f3(s.structureRecall)}/${f3(s.axisRecall)}` +
       `  gate ${f3(gate.locationRecall)}/${f3(gate.structureRecall)}/${f3(gate.axisRecall)}` +
-      `  (truth ${s.truthCount}, det ${s.detectedCount})`
+      `  (truth ${s.truthCount}, det ${s.detectedCount}, 1d ${oneD}, fpD ${s.falsePositiveDensity.toFixed(2)})`
   );
   return ok;
 }
