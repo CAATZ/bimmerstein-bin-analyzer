@@ -532,5 +532,6 @@ export function applyProject(image: BinImage, project: Project): ApplyProjectRep
   viewParams.set({ ...DEFAULT_VIEW_PARAMS, format: { ...project.valueDefaults } });
   addressFrame.set(project.addressFrame === 'ms41full' ? 'ms41full' : 'none');
   framePromptAnswered.set(false); // a project load brings a new bin — the frame prompt re-arms
+  clearUndo(); // ...and a new bin is a new address space: undoing across it would restore a foreign session
   return { droppedMaps, droppedPotentials, droppedAxisEntries, clearedStamps };
 }

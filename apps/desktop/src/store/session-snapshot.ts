@@ -16,6 +16,13 @@ import {
  * disk, a data-loss hazard for undo. Within one session the bytes never change,
  * so a snapshot taken here was valid when taken and needs no re-validation.
  *
+ * That premise is ENFORCED, not assumed: every path that swaps the loaded bin
+ * (setBin, applyProject, resetStores) calls clearUndo, so no snapshot can
+ * outlive the bytes it was captured against. Without that, undo would restore a
+ * previous bin's session on top of the current one — and any per-bin store NOT
+ * listed below (the checksum verdict) would stay on the new bin, leaving two
+ * stores disagreeing about which file is loaded.
+ *
  * Excluded on purpose: toasts, modalOpen and scrollRequest are transient UI, not
  * session state; restoring them would resurrect dismissed toasts and re-fire a
  * scroll.

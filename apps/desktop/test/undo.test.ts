@@ -4,7 +4,7 @@ import type { AxisDef, MapDef } from '@binanalyzer/core';
 import { createBinImage } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
 import { UNDO_LIMIT, clearUndo, redo, undo, undoState } from '../src/store/undo.js';
-import { axisLibrary, maps, potentialMaps, viewParams } from '../src/store/stores.js';
+import { axisLibrary, bin, maps, potentialMaps, viewParams } from '../src/store/stores.js';
 
 function testBin() {
   return createBinImage(Uint8Array.from({ length: 4096 }, (_, i) => i & 0xff), 'undo.bin');
@@ -101,6 +101,28 @@ describe('undo stack', () => {
     expect(get(undoState).canUndo).toBe(true);
     a.setBin(testBin());
     expect(get(undoState).canUndo).toBe(false);
+  });
+
+  it('applyProject clears the stack too — a project load brings a new bin, so undoing across it would restore a foreign session', () => {
+    // Without this, Ctrl+Z after opening a project restores the PREVIOUS bin
+    // together with its map set, while the per-bin stores the snapshot does not
+    // carry (the checksum verdict) stay on the new one — two stores disagreeing
+    // about which file is loaded.
+    a.addImportedMaps([mapAt('m1', 0x100, 'imported')]);
+    expect(get(undoState).canUndo).toBe(true);
+
+    const other = createBinImage(Uint8Array.from({ length: 2048 }, (_, i) => (i * 3) & 0xff), 'project.bin');
+    a.applyProject(other, {
+      schemaVersion: 1,
+      bin: { name: other.name, sha256: other.sha256, size: other.size },
+      valueDefaults: { width: 1, signed: false, endianness: 'little' },
+      maps: [],
+      potentialMaps: [],
+    });
+
+    expect(get(undoState)).toEqual({ canUndo: false, canRedo: false, nextUndoLabel: null });
+    expect(undo()).toBe(false);
+    expect(get(bin)?.name).toBe('project.bin'); // the project's bin stands — nothing restored over it
   });
 
   it('view changes do not push', () => {
