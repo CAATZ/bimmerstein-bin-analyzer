@@ -1,12 +1,20 @@
 <!-- apps/desktop/src/components/ChecksumDialog.svelte -->
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { checksumReport } from '../store/stores.js';
+  import * as actions from '../store/actions.js';
   let { onClose }: { onClose: () => void } = $props();
   const hex = (v: number, w = 4): string => '0x' + v.toString(16).toUpperCase().padStart(w, '0');
+
+  // Suspend the global keymap (T/K etc.) while this dialog is open.
+  onMount(() => {
+    actions.pushModal();
+    return () => actions.popModal();
+  });
 </script>
 
-<div class="backdrop" role="presentation" onclick={onClose}>
-  <div class="dialog" role="dialog" aria-label="Checksums" onclick={(e) => e.stopPropagation()}>
+<div class="backdrop">
+  <div class="dialog" role="dialog" aria-label="Checksums">
     <h2>Checksums</h2>
     {#if $checksumReport}
       <!-- Own scroll container: a flex child with overflow:visible defeats

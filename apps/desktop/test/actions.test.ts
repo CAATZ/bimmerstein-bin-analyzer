@@ -4,7 +4,8 @@ import type { MapDef, Project } from '@binanalyzer/core';
 import { createBinImage } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
 import {
-  bin, binPath, maps, modalOpen, potentialMaps, regions, scanStatus, scrollRequest, selection, toasts, viewParams,
+  bin, binPath, checksumReport, maps, modalOpen, potentialMaps, regions, scanStatus, scrollRequest, selection, toasts,
+  viewParams,
 } from '../src/store/stores.js';
 
 /** 256-byte bin: bytes[i] = i & 0xff — deterministic values for range math. */
@@ -363,5 +364,15 @@ describe('binPath', () => {
     a.setBinPath('C:/bins/x.bin');
     a.resetStores();
     expect(get(binPath)).toBeNull();
+  });
+});
+
+describe('checksumReport', () => {
+  it('resetStores clears it', () => {
+    a.setChecksumReport({
+      familyId: 'ms41', applies: true, blocks: [], valid: true, skipped: [], notes: [],
+    });
+    a.resetStores();
+    expect(get(checksumReport)).toBeUndefined();
   });
 });

@@ -3,8 +3,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createBinImage } from '@binanalyzer/core';
 import type { MapDef } from '@binanalyzer/core';
 import { importRomRaiderXml } from '@binanalyzer/formats';
+import { CAL_MAGIC, crc16 } from '@binanalyzer/families';
 import * as a from '../src/store/actions.js';
-import { addressFrame, bin, binPath, maps, potentialMaps, toasts } from '../src/store/stores.js';
+import { addressFrame, bin, binPath, checksumReport, maps, potentialMaps, toasts } from '../src/store/stores.js';
 import { basename, dirname, joinPath, stemOf, type PlatformHost } from '../src/platform/host.js';
 import {
   exportFlow, importDef, loadBinFromPath, openBinFlow, openProjectFlow, saveProjectFlow,
@@ -57,6 +58,28 @@ class FakeHost implements PlatformHost {
 
 const BYTES = Uint8Array.from({ length: 64 }, (_, i) => i);
 
+/**
+ * A 24 KB (TUNE_SIZE) MS41-shaped image with a single valid cal entry, built
+ * locally the same way packages/families/test/fixture.ts's ms41Image(TUNE)
+ * does — but via the @binanalyzer/families package entry point only, never
+ * by importing that test helper directly (it is not a public entry point).
+ */
+function ms41TuneImage(): Uint8Array {
+  const size = 24 * 1024;
+  const d = new Uint8Array(size);
+  for (let i = 0; i < size; i++) d[i] = (i * 7) % 251;
+  const start = 0x1000;
+  d.set(CAL_MAGIC, start);
+  d[start + 0x0e] = 0x12; // init BE hi
+  d[start + 0x0f] = 0x34; // init BE lo
+  d[start + 0x50] = 0xff; // terminator
+  d[start + 0x51] = 0xff;
+  const calc = crc16(d.subarray(start, start + 0x4e), 0x1234);
+  d[start + 0x4e] = calc & 0xff;
+  d[start + 0x4f] = (calc >>> 8) & 0xff;
+  return d;
+}
+
 function confirmedMap(id: string, address: number): MapDef {
   return {
     id, name: `M ${id}`, address, rows: 2, cols: 4,
@@ -103,6 +126,25 @@ describe('openBinFlow / loadBinFromPath', () => {
     host.files.set('C:\\empty.bin', new Uint8Array(0));
     expect(await loadBinFromPath(host, 'C:\\empty.bin')).toBe(false);
     expect(get(bin)).toBeNull();
+  });
+
+  it('runs checksum verification on load and leaves a report the family module recognises', async () => {
+    const host = new FakeHost();
+    host.files.set('C:\\bins\\tune.bin', ms41TuneImage());
+    host.openAnswers = ['C:\\bins\\tune.bin'];
+    expect(await openBinFlow(host)).toBe(true);
+    const r = get(checksumReport);
+    expect(r).not.toBeUndefined();
+    expect(r?.familyId).toBe('ms41');
+    expect(r?.applies).toBe(true);
+  });
+
+  it('leaves checksumReport undefined when the loaded bytes match no family module', async () => {
+    const host = new FakeHost();
+    host.files.set('C:\\bins\\dump.bin', BYTES);
+    host.openAnswers = ['C:\\bins\\dump.bin'];
+    expect(await openBinFlow(host)).toBe(true);
+    expect(get(checksumReport)).toBeUndefined();
   });
 });
 
