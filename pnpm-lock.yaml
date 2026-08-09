@@ -164,6 +164,19 @@ importers:
         specifier: ^3.0.0
         version: 3.2.6(@types/node@22.20.0)(tsx@4.23.0)
 
+  packages/families:
+    dependencies:
+      '@binanalyzer/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@22.20.0)(tsx@4.23.0)
+
   packages/formats:
     dependencies:
       '@binanalyzer/core':

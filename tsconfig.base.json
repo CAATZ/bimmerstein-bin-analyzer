@@ -19,6 +19,7 @@
       "@binanalyzer/appkit": ["packages/appkit/src/index.ts"],
       "@binanalyzer/core": ["packages/core/src/index.ts"],
       "@binanalyzer/engine": ["packages/engine/src/index.ts"],
+      "@binanalyzer/families": ["packages/families/src/index.ts"],
       "@binanalyzer/formats": ["packages/formats/src/index.ts"]
     }
   }
