@@ -147,7 +147,34 @@ export const ms41Checksums: FamilyChecksums = {
   },
 
   correct(bytes) {
-    // Implemented in Task 6.
-    return { bytes: new Uint8Array(bytes), report: this.verify(bytes), changed: [] };
+    const out = new Uint8Array(bytes);
+    const changed: { offset: number; from: number; to: number }[] = [];
+    if (!this.applies(out)) return { bytes: out, report: inapplicable(), changed };
+
+    const write16 = (at: number, v: number): void => {
+      for (const [i, b] of [v & 0xff, (v >>> 8) & 0xff].entries()) {
+        if (out[at + i] !== b) {
+          changed.push({ offset: at + i, from: out[at + i]!, to: b });
+          out[at + i] = b;
+        }
+      }
+    };
+
+    // Boot (full ROM only). The PROGRAM checksum is deliberately never written —
+    // its layout is unconfirmed for MS41.3 and the reference tooling always
+    // leaves it alone.
+    if (out.length === FULL_ROM_SIZE) {
+      const b = bootBlock(out);
+      if (!b.ok) write16(BOOT_STORE, b.computed);
+    }
+
+    // Calibration table — present in both framings, recomputed from the FINAL
+    // image so an earlier repair is included.
+    const start = findCalTable(out);
+    for (const e of calEntries(out, start)) {
+      if (u16le(out, e.store) !== e.calc) write16(e.store, e.calc);
+    }
+
+    return { bytes: out, report: this.verify(out), changed };
   },
 };
