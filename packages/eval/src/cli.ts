@@ -312,6 +312,12 @@ interface Ms41ChecksumCase {
   /** Blocks reporting ok, out of `totalBlocks` (boot + cal for a full read, cal only for a partial). */
   okBlocks: number;
   totalBlocks: number;
+  /**
+   * WHICH blocks are stale, in report order — not just how many. A count alone
+   * is blind to a permutation that leaves a different entry stale, and on the
+   * two s52 images the identity of the stale entries IS the pin.
+   */
+  staleIds: readonly string[];
 }
 
 /**
@@ -331,10 +337,10 @@ interface Ms41ChecksumCase {
  * re-measured and re-pinned deliberately, not silently absorbed.
  */
 export const MS41_CHECKSUM_CASES: readonly Ms41ChecksumCase[] = [
-  { key: 'e36m3-full', bin: 'E36 M3 Stock Full Read.bin', bootOk: true, okBlocks: 17, totalBlocks: 17 },
-  { key: 's52-full', bin: 'MS41.3 S52 Stock Full Read.bin', bootOk: true, okBlocks: 16, totalBlocks: 17 },
-  { key: 'e36m3-partial', bin: 'partial/E36 M3 Stock partial.bin', bootOk: null, okBlocks: 16, totalBlocks: 16 },
-  { key: 's52-partial', bin: 'partial/MS41.3 S52 Stock partial.bin', bootOk: null, okBlocks: 13, totalBlocks: 16 },
+  { key: 'e36m3-full', bin: 'E36 M3 Stock Full Read.bin', bootOk: true, okBlocks: 17, totalBlocks: 17, staleIds: [] },
+  { key: 's52-full', bin: 'MS41.3 S52 Stock Full Read.bin', bootOk: true, okBlocks: 16, totalBlocks: 17, staleIds: ['cal-0'] },
+  { key: 'e36m3-partial', bin: 'partial/E36 M3 Stock partial.bin', bootOk: null, okBlocks: 16, totalBlocks: 16, staleIds: [] },
+  { key: 's52-partial', bin: 'partial/MS41.3 S52 Stock partial.bin', bootOk: null, okBlocks: 13, totalBlocks: 16, staleIds: ['cal-4', 'cal-6', 'cal-14'] },
 ];
 
 export function meetsGate(s: EvalScores, g: Gate): boolean {
@@ -770,14 +776,22 @@ export function runAcceptance(repoRoot: string): number {
     const bootOk = bootBlock ? bootBlock.ok : null;
     const okBlocks = r.blocks.filter((b) => b.ok).length;
     const totalBlocks = r.blocks.length;
-    const drift = bootOk !== c.bootOk || okBlocks !== c.okBlocks || totalBlocks !== c.totalBlocks;
+    // Report order, so the comparison is positional and the message reads like
+    // the dialog: a permutation that keeps the COUNT identical still drifts.
+    const staleIds = r.blocks.filter((b) => !b.ok).map((b) => b.id);
+    const drift =
+      bootOk !== c.bootOk ||
+      okBlocks !== c.okBlocks ||
+      totalBlocks !== c.totalBlocks ||
+      staleIds.join(',') !== c.staleIds.join(',');
     if (drift) passed = false;
     checked++;
     const fmt = (v: boolean | null): string => (v === null ? 'n/a' : String(v));
+    const stale = (ids: readonly string[]): string => (ids.length > 0 ? ids.join(',') : 'none');
     console.log(
       `${drift ? 'FAIL' : 'PASS'} ${c.key.padEnd(14)} checksums  boot=${fmt(bootOk)} ` +
-        `${okBlocks}/${totalBlocks} blocks ok` +
-        `  pinned boot=${fmt(c.bootOk)} ${c.okBlocks}/${c.totalBlocks}` +
+        `${okBlocks}/${totalBlocks} blocks ok  stale=${stale(staleIds)}` +
+        `  pinned boot=${fmt(c.bootOk)} ${c.okBlocks}/${c.totalBlocks} stale=${stale(c.staleIds)}` +
         `  (skipped ${r.skipped.map((s) => s.id).join(',') || 'none'})`
     );
   }

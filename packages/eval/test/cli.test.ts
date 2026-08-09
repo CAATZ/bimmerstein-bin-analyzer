@@ -137,6 +137,29 @@ describe('real-bin checksum acceptance', () => {
   it('every case names a bin path under fixtures/ms41', () => {
     for (const c of MS41_CHECKSUM_CASES) expect(c.bin).toMatch(/\.bin$/);
   });
+
+  it('every case pins WHICH blocks are stale, consistently with how many', () => {
+    // A count-only pin is blind to a permutation: a change that makes a
+    // DIFFERENT calibration entry stale while keeping the total identical would
+    // pass silently, and the identity of the stale entries is the whole point of
+    // the two s52 pins. This also catches a hand-mistyped pin, since the two
+    // halves must agree.
+    for (const c of MS41_CHECKSUM_CASES) {
+      expect(c.staleIds).toBeDefined();
+      expect(c.staleIds.length, `${c.key} staleIds vs ok/total`).toBe(c.totalBlocks - c.okBlocks);
+      expect(new Set(c.staleIds).size, `${c.key} staleIds has duplicates`).toBe(c.staleIds.length);
+    }
+  });
+
+  it('pins the s52 images as the known-stale ones and both e36m3 images as clean', () => {
+    // Guards the direction of the ratchet: if a future edit "fixed" the pins by
+    // blanking them, this fails rather than quietly widening what passes.
+    const byKey = Object.fromEntries(MS41_CHECKSUM_CASES.map((c) => [c.key, c.staleIds]));
+    expect(byKey['e36m3-full']).toEqual([]);
+    expect(byKey['e36m3-partial']).toEqual([]);
+    expect(byKey['s52-full']).toEqual(['cal-0']);
+    expect(byKey['s52-partial']).toEqual(['cal-4', 'cal-6', 'cal-14']);
+  });
 });
 
 describe('holdout', () => {
