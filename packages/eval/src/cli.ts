@@ -19,6 +19,7 @@ import { join, basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createBinImage, type MapDef } from '@binanalyzer/core';
 import { DEFAULT_SCAN_CONFIG, scan } from '@binanalyzer/engine';
+import { checksumsFor } from '@binanalyzer/families';
 import { buildGroundTruth, type GtBuildOptions } from './gt-from-romraider.js';
 import { parseGroundTruth } from './groundtruth.js';
 import { scoreDetections, type EvalScores } from './metrics.js';
@@ -300,6 +301,41 @@ export const MS41_PARTIAL_ACCEPTANCE_CASES: PartialAcceptanceCase[] = [
 
 /** Source definition for the acceptance ground truth (gitignored, third-party). */
 const MS41_ACCEPTANCE_DEF = 'fixtures/ms41/defs/2023 MS41 ECU Definitions.xml';
+
+/** One real-bin checksum case: the pinned MEASURED result, not a "must be valid" claim. */
+interface Ms41ChecksumCase {
+  key: string;
+  /** Path relative to fixtures/ms41/. */
+  bin: string;
+  /** Boot-sector verdict, or null when the framing carries no boot block (partials). */
+  bootOk: boolean | null;
+  /** Blocks reporting ok, out of `totalBlocks` (boot + cal for a full read, cal only for a partial). */
+  okBlocks: number;
+  totalBlocks: number;
+}
+
+/**
+ * Real-bin checksum acceptance. Both framings per bin: a 24 KB partial carries
+ * only the calibration table, so a full-read-only list would leave the partial
+ * path unguarded. Paths are relative to fixtures/ms41/.
+ *
+ * These are PINNED MEASUREMENTS, cross-checked against the reference
+ * `checksum.py` implementation over the real images (see the Task 8 commit
+ * message for the full comparison) — not an assertion that every image must
+ * verify clean. Two of the four genuinely carry stale checksums: the s52
+ * images are MODDED firmware with boot verification DISABLED at file offset
+ * 0x605C, so a stale calibration entry there is the firmware's real state,
+ * not a transcription bug. The gate below fails on ANY drift from these
+ * pinned numbers, in either direction — a fix that newly invalidates a
+ * pinned-clean entry, or newly validates a pinned-stale one, must be
+ * re-measured and re-pinned deliberately, not silently absorbed.
+ */
+export const MS41_CHECKSUM_CASES: readonly Ms41ChecksumCase[] = [
+  { key: 'e36m3-full', bin: 'E36 M3 Stock Full Read.bin', bootOk: true, okBlocks: 17, totalBlocks: 17 },
+  { key: 's52-full', bin: 'MS41.3 S52 Stock Full Read.bin', bootOk: true, okBlocks: 16, totalBlocks: 17 },
+  { key: 'e36m3-partial', bin: 'partial/E36 M3 Stock partial.bin', bootOk: null, okBlocks: 16, totalBlocks: 16 },
+  { key: 's52-partial', bin: 'partial/MS41.3 S52 Stock partial.bin', bootOk: null, okBlocks: 13, totalBlocks: 16 },
+];
 
 export function meetsGate(s: EvalScores, g: Gate): boolean {
   return (
@@ -646,12 +682,15 @@ function scanForAcceptance(bytes: Uint8Array): { maps: MapDef[]; dataBytes: numb
  * missed; exit 0 with skips means there was nothing local to check.
  */
 export function runAcceptance(repoRoot: string): number {
-  let defXml: string;
+  // The definition-driven detection cases below need this XML; the checksum
+  // cases further down operate directly on bytes and do not, so its absence
+  // must not short-circuit the whole function — that would make the checksum
+  // gate silently dead whenever only the (also-gitignored) def is missing.
+  let defXml: string | undefined;
   try {
     defXml = readFileSync(join(repoRoot, MS41_ACCEPTANCE_DEF), 'utf8');
   } catch {
     console.log(`accept: no local definition at ${MS41_ACCEPTANCE_DEF} — nothing to check (skipped)`);
-    return 0;
   }
   let passed = true;
   let checked = 0;
@@ -664,33 +703,75 @@ export function runAcceptance(repoRoot: string): number {
     }
   };
 
-  // Full reads — curve class only (grid is covered by MS41_GATE in runEval).
-  for (const c of MS41_ACCEPTANCE_CASES) {
+  if (defXml !== undefined) {
+    // Full reads — curve class only (grid is covered by MS41_GATE in runEval).
+    for (const c of MS41_ACCEPTANCE_CASES) {
+      let bytes: Uint8Array;
+      try {
+        bytes = new Uint8Array(readFileSync(join(repoRoot, 'fixtures', 'ms41', c.bin)));
+      } catch {
+        skipped.push(`${c.key} (full)`);
+        continue;
+      }
+      const { maps, dataBytes } = scanForAcceptance(bytes);
+      record(checkAgainstClass(defXml, bytes, maps, dataBytes, c.key, 'curve', true, c.romId, c.gate));
+    }
+
+    // Partials — BOTH classes, applyFo false (a direct-SA storageaddress already
+    // IS the file offset). One scan per bin, scored twice.
+    for (const c of MS41_PARTIAL_ACCEPTANCE_CASES) {
+      let bytes: Uint8Array;
+      try {
+        bytes = new Uint8Array(readFileSync(join(repoRoot, 'fixtures', 'ms41', 'partial', c.bin)));
+      } catch {
+        skipped.push(`${c.key} (partial)`);
+        continue;
+      }
+      const label = `${c.key}-partial`;
+      const { maps, dataBytes } = scanForAcceptance(bytes);
+      record(checkAgainstClass(defXml, bytes, maps, dataBytes, label, '2d', false, c.romId, c.gridGate));
+      record(checkAgainstClass(defXml, bytes, maps, dataBytes, label, 'curve', false, c.romId, c.curveGate));
+    }
+  }
+
+  // Checksum acceptance: a regression RATCHET pinning the MEASURED per-image
+  // checksum result, not a "must verify clean" assertion. Two of the four
+  // real images genuinely carry stale checksums — the s52 images are modded
+  // firmware with boot verification DISABLED at file offset 0x605C, which is
+  // a discoverable firmware state, not a per-bin rule this module enforces —
+  // so MS41_CHECKSUM_CASES pins those known-stale results too, and drift in
+  // EITHER direction (a newly-invalid clean entry, or a newly-valid stale
+  // one) fails the gate rather than passing silently.
+  for (const c of MS41_CHECKSUM_CASES) {
     let bytes: Uint8Array;
     try {
       bytes = new Uint8Array(readFileSync(join(repoRoot, 'fixtures', 'ms41', c.bin)));
     } catch {
-      skipped.push(`${c.key} (full)`);
+      skipped.push(`${c.key} (checksums)`);
       continue;
     }
-    const { maps, dataBytes } = scanForAcceptance(bytes);
-    record(checkAgainstClass(defXml, bytes, maps, dataBytes, c.key, 'curve', true, c.romId, c.gate));
-  }
-
-  // Partials — BOTH classes, applyFo false (a direct-SA storageaddress already
-  // IS the file offset). One scan per bin, scored twice.
-  for (const c of MS41_PARTIAL_ACCEPTANCE_CASES) {
-    let bytes: Uint8Array;
-    try {
-      bytes = new Uint8Array(readFileSync(join(repoRoot, 'fixtures', 'ms41', 'partial', c.bin)));
-    } catch {
-      skipped.push(`${c.key} (partial)`);
+    const mod = checksumsFor(bytes);
+    if (!mod) {
+      console.log(`FAIL ${c.key.padEnd(14)} checksums  no family module recognised this image`);
+      passed = false;
+      checked++;
       continue;
     }
-    const label = `${c.key}-partial`;
-    const { maps, dataBytes } = scanForAcceptance(bytes);
-    record(checkAgainstClass(defXml, bytes, maps, dataBytes, label, '2d', false, c.romId, c.gridGate));
-    record(checkAgainstClass(defXml, bytes, maps, dataBytes, label, 'curve', false, c.romId, c.curveGate));
+    const r = mod.verify(bytes);
+    const bootBlock = r.blocks.find((b) => b.id === 'boot');
+    const bootOk = bootBlock ? bootBlock.ok : null;
+    const okBlocks = r.blocks.filter((b) => b.ok).length;
+    const totalBlocks = r.blocks.length;
+    const drift = bootOk !== c.bootOk || okBlocks !== c.okBlocks || totalBlocks !== c.totalBlocks;
+    if (drift) passed = false;
+    checked++;
+    const fmt = (v: boolean | null): string => (v === null ? 'n/a' : String(v));
+    console.log(
+      `${drift ? 'FAIL' : 'PASS'} ${c.key.padEnd(14)} checksums  boot=${fmt(bootOk)} ` +
+        `${okBlocks}/${totalBlocks} blocks ok` +
+        `  pinned boot=${fmt(c.bootOk)} ${c.okBlocks}/${c.totalBlocks}` +
+        `  (skipped ${r.skipped.map((s) => s.id).join(',') || 'none'})`
+    );
   }
 
   if (skipped.length > 0) console.log(`accept: skipped (no local bin): ${skipped.join(', ')}`);

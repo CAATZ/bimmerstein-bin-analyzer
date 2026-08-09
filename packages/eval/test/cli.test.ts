@@ -5,6 +5,7 @@ import { runHoldoutPoolSeed, HOLDOUT_POOL_SPECS } from '../src/cli.js';
 import { runHoldoutPartialSeed, HOLDOUT_PCURVE_SPECS } from '../src/cli.js';
 import { MS41_CURVE_GATE, MS41_ACCEPTANCE_CASES, meetsGate, runAcceptance } from '../src/cli.js';
 import { MS41_PARTIAL_GATE, MS41_PARTIAL_ACCEPTANCE_CASES } from '../src/cli.js';
+import { MS41_CHECKSUM_CASES } from '../src/cli.js';
 import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -121,6 +122,20 @@ describe('real-bin acceptance (pnpm eval accept)', () => {
     expect(meetsGate({ locationRecall: 0.968, structureRecall: 0.84, axisRecall: 0.981, ...ok }, g.grid)).toBe(false);
     // and a curve regression below the 0.90 floor must fail
     expect(meetsGate({ locationRecall: 0.89, structureRecall: 0.906, axisRecall: 0.983, ...ok }, g.curve)).toBe(false);
+  });
+});
+
+describe('real-bin checksum acceptance', () => {
+  it('covers both framings — a full read and a partial for each real bin', () => {
+    // Checksum coverage differs by framing: a partial carries only the cal
+    // table. Both must be exercised or the partial path is unguarded.
+    expect(MS41_CHECKSUM_CASES.map((c) => c.key).sort()).toEqual(
+      ['e36m3-full', 'e36m3-partial', 's52-full', 's52-partial'].sort()
+    );
+  });
+
+  it('every case names a bin path under fixtures/ms41', () => {
+    for (const c of MS41_CHECKSUM_CASES) expect(c.bin).toMatch(/\.bin$/);
   });
 });
 

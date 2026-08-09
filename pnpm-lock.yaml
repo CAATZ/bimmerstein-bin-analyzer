@@ -147,6 +147,9 @@ importers:
       '@binanalyzer/engine':
         specifier: workspace:*
         version: link:../engine
+      '@binanalyzer/families':
+        specifier: workspace:*
+        version: link:../families
       '@binanalyzer/formats':
         specifier: workspace:*
         version: link:../formats

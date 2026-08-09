@@ -12,6 +12,7 @@
   "dependencies": {
     "@binanalyzer/core": "workspace:*",
     "@binanalyzer/engine": "workspace:*",
+    "@binanalyzer/families": "workspace:*",
     "@binanalyzer/formats": "workspace:*"
   },
   "devDependencies": {
