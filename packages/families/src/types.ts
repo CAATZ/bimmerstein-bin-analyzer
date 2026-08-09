@@ -41,6 +41,7 @@ export interface FamilyChecksums {
   correct(bytes: Uint8Array): {
     bytes: Uint8Array;
     report: ChecksumReport;
+    /** Structural: always report what was altered — a data guarantee, not a UI convenience a later refactor may drop. */
     changed: { offset: number; from: number; to: number }[];
   };
 }
