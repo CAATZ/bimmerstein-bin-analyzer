@@ -125,6 +125,7 @@ export async function openProjectFlow(host: PlatformHost): Promise<void> {
     }
   }
   const { droppedMaps, droppedPotentials, droppedAxisEntries, clearedStamps } = actions.applyProject(image, project);
+  actions.runChecksumVerify(image.bytes); // applyProject cleared the old verdict — recompute for this bin
   const dropped = droppedMaps.length + droppedPotentials.length;
   if (dropped > 0) {
     actions.pushToast(

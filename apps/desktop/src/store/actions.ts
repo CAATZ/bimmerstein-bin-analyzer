@@ -90,6 +90,7 @@ export function setBin(image: BinImage): void {
   addressFrame.set('none'); // a new bin is a new frame decision
   framePromptAnswered.set(false);
   proposals.set([]); // a proposal is about maps in the bin that just went away
+  checksumReport.set(undefined); // a new bin is a new checksum verdict — the old one would be fabricated data
   clearUndo();
 }
 
@@ -521,6 +522,7 @@ export function applyProject(image: BinImage, project: Project): ApplyProjectRep
     return next;
   };
   bin.set(image);
+  checksumReport.set(undefined); // a new bin is a new checksum verdict — the old one would be fabricated data
   axisLibrary.set(lib);
   maps.set(keep(project.maps, droppedMaps).map(clearDangling).sort(byAddress));
   potentialMaps.set(keep(project.potentialMaps, droppedPotentials).map(clearDangling)); // ENGINE RANK ORDER — never re-sort

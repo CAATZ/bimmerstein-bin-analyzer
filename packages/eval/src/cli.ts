@@ -690,11 +690,19 @@ export function runAcceptance(repoRoot: string): number {
   try {
     defXml = readFileSync(join(repoRoot, MS41_ACCEPTANCE_DEF), 'utf8');
   } catch {
-    console.log(`accept: no local definition at ${MS41_ACCEPTANCE_DEF} — nothing to check (skipped)`);
+    console.log(`accept: no local definition at ${MS41_ACCEPTANCE_DEF} — skipping the detection cases`);
   }
   let passed = true;
   let checked = 0;
   const skipped: string[] = [];
+
+  // Account for the detection cases the missing def just disabled. Without this
+  // the summary cannot distinguish "4 of 10 ran" from "4 exist", and six gates
+  // would go unrun without appearing anywhere in the output.
+  if (defXml === undefined) {
+    for (const c of MS41_ACCEPTANCE_CASES) skipped.push(`${c.key} (full)`);
+    for (const c of MS41_PARTIAL_ACCEPTANCE_CASES) skipped.push(`${c.key} (partial)`);
+  }
   const record = (v: boolean | undefined): void => {
     if (v === undefined) passed = false;
     else {

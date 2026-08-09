@@ -222,6 +222,50 @@ describe('project save + open (spec §3 sha gate)', () => {
     expect(get(toasts).some((t) => t.kind === 'error')).toBe(true);
   });
 
+  it('openProjectFlow computes a fresh checksum report for the newly opened bin', async () => {
+    const host = new FakeHost();
+    const tuneBytes = ms41TuneImage();
+    const tuneImg = createBinImage(tuneBytes, 'tune.bin');
+    const project = {
+      schemaVersion: 2,
+      bin: { name: 'tune.bin', sha256: tuneImg.sha256, size: tuneImg.size },
+      valueDefaults: { width: 1, signed: false, endianness: 'little' },
+      maps: [],
+      potentialMaps: [],
+    };
+    host.files.set('C:\\proj\\p.binproj.json', JSON.stringify(project));
+    host.files.set('C:\\proj\\tune.bin', tuneBytes);
+    host.openAnswers = ['C:\\proj\\p.binproj.json'];
+    await openProjectFlow(host);
+    const r = get(checksumReport);
+    expect(r).not.toBeUndefined();
+    expect(r?.familyId).toBe('ms41');
+    expect(r?.applies).toBe(true);
+  });
+
+  it('openProjectFlow clears a stale checksum report when the newly opened bin matches no family module', async () => {
+    const host = new FakeHost();
+    // First load a recognised MS41 bin directly so a report is present.
+    host.files.set('C:\\bins\\tune.bin', ms41TuneImage());
+    host.openAnswers = ['C:\\bins\\tune.bin'];
+    expect(await openBinFlow(host)).toBe(true);
+    expect(get(checksumReport)).not.toBeUndefined();
+    // Now open a project pointing at bytes no family module recognises.
+    const img = createBinImage(BYTES, 'dump.bin');
+    const project = {
+      schemaVersion: 2,
+      bin: { name: 'dump.bin', sha256: img.sha256, size: img.size },
+      valueDefaults: { width: 1, signed: false, endianness: 'little' },
+      maps: [],
+      potentialMaps: [],
+    };
+    host.files.set('C:\\proj\\p2.binproj.json', JSON.stringify(project));
+    host.files.set('C:\\proj\\dump.bin', BYTES);
+    host.openAnswers = ['C:\\proj\\p2.binproj.json'];
+    await openProjectFlow(host);
+    expect(get(checksumReport)).toBeUndefined();
+  });
+
   it('toasts dropped axis library entries and cleared stamps on a mismatched-bin load', async () => {
     const host = new FakeHost();
     const smallBytes = new Uint8Array(64);
