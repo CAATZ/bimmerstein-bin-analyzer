@@ -161,3 +161,13 @@ export interface Project {
 
 /** Typed result used across all package boundaries — parsing never throws. */
 export type Result<T, E = string> = { ok: true; value: T } | { ok: false; error: E };
+
+/**
+ * Single source of ECU-family identity. A family is described in two packages —
+ * detection in packages/engine, byte semantics (checksums) in
+ * packages/families — and neither may import the other. Both test their
+ * registries against this list, so adding an id here fails both suites until
+ * both halves exist or explicitly opt out.
+ */
+export const FAMILY_IDS = ['ms41'] as const;
+export type FamilyId = (typeof FAMILY_IDS)[number];
