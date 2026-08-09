@@ -6,10 +6,11 @@ import { fakeDeps } from './helpers.js';
 const names = (ts: Array<{ name: string }>): string[] => ts.map((t) => t.name).sort();
 
 describe('tool registries diverge by mode (spec §8)', () => {
-  it('headless is exactly the Phase-1 ten', () => {
+  it('headless is exactly the Phase-1 ten plus verify_checksums', () => {
     expect(names(HEADLESS_TOOLS)).toEqual([
       'export_definition', 'get_map', 'import_definition', 'list_bins',
       'list_detected_axes', 'list_maps', 'open_bin', 'read_bytes', 'read_map', 'scan_bin',
+      'verify_checksums',
     ]);
   });
 

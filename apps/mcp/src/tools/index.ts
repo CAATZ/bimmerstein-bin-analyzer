@@ -7,6 +7,7 @@ import { getMapTool } from './get-map.js';
 import { readMapTool } from './read-map.js';
 import { readBytesTool } from './read-bytes.js';
 import { listDetectedAxesTool } from './list-detected-axes.js';
+import { verifyChecksumsTool } from './verify-checksums.js';
 import { importDefinitionTool } from './import-definition.js';
 import { exportDefinitionTool } from './export-definition.js';
 import { getSessionTool } from './get-session.js';
@@ -24,6 +25,7 @@ export {
   readMapTool,
   readBytesTool,
   listDetectedAxesTool,
+  verifyChecksumsTool,
   importDefinitionTool,
   exportDefinitionTool,
   getSessionTool,
@@ -47,6 +49,7 @@ export const HEADLESS_TOOLS: ToolSpec[] = [
   readMapTool,
   readBytesTool,
   listDetectedAxesTool,
+  verifyChecksumsTool,
   importDefinitionTool,
   exportDefinitionTool,
 ];
@@ -72,6 +75,7 @@ export const COPILOT_TOOLS: ToolSpec[] = [
   readMapTool,
   readBytesTool,
   listDetectedAxesTool,
+  verifyChecksumsTool,
   importDefinitionTool,
   exportDefinitionTool,
 ];

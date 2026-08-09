@@ -74,6 +74,9 @@ importers:
       '@binanalyzer/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@binanalyzer/families':
+        specifier: workspace:*
+        version: link:../../packages/families
       '@binanalyzer/formats':
         specifier: workspace:*
         version: link:../../packages/formats

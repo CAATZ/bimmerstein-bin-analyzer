@@ -63,7 +63,7 @@ function toolPayload(response: Record<string, unknown>): Record<string, unknown>
 describe('stdio server (real launcher, real JSON-RPC)', () => {
   let binId = '';
 
-  it('initializes and advertises all 10 tools', async () => {
+  it('initializes and advertises all 11 tools', async () => {
     const init = await client.request(1, 'initialize', {
       protocolVersion: '2025-06-18',
       capabilities: {},
@@ -78,7 +78,7 @@ describe('stdio server (real launcher, real JSON-RPC)', () => {
     const tools = (list['result'] as { tools: Array<{ name: string }> }).tools;
     expect(tools.map((t) => t.name).sort()).toEqual([
       'export_definition', 'get_map', 'import_definition', 'list_bins', 'list_detected_axes',
-      'list_maps', 'open_bin', 'read_bytes', 'read_map', 'scan_bin',
+      'list_maps', 'open_bin', 'read_bytes', 'read_map', 'scan_bin', 'verify_checksums',
     ]);
   });
 
