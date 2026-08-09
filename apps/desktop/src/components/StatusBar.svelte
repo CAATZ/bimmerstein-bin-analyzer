@@ -1,6 +1,8 @@
 <!-- apps/desktop/src/components/StatusBar.svelte -->
 <script lang="ts">
-  import { bin, coPilotStatus, scanStatus, selection, viewParams } from '../store/stores.js';
+  import { bin, checksumReport, coPilotStatus, scanStatus, selection, viewParams } from '../store/stores.js';
+
+  let { onShowChecksums }: { onShowChecksums: () => void } = $props();
 </script>
 
 <footer class="status">
@@ -22,6 +24,16 @@
       {:else}Co-pilot: disconnected — retrying
       {/if}
     </span>
+  {/if}
+  {#if $checksumReport}
+    <button
+      class="chip chip-{$checksumReport.valid ? 'connected' : 'disconnected'}"
+      onclick={onShowChecksums}
+    >
+      Checksums: {$checksumReport.valid
+        ? 'OK'
+        : `${$checksumReport.blocks.filter((b) => !b.ok).length} mismatched`}
+    </button>
   {/if}
   <span class="grow"></span>
   {#if $scanStatus.state === 'running'}

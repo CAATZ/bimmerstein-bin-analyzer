@@ -4,6 +4,7 @@
   import Toolbar from './components/Toolbar.svelte';
   import Sidebar from './components/Sidebar.svelte';
   import StatusBar from './components/StatusBar.svelte';
+  import ChecksumDialog from './components/ChecksumDialog.svelte';
   import Toasts from './components/Toasts.svelte';
   import HexdumpView from './views/HexdumpView.svelte';
   import View2d from './views/View2d.svelte';
@@ -27,6 +28,8 @@
   import { mountCoPilot, type CoPilotMount } from './copilot/mount.js';
   import { persistCoPilotConsent } from './store/consent.js';
   import { homeDir, localDataDir } from '@tauri-apps/api/path';
+
+  let showChecksums = $state(false);
 
   function isEditable(target: EventTarget | null): boolean {
     return (
@@ -150,9 +153,12 @@
       {/if}
     </main>
   </div>
-  <StatusBar />
+  <StatusBar onShowChecksums={() => (showChecksums = true)} />
   <Toasts />
   {#if $viewParams.previewOpen}
     <PreviewPanel />
+  {/if}
+  {#if showChecksums}
+    <ChecksumDialog onClose={() => (showChecksums = false)} />
   {/if}
 </div>

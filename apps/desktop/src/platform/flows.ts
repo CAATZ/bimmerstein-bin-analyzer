@@ -41,6 +41,7 @@ export async function loadBinFromPath(host: PlatformHost, path: string): Promise
     }
     actions.setBin(createBinImage(bytes, basename(path)));
     actions.setBinPath(path); // AFTER setBin — setBin clears it
+    actions.runChecksumVerify(bytes); // raw bytes still in hand here
     return true;
   } catch (e) {
     actions.pushToast('error', `Cannot read ${basename(path)}: ${errText(e)}`);

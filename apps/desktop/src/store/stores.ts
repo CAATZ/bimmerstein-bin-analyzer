@@ -1,6 +1,7 @@
 import { writable, type Writable } from 'svelte/store';
 import type { AxisLibEntry, BinImage, MapDef, ValueFormat } from '@binanalyzer/core';
 import type { Region, ScanProgress } from '@binanalyzer/engine';
+import type { ChecksumReport } from '@binanalyzer/families';
 
 /**
  * Single source of truth (spec §7). Views subscribe;
@@ -110,3 +111,6 @@ export type AddressFrame = 'none' | 'ms41full';
 export const addressFrame: Writable<AddressFrame> = writable('none');
 /** True once the full-read frame prompt has been answered (yes OR no) for the loaded bin — a decline sticks until a new bin is loaded. A confirm() FAILURE is not an answer. */
 export const framePromptAnswered: Writable<boolean> = writable(false);
+
+/** Checksum verdict for the loaded bin; undefined until a bin is loaded. */
+export const checksumReport: Writable<ChecksumReport | undefined> = writable(undefined);

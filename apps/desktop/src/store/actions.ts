@@ -2,8 +2,11 @@ import { get } from 'svelte/store';
 import type { AxisDef, AxisLibEntry, BinImage, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
 import { readValue, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
+import type { ChecksumReport } from '@binanalyzer/families';
+import { checksumsFor } from '@binanalyzer/families';
 import {
-  DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, framePromptAnswered, maps, modalOpen, potentialMaps,
+  DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, checksumReport, framePromptAnswered, maps, modalOpen,
+  potentialMaps,
   proposals, regions,
   scanStatus, scrollRequest, selection, toasts, viewParams,
   type Selection, type Toast, type ViewMode,
@@ -68,6 +71,7 @@ export function resetStores(): void {
   addressFrame.set('none');
   framePromptAnswered.set(false);
   proposals.set([]);
+  checksumReport.set(undefined);
   modalDepth = 0;
   modalOpen.set(false);
   clearUndo();
@@ -92,6 +96,19 @@ export function setBin(image: BinImage): void {
 /** Records where the loaded bin came from. Call AFTER setBin, which clears it. */
 export function setBinPath(path: string | null): void {
   binPath.set(path);
+}
+
+export function setChecksumReport(r: ChecksumReport | undefined): void {
+  checksumReport.set(r);
+}
+
+/**
+ * Verify the loaded bytes. Table-driven CRC over ~160 KB is single-digit
+ * milliseconds, so this runs inline on load — no worker needed.
+ */
+export function runChecksumVerify(bytes: Uint8Array): void {
+  const mod = checksumsFor(bytes);
+  setChecksumReport(mod ? mod.verify(bytes) : undefined);
 }
 
 export function setScanRunning(): void {
