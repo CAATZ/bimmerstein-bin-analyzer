@@ -1,7 +1,7 @@
 import type { FamilyChecksums, ChecksumBlock, ChecksumReport } from '../types.js';
 import { crc16 } from '../crc16.js';
 import { trimEnd, u16le } from '../bytes.js';
-import { calEntries, findCalTable } from './cal.js';
+import { calEntries, findCalTable, isCoherentCalTable } from './cal.js';
 
 /**
  * MS41 checksum semantics, transcribed from the patch tooling's reference
@@ -109,8 +109,7 @@ export const ms41Checksums: FamilyChecksums = {
 
   applies(bytes) {
     if (bytes.length !== FULL_ROM_SIZE && bytes.length !== TUNE_SIZE) return false;
-    const start = findCalTable(bytes);
-    return start >= 0 && calEntries(bytes, start).length > 0;
+    return isCoherentCalTable(bytes, findCalTable(bytes));
   },
 
   verify(bytes) {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { crc16 } from '../src/crc16.js';
-import { CAL_MAGIC, calEntries, findCalTable } from '../src/ms41/cal.js';
+import { CAL_MAGIC, calEntries, calWalk, findCalTable } from '../src/ms41/cal.js';
 
 /**
  * Build a minimal image carrying a valid cal table, laid out like real
@@ -50,6 +50,20 @@ describe('MS41 cal table', () => {
     d[start] = 0xff;
     d[start + 1] = 0xff;
     expect(calEntries(d, start)).toEqual([]);
+  });
+
+  it('reports WHY the walk ended, so a coincidence can be told from a real table', () => {
+    // The magic's own first two bytes are entry 0's offset word, so ANY
+    // occurrence of the magic yields at least one entry. Termination is what
+    // separates a real table from a chance match.
+    const { d, start } = imageWithCalTable();
+    expect(calWalk(d, start).terminated).toBe(true);
+
+    // Walk off the end instead of reaching the terminator.
+    const runaway = Uint8Array.from(d);
+    runaway[start + 0x50] = 0x00;
+    runaway[start + 0x51] = 0xf0; // store far past the buffer ⇒ bounds guard, not terminator
+    expect(calWalk(runaway, start).terminated).toBe(false);
   });
 
   it('stops when an entry would point outside the buffer', () => {

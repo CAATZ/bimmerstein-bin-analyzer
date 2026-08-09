@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ms41Checksums } from '../src/ms41/checksums.js';
+import { CAL_MAGIC, calEntries, calWalk, findCalTable } from '../src/ms41/cal.js';
 import { FULL, TUNE, ms41Image } from './fixture.js';
 
 describe('ms41Checksums.applies', () => {
@@ -15,6 +16,28 @@ describe('ms41Checksums.applies', () => {
     expect(ms41Checksums.applies(ms41Image(FULL))).toBe(true);
     expect(ms41Checksums.applies(ms41Image(TUNE))).toBe(true);
   });
+
+  it('rejects a magic sitting in erased flash — one entry is not a table', () => {
+    // The magic's own first two bytes ARE entry 0's offset word, so every
+    // occurrence yields one entry. A magic landing in a 0xFF padding run walks
+    // exactly one and hits the terminator immediately — the single most likely
+    // false positive in a real non-MS41 image, and the old gate accepted it.
+    const d = new Uint8Array(TUNE).fill(0xff);
+    d.set(CAL_MAGIC, 0x1000);
+    expect(calWalk(d, findCalTable(d))).toMatchObject({ terminated: true });
+    expect(calEntries(d, findCalTable(d))).toHaveLength(1);
+    expect(ms41Checksums.applies(d)).toBe(false);
+  });
+
+  it('rejects a walk that never reaches the terminator', () => {
+    // Offsets that keep advancing but never hit 0xFFFF: the walk dies on a
+    // bounds guard or the entry cap, which a real table never does.
+    const d = new Uint8Array(TUNE);
+    for (let i = 0; i < d.length; i++) d[i] = (i * 7) % 251; // no 0xFF anywhere
+    d.set(CAL_MAGIC, 0x1000);
+    expect(calWalk(d, findCalTable(d)).terminated).toBe(false);
+    expect(ms41Checksums.applies(d)).toBe(false);
+  });
 });
 
 describe('ms41Checksums.verify — full ROM', () => {
@@ -22,7 +45,7 @@ describe('ms41Checksums.verify — full ROM', () => {
     const r = ms41Checksums.verify(ms41Image(FULL));
     expect(r.applies).toBe(true);
     expect(r.valid).toBe(true);
-    expect(r.blocks.map((b) => b.id)).toEqual(['boot', 'cal-0']);
+    expect(r.blocks.map((b) => b.id)).toEqual(['boot', 'cal-0', 'cal-1', 'cal-2', 'cal-3']);
     expect(r.blocks.every((b) => b.ok)).toBe(true);
   });
 
@@ -53,7 +76,7 @@ describe('ms41Checksums.verify — 24 KB partial', () => {
   it('evaluates cal only and skips boot/program as out of frame', () => {
     const r = ms41Checksums.verify(ms41Image(TUNE));
     expect(r.valid).toBe(true);
-    expect(r.blocks.map((b) => b.id)).toEqual(['cal-0']);
+    expect(r.blocks.map((b) => b.id)).toEqual(['cal-0', 'cal-1', 'cal-2', 'cal-3']);
     expect(r.skipped.map((s) => s.id).sort()).toEqual(['boot', 'program']);
     for (const s of r.skipped) expect(s.reason).toMatch(/partial/i);
   });
