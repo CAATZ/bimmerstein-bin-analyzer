@@ -1,6 +1,26 @@
-import { checksumsFor } from '@binanalyzer/families';
+import { checksumsFor, type ChecksumReport } from '@binanalyzer/families';
 import { asArgs, reqString } from '../args.js';
 import { err, ok, unknownBin, type ToolSpec } from '../result.js';
+
+/**
+ * What this tool returns when NO family module recognises the image.
+ *
+ * `ChecksumReport.familyId` is a `FamilyId`, so the no-module case cannot be
+ * one: there is no family to name. Declaring the shape instead of writing a
+ * bare object literal keeps the two payloads honest — a field added to
+ * `ChecksumReport` now has to be considered here too, rather than silently
+ * leaving agents with two different shapes for the same tool.
+ */
+type UnrecognisedReport = Omit<ChecksumReport, 'familyId'> & { familyId: null };
+
+const unrecognised = (size: number): UnrecognisedReport => ({
+  familyId: null,
+  applies: false,
+  valid: false,
+  blocks: [],
+  skipped: [],
+  notes: [`No family module recognised this image (${size} bytes).`],
+});
 
 export const verifyChecksumsTool: ToolSpec = {
   name: 'verify_checksums',
@@ -23,16 +43,7 @@ export const verifyChecksumsTool: ToolSpec = {
     if (entry === undefined) return await unknownBin(deps, id.value);
 
     const mod = checksumsFor(entry.bytes);
-    if (mod === undefined) {
-      return ok({
-        familyId: null,
-        applies: false,
-        valid: false,
-        blocks: [],
-        skipped: [],
-        notes: [`No family module recognised this image (${entry.bytes.length} bytes).`],
-      });
-    }
+    if (mod === undefined) return ok(unrecognised(entry.bytes.length));
     return ok(mod.verify(entry.bytes));
   },
 };

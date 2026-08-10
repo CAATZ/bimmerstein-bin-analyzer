@@ -30,9 +30,16 @@
       class="chip chip-{$checksumReport.valid ? 'connected' : 'disconnected'}"
       onclick={onShowChecksums}
     >
+      <!-- `valid` covers only the checksums the family module stands behind —
+           on MS41 the program checksum is always skipped. A bare "OK" would
+           read as "everything checked out", so the count of not-checked blocks
+           rides along; the dialog names them and says why. -->
       Checksums: {$checksumReport.valid
         ? 'OK'
-        : `${$checksumReport.blocks.filter((b) => !b.ok).length} mismatched`}
+        : `${$checksumReport.blocks.filter((b) => !b.ok).length} mismatched`}{$checksumReport.skipped
+        .length > 0
+        ? ` · ${$checksumReport.skipped.length} not checked`
+        : ''}
     </button>
   {/if}
   <span class="grow"></span>

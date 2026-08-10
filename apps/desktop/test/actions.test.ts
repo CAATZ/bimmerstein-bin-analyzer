@@ -368,11 +368,37 @@ describe('binPath', () => {
 });
 
 describe('checksumReport', () => {
-  it('resetStores clears it', () => {
+  const stubReport = (): void =>
     a.setChecksumReport({
       familyId: 'ms41', applies: true, blocks: [], valid: true, skipped: [], notes: [],
     });
+
+  it('resetStores clears it', () => {
+    stubReport();
     a.resetStores();
+    expect(get(checksumReport)).toBeUndefined();
+  });
+
+  // The two clears below are defence in depth: today every caller recomputes a
+  // verdict right after, so the flow tests would still pass without them. They
+  // are what stops a FUTURE caller that forgets to recompute from leaving the
+  // previous bin's verdict on screen beside the new bin's name and sha.
+  it('setBin clears it — a new bin is a new verdict, never the old one', () => {
+    stubReport();
+    a.setBin(createBinImage(new Uint8Array(256), 'other.bin'));
+    expect(get(checksumReport)).toBeUndefined();
+  });
+
+  it('applyProject clears it — a project load brings a new bin too', () => {
+    stubReport();
+    const image = createBinImage(new Uint8Array(256), 'proj.bin');
+    a.applyProject(image, {
+      schemaVersion: 1,
+      bin: { name: image.name, sha256: image.sha256, size: image.size },
+      valueDefaults: { width: 1, signed: false, endianness: 'little' },
+      maps: [],
+      potentialMaps: [],
+    });
     expect(get(checksumReport)).toBeUndefined();
   });
 });
