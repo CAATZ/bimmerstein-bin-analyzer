@@ -171,3 +171,28 @@ export type Result<T, E = string> = { ok: true; value: T } | { ok: false; error:
  */
 export const FAMILY_IDS = ['ms41'] as const;
 export type FamilyId = (typeof FAMILY_IDS)[number];
+
+/**
+ * The drift rule both registries are checked against, in one place so it can be
+ * tested against lists that actually disagree.
+ *
+ * With a single declared family neither suite can drive its own check to a
+ * non-empty result, so each would pass even if the rule were inverted. Sharing
+ * the rule lets core exercise it with synthetic lists while engine and families
+ * each apply it to the registry they own.
+ *
+ * `missing`    — declared in FAMILY_IDS, no implementation, no opt-out.
+ * `undeclared` — an implementation exists for an id core never declared.
+ */
+export function familyCoverageGaps(
+  declared: readonly string[],
+  implemented: readonly string[],
+  optedOut: readonly string[] = []
+): { missing: string[]; undeclared: string[] } {
+  const have = new Set(implemented);
+  const known = new Set(declared);
+  return {
+    missing: declared.filter((id) => !have.has(id) && !optedOut.includes(id)),
+    undeclared: implemented.filter((id) => !known.has(id)),
+  };
+}

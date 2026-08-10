@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FAMILY_IDS } from '@binanalyzer/core';
+import { FAMILY_IDS, familyCoverageGaps } from '@binanalyzer/core';
 import { FAMILY_ANALYZERS } from '../src/family/index.js';
 
 /**
@@ -7,20 +7,21 @@ import { FAMILY_ANALYZERS } from '../src/family/index.js';
  * packages/families. Neither may import the other, so drift is caught by each
  * side testing itself against core's FAMILY_IDS. Adding an id fails both
  * suites until both halves exist or explicitly opt out.
+ *
+ * The rule itself lives in core and is exercised there against lists that
+ * disagree — with one declared family this side can only ever feed it agreeing
+ * lists, so it could not tell a working rule from an inverted one.
  */
 const DETECTION_NOT_IMPLEMENTED: readonly string[] = [];
 
 describe('family coverage (detection side)', () => {
-  it('every FamilyId has an analyzer or an explicit opt-out', () => {
-    const analyzers = new Set(FAMILY_ANALYZERS.map((a) => a.id));
-    const missing = FAMILY_IDS.filter(
-      (id) => !analyzers.has(id) && !DETECTION_NOT_IMPLEMENTED.includes(id)
-    );
-    expect(missing).toEqual([]);
-  });
-
-  it('no analyzer exists for an id core does not declare', () => {
-    const declared = new Set<string>(FAMILY_IDS);
-    expect(FAMILY_ANALYZERS.map((a) => a.id).filter((id) => !declared.has(id))).toEqual([]);
+  it('every FamilyId has an analyzer, and no analyzer claims an undeclared id', () => {
+    expect(
+      familyCoverageGaps(
+        FAMILY_IDS,
+        FAMILY_ANALYZERS.map((a) => a.id),
+        DETECTION_NOT_IMPLEMENTED
+      )
+    ).toEqual({ missing: [], undeclared: [] });
   });
 });
