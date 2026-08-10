@@ -706,8 +706,8 @@ export function runAcceptance(repoRoot: string): number {
   // the summary cannot distinguish "4 of 10 ran" from "4 exist", and six gates
   // would go unrun without appearing anywhere in the output.
   if (defXml === undefined) {
-    for (const c of MS41_ACCEPTANCE_CASES) skipped.push(`${c.key} (full)`);
-    for (const c of MS41_PARTIAL_ACCEPTANCE_CASES) skipped.push(`${c.key} (partial)`);
+    for (const c of MS41_ACCEPTANCE_CASES) skipped.push(`${c.key} (full — no local definition)`);
+    for (const c of MS41_PARTIAL_ACCEPTANCE_CASES) skipped.push(`${c.key} (partial — no local definition)`);
   }
   const record = (v: boolean | undefined): void => {
     if (v === undefined) passed = false;
@@ -724,7 +724,7 @@ export function runAcceptance(repoRoot: string): number {
       try {
         bytes = new Uint8Array(readFileSync(join(repoRoot, 'fixtures', 'ms41', c.bin)));
       } catch {
-        skipped.push(`${c.key} (full)`);
+        skipped.push(`${c.key} (full — no local bin)`);
         continue;
       }
       const { maps, dataBytes } = scanForAcceptance(bytes);
@@ -738,7 +738,7 @@ export function runAcceptance(repoRoot: string): number {
       try {
         bytes = new Uint8Array(readFileSync(join(repoRoot, 'fixtures', 'ms41', 'partial', c.bin)));
       } catch {
-        skipped.push(`${c.key} (partial)`);
+        skipped.push(`${c.key} (partial — no local bin)`);
         continue;
       }
       const label = `${c.key}-partial`;
@@ -761,7 +761,7 @@ export function runAcceptance(repoRoot: string): number {
     try {
       bytes = new Uint8Array(readFileSync(join(repoRoot, 'fixtures', 'ms41', c.bin)));
     } catch {
-      skipped.push(`${c.key} (checksums)`);
+      skipped.push(`${c.key} (checksums — no local bin)`);
       continue;
     }
     const mod = checksumsFor(bytes);
@@ -794,9 +794,13 @@ export function runAcceptance(repoRoot: string): number {
         `  pinned boot=${fmt(c.bootOk)} ${c.okBlocks}/${c.totalBlocks} stale=${stale(c.staleIds)}` +
         `  (skipped ${r.skipped.map((s) => s.id).join(',') || 'none'})`
     );
+    // Notes change what a result MEANS without changing whether it passes —
+    // "boot verification DISABLED" is the most consequential thing this module
+    // can say about the s52 images, and the gate used to swallow it.
+    for (const n of r.notes) console.log(`     note: ${n}`);
   }
 
-  if (skipped.length > 0) console.log(`accept: skipped (no local bin): ${skipped.join(', ')}`);
+  if (skipped.length > 0) console.log(`accept: skipped: ${skipped.join(', ')}`);
   if (checked === 0) {
     console.log('accept: no local real-bin fixtures — nothing to check (skipped)');
     return passed ? 0 : 1;

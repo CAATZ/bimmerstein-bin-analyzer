@@ -8,7 +8,7 @@ import { MS41_PARTIAL_GATE, MS41_PARTIAL_ACCEPTANCE_CASES } from '../src/cli.js'
 import { MS41_CHECKSUM_CASES } from '../src/cli.js';
 import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { isAbsolute, join } from 'node:path';
 
 describe('discoverFixtures', () => {
   it('finds directories containing a bin + matching groundtruth', () => {
@@ -48,6 +48,27 @@ describe('real-bin acceptance (pnpm eval accept)', () => {
     const root = mkdtempSync(join(tmpdir(), 'binacc-'));
     mkdirSync(join(root, 'fixtures', 'ms41'), { recursive: true });
     expect(runAcceptance(root)).toBe(0);
+  });
+
+  it('accounts for EVERY case it could not run, so the summary cannot read as full coverage', () => {
+    // Exit 0 alone would still hold if the checksum loop were short-circuited
+    // by the missing-definition early return again — the skip lines are what
+    // prove each of the ten cases was considered and named.
+    const root = mkdtempSync(join(tmpdir(), 'binacc-'));
+    mkdirSync(join(root, 'fixtures', 'ms41'), { recursive: true });
+    const lines: string[] = [];
+    const log = console.log;
+    console.log = (...a: unknown[]): void => void lines.push(a.join(' '));
+    try {
+      expect(runAcceptance(root)).toBe(0);
+    } finally {
+      console.log = log;
+    }
+    const out = lines.join('\n');
+    for (const c of MS41_CHECKSUM_CASES) expect(out).toContain(`${c.key} (checksums`);
+    for (const c of MS41_ACCEPTANCE_CASES) expect(out).toContain(`${c.key} (full`);
+    for (const c of MS41_PARTIAL_ACCEPTANCE_CASES) expect(out).toContain(`${c.key} (partial`);
+    expect(out).toContain('nothing to check');
   });
 
   it('binds EVERY MS41_PARTIAL_GATE entry to a partial acceptance case', () => {
@@ -135,7 +156,14 @@ describe('real-bin checksum acceptance', () => {
   });
 
   it('every case names a bin path under fixtures/ms41', () => {
-    for (const c of MS41_CHECKSUM_CASES) expect(c.bin).toMatch(/\.bin$/);
+    for (const c of MS41_CHECKSUM_CASES) {
+      expect(c.bin).toMatch(/\.bin$/);
+      // The paths are joined onto fixtures/ms41, so a traversal segment or an
+      // absolute path would silently read from somewhere else entirely — which
+      // "under fixtures/ms41" is exactly the claim this test makes.
+      expect(c.bin).not.toMatch(/(^|[\\/])\.\.([\\/]|$)/);
+      expect(isAbsolute(c.bin)).toBe(false);
+    }
   });
 
   it('every case pins WHICH blocks are stale, consistently with how many', () => {
