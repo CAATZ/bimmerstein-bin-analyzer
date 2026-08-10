@@ -7,6 +7,17 @@
  */
 const POLY = 0xa001;
 
+/**
+ * The table build below uses a two-register (`n` / `n2`) bit-serial form rather
+ * than the single-register `c = c & 1 ? (c >> 1) ^ POLY : c >> 1` you will find
+ * in most references. That is deliberate: it mirrors the reference
+ * implementation this module was transcribed from, so the two can be diffed
+ * line by line. The forms are algebraically equivalent — `n2` just carries the
+ * input bits that the single-register version keeps in the low bits of `c` —
+ * and the equivalence is pinned by the published CRC-16/ARC check value
+ * (0xBB3D for "123456789"), which is an external constant, not a self-check.
+ */
+
 const TABLE: readonly number[] = (() => {
   const t: number[] = [];
   for (let i = 0; i < 256; i++) {

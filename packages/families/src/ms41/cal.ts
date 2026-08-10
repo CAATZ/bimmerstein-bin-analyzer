@@ -86,6 +86,10 @@ export function calEntries(d: Uint8Array, start: number): CalEntry[] {
  * A genuine table walks several entries and stops on its terminator.
  */
 export function isCoherentCalTable(d: Uint8Array, start: number): boolean {
-  const w = calWalk(d, start);
+  return isCoherentWalk(calWalk(d, start));
+}
+
+/** The same judgement on a walk you already have — so callers need not re-walk. */
+export function isCoherentWalk(w: CalWalk): boolean {
   return w.terminated && w.entries.length >= MIN_ENTRIES;
 }

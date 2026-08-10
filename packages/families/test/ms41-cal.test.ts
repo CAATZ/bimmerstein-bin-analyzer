@@ -41,15 +41,19 @@ describe('MS41 cal table', () => {
     expect(e.calc).toBe(crc16(d.subarray(start, start + 0x4e), 0x1234));
   });
 
-  it('stops on a 0xFFFF offset rather than running past the table', () => {
+  it('yields nothing when the FIRST offset word is already the terminator', () => {
     const { d, start } = imageWithCalTable();
+    // Entry 0's offset word is read at `pos === start`, so a 0xFFFF there ends
+    // the walk before a single entry exists — the name says that rather than
+    // implying a mid-walk stop.
     // Overwrites d[start]/d[start+1], which also destroys the magic's first
     // two bytes — intentional: this test calls calEntries(d, start) directly
     // with an explicit `start` rather than locating it via findCalTable, so
-    // an intact magic is not needed here. Make entry 0 itself the terminator.
+    // an intact magic is not needed here.
     d[start] = 0xff;
     d[start + 1] = 0xff;
     expect(calEntries(d, start)).toEqual([]);
+    expect(calWalk(d, start).terminated).toBe(true);
   });
 
   it('reports WHY the walk ended, so a coincidence can be told from a real table', () => {
@@ -64,6 +68,32 @@ describe('MS41 cal table', () => {
     runaway[start + 0x50] = 0x00;
     runaway[start + 0x51] = 0xf0; // store far past the buffer ⇒ bounds guard, not terminator
     expect(calWalk(runaway, start).terminated).toBe(false);
+  });
+
+  it('stops when an entry would move BACKWARDS', () => {
+    const { d, start } = imageWithCalTable();
+    // Entry 0 ends at start+0x4E, so the walk resumes at start+0x50. Point the
+    // next entry behind that and it must stop rather than loop or re-cover
+    // ground it has already checksummed.
+    d[start + 0x50] = 0x10;
+    d[start + 0x51] = 0x00; // store = start + 0x10, which is < pos
+    const w = calWalk(d, start);
+    expect(w.entries).toHaveLength(1);
+    expect(w.terminated).toBe(false);
+  });
+
+  it('stops at the 20-entry cap when offsets keep advancing without a terminator', () => {
+    // Offsets that step forward forever: the cap is the only thing that ends
+    // this walk, so it stays bounded and reports itself unterminated.
+    const d = new Uint8Array(0x400);
+    for (let k = 0; k < 30; k++) {
+      const pos = 4 * k; // entry k covers [pos, pos + 2), next pos = pos + 4
+      d[pos] = (pos + 2) & 0xff;
+      d[pos + 1] = ((pos + 2) >>> 8) & 0xff;
+    }
+    const w = calWalk(d, 0);
+    expect(w.entries).toHaveLength(20);
+    expect(w.terminated).toBe(false);
   });
 
   it('stops when an entry would point outside the buffer', () => {

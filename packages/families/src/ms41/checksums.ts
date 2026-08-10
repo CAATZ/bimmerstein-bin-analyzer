@@ -1,7 +1,7 @@
 import type { FamilyChecksums, ChecksumBlock, ChecksumReport } from '../types.js';
 import { crc16 } from '../crc16.js';
 import { trimEnd, u16le } from '../bytes.js';
-import { calEntries, findCalTable, isCoherentCalTable } from './cal.js';
+import { calEntries, calWalk, findCalTable, isCoherentCalTable, isCoherentWalk, type CalEntry } from './cal.js';
 
 /**
  * MS41 checksum semantics, transcribed from the patch tooling's reference
@@ -78,8 +78,9 @@ function switchNote(d: Uint8Array): string {
   return `Boot verification switch is an unrecognised value (${hex(SWITCH_ADDR, 5)}=${hex(b, 2)}).`;
 }
 
-function calBlocks(d: Uint8Array, start: number): ChecksumBlock[] {
-  return calEntries(d, start).map((e, i) => {
+
+function calBlocks(d: Uint8Array, entries: readonly CalEntry[]): ChecksumBlock[] {
+  return entries.map((e, i) => {
     const stored = u16le(d, e.store);
     return {
       id: `cal-${i}`,
@@ -104,76 +105,91 @@ function inapplicable(): ChecksumReport {
   };
 }
 
+const recognisedSize = (n: number): boolean => n === FULL_ROM_SIZE || n === TUNE_SIZE;
+
+function appliesTo(bytes: Uint8Array): boolean {
+  return recognisedSize(bytes.length) && isCoherentCalTable(bytes, findCalTable(bytes));
+}
+
+function verifyImage(bytes: Uint8Array): ChecksumReport {
+  if (!recognisedSize(bytes.length)) return inapplicable();
+  // ONE walk serves both the activation gate and the calibration blocks.
+  const walk = calWalk(bytes, findCalTable(bytes));
+  if (!isCoherentWalk(walk)) return inapplicable();
+
+  const blocks: ChecksumBlock[] = [];
+  const skipped: { id: string; reason: string }[] = [];
+  const notes: string[] = [];
+
+  if (bytes.length === FULL_ROM_SIZE) {
+    blocks.push(bootBlock(bytes));
+    const pc = programComputed(bytes);
+    const ps = u16le(bytes, PROG_STORE);
+    skipped.push({
+      id: 'program',
+      reason: `${PROGRAM_SKIP_REASON} — stored ${hex(ps)}, computed ${hex(pc)}`,
+    });
+    notes.push(switchNote(bytes));
+  } else {
+    skipped.push({ id: 'boot', reason: 'lives outside a 24 KB partial' });
+    skipped.push({ id: 'program', reason: 'lives outside a 24 KB partial' });
+    notes.push('24 KB partial: the calibration table is the only checksum present, and the only one a partial write must fix.');
+  }
+
+  blocks.push(...calBlocks(bytes, walk.entries));
+  return {
+    familyId: 'ms41',
+    applies: true,
+    blocks,
+    valid: blocks.length > 0 && blocks.every((b) => b.ok),
+    skipped,
+    notes,
+  };
+}
+
+function correctImage(bytes: Uint8Array): {
+  bytes: Uint8Array;
+  report: ChecksumReport;
+  changed: { offset: number; from: number; to: number }[];
+} {
+  const out = new Uint8Array(bytes);
+  const changed: { offset: number; from: number; to: number }[] = [];
+  if (!appliesTo(out)) return { bytes: out, report: inapplicable(), changed };
+
+  const write16 = (at: number, v: number): void => {
+    for (const [i, b] of [v & 0xff, (v >>> 8) & 0xff].entries()) {
+      if (out[at + i] !== b) {
+        changed.push({ offset: at + i, from: out[at + i]!, to: b });
+        out[at + i] = b;
+      }
+    }
+  };
+
+  // Boot (full ROM only). The PROGRAM checksum is deliberately never written —
+  // its layout is unconfirmed for MS41.3 and the reference tooling always
+  // leaves it alone.
+  if (out.length === FULL_ROM_SIZE) {
+    const b = bootBlock(out);
+    if (!b.ok) write16(BOOT_STORE, b.computed);
+  }
+
+  // Calibration table — present in both framings, recomputed from the FINAL
+  // image so an earlier repair is included.
+  for (const e of calEntries(out, findCalTable(out))) {
+    if (u16le(out, e.store) !== e.calc) write16(e.store, e.calc);
+  }
+
+  return { bytes: out, report: verifyImage(out), changed };
+}
+
+/**
+ * Plain function references, not object methods: nothing here depends on
+ * `this`, so destructuring the module or passing a method as a callback stays
+ * safe.
+ */
 export const ms41Checksums: FamilyChecksums = {
   familyId: 'ms41',
-
-  applies(bytes) {
-    if (bytes.length !== FULL_ROM_SIZE && bytes.length !== TUNE_SIZE) return false;
-    return isCoherentCalTable(bytes, findCalTable(bytes));
-  },
-
-  verify(bytes) {
-    if (!this.applies(bytes)) return inapplicable();
-    const start = findCalTable(bytes);
-    const blocks: ChecksumBlock[] = [];
-    const skipped: { id: string; reason: string }[] = [];
-    const notes: string[] = [];
-
-    if (bytes.length === FULL_ROM_SIZE) {
-      blocks.push(bootBlock(bytes));
-      const pc = programComputed(bytes);
-      const ps = u16le(bytes, PROG_STORE);
-      skipped.push({
-        id: 'program',
-        reason: `${PROGRAM_SKIP_REASON} — stored ${hex(ps)}, computed ${hex(pc)}`,
-      });
-      notes.push(switchNote(bytes));
-    } else {
-      skipped.push({ id: 'boot', reason: 'lives outside a 24 KB partial' });
-      skipped.push({ id: 'program', reason: 'lives outside a 24 KB partial' });
-      notes.push('24 KB partial: the calibration table is the only checksum present, and the only one a partial write must fix.');
-    }
-
-    blocks.push(...calBlocks(bytes, start));
-    return {
-      familyId: 'ms41',
-      applies: true,
-      blocks,
-      valid: blocks.length > 0 && blocks.every((b) => b.ok),
-      skipped,
-      notes,
-    };
-  },
-
-  correct(bytes) {
-    const out = new Uint8Array(bytes);
-    const changed: { offset: number; from: number; to: number }[] = [];
-    if (!this.applies(out)) return { bytes: out, report: inapplicable(), changed };
-
-    const write16 = (at: number, v: number): void => {
-      for (const [i, b] of [v & 0xff, (v >>> 8) & 0xff].entries()) {
-        if (out[at + i] !== b) {
-          changed.push({ offset: at + i, from: out[at + i]!, to: b });
-          out[at + i] = b;
-        }
-      }
-    };
-
-    // Boot (full ROM only). The PROGRAM checksum is deliberately never written —
-    // its layout is unconfirmed for MS41.3 and the reference tooling always
-    // leaves it alone.
-    if (out.length === FULL_ROM_SIZE) {
-      const b = bootBlock(out);
-      if (!b.ok) write16(BOOT_STORE, b.computed);
-    }
-
-    // Calibration table — present in both framings, recomputed from the FINAL
-    // image so an earlier repair is included.
-    const start = findCalTable(out);
-    for (const e of calEntries(out, start)) {
-      if (u16le(out, e.store) !== e.calc) write16(e.store, e.calc);
-    }
-
-    return { bytes: out, report: this.verify(out), changed };
-  },
+  applies: appliesTo,
+  verify: verifyImage,
+  correct: correctImage,
 };

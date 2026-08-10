@@ -1,8 +1,16 @@
-export * from './crc16.js';
-export * from './bytes.js';
-export * from './types.js';
-export * from './ms41/cal.js';
-export { ms41Checksums, FULL_ROM_SIZE, TUNE_SIZE } from './ms41/checksums.js';
+/**
+ * The package's public surface, listed rather than re-exported wholesale.
+ *
+ * Consumers need the capability contract, the registry, and the two byte
+ * primitives an app needs to construct or reason about an MS41 image. The walk
+ * internals (findCalTable, calWalk, calEntries, isCoherentCalTable, the byte
+ * readers, the size constants) stay module-private so Part B's write path
+ * cannot quietly couple to them — when it needs one, exporting it should be a
+ * deliberate decision with a reason, not an accident of `export *`.
+ */
+export { crc16 } from './crc16.js';
+export { CAL_MAGIC } from './ms41/cal.js';
+export type { ChecksumBlock, ChecksumReport, FamilyChecksums } from './types.js';
 
 import type { FamilyChecksums } from './types.js';
 import { ms41Checksums } from './ms41/checksums.js';
