@@ -31,6 +31,11 @@ const CAL_STORES = [0x4e, 0x80, 0xb0, 0xe0] as const;
  * This fixture is self-consistent BY CONSTRUCTION — it proves round-trip and
  * guards regressions, it does NOT validate the algorithm. That is the real-bin
  * cross-check's job (Task 8).
+ *
+ * NOTE — near-identical 24 KB builders live in `apps/desktop/test/ms41-image.ts`
+ * and `apps/mcp/test/verify-checksums.test.ts`, because neither app may import
+ * this file across the package boundary. Keep the three in step. They do not
+ * drift silently: tightening the activation gate failed all of them in one run.
  */
 export function ms41Image(size: typeof FULL | typeof TUNE): Uint8Array {
   const d = new Uint8Array(size);

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createBinImage } from '@binanalyzer/core';
 import type { MapDef } from '@binanalyzer/core';
 import { importRomRaiderXml } from '@binanalyzer/formats';
-import { CAL_MAGIC, crc16 } from '@binanalyzer/families';
+import { ms41TuneImage } from './ms41-image.js';
 import * as a from '../src/store/actions.js';
 import { addressFrame, bin, binPath, checksumReport, maps, potentialMaps, toasts } from '../src/store/stores.js';
 import { basename, dirname, joinPath, stemOf, type PlatformHost } from '../src/platform/host.js';
@@ -57,44 +57,6 @@ class FakeHost implements PlatformHost {
 }
 
 const BYTES = Uint8Array.from({ length: 64 }, (_, i) => i);
-
-/**
- * A 24 KB (TUNE_SIZE) MS41-shaped image with a single valid cal entry, built
- * locally the same way packages/families/test/fixture.ts's ms41Image(TUNE)
- * does — but via the @binanalyzer/families package entry point only, never
- * by importing that test helper directly (it is not a public entry point).
- */
-function ms41TuneImage(): Uint8Array {
-  const size = 24 * 1024;
-  const d = new Uint8Array(size);
-  for (let i = 0; i < size; i++) d[i] = (i * 7) % 251;
-  const start = 0x1000;
-  d.set(CAL_MAGIC, start);
-  d[start + 0x0e] = 0x12; // init BE hi
-  d[start + 0x0f] = 0x34; // init BE lo
-  // Four entries: the activation gate rejects a terminating walk shorter than
-  // that, because a lone entry is what a magic landing in erased flash produces.
-  // Entry 0's offset word is the magic itself (0x004E); the rest follow at the
-  // previous store + 2, and the walk ends on the 0xFFFF terminator.
-  const stores = [0x4e, 0x80, 0xb0, 0xe0];
-  for (let i = 1; i < stores.length; i++) {
-    const at = start + stores[i - 1]! + 2;
-    d[at] = stores[i]! & 0xff;
-    d[at + 1] = (stores[i]! >>> 8) & 0xff;
-  }
-  const end = start + stores[stores.length - 1]! + 2;
-  d[end] = 0xff;
-  d[end + 1] = 0xff;
-  let from = start;
-  for (const s of stores) {
-    const store = start + s;
-    const calc = crc16(d.subarray(from, store), 0x1234);
-    d[store] = calc & 0xff;
-    d[store + 1] = (calc >>> 8) & 0xff;
-    from = store + 2;
-  }
-  return d;
-}
 
 function confirmedMap(id: string, address: number): MapDef {
   return {

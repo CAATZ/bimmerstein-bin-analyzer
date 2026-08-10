@@ -5,10 +5,17 @@ import { openBinTool } from '../src/tools/index.js';
 import { verifyChecksumsTool } from '../src/tools/verify-checksums.js';
 
 /**
- * A 24 KB (TUNE_SIZE) MS41-shaped image with a single valid cal entry, built
- * locally the same way apps/desktop/test/checksums.test.ts's ms41TuneImage()
- * does — via the @binanalyzer/families package entry point only, never by
- * importing packages/families/test/ directly (it is not a public entry point).
+ * A 24 KB MS41-shaped image the checksum module recognises, built from the
+ * package's public primitives — never by importing packages/families/test/,
+ * which is not an entry point this app may reach across.
+ *
+ * NOTE — near-identical builders live in `apps/desktop/test/ms41-image.ts` and
+ * `packages/families/test/fixture.ts`. Three copies is what package boundaries
+ * cost here; keep them in step. They do not drift silently: tightening the
+ * activation gate failed all of them in one run.
+ *
+ * Four entries because the gate rejects a shorter terminating walk — a lone
+ * entry is what a magic landing in erased flash produces.
  */
 function ms41TuneImage(): Uint8Array {
   const size = 24 * 1024;
