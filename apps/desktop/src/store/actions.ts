@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import type { AxisDef, AxisLibEntry, BinImage, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
-import { applyEdit, quantise, readValue, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
+import { applyEdit, quantise, readValue, toPhysical, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
 import type { ChecksumReport } from '@binanalyzer/families';
 import { checksumsFor } from '@binanalyzer/families';
@@ -178,6 +178,53 @@ export function editCell(
   workingBytes.set(working);
   editJournal.set(journal);
   return { ok: true, physical: q.physical, clamped: q.clamped };
+}
+
+export type RegionOp =
+  | { kind: 'step'; steps: number }
+  | { kind: 'percent'; percent: number }
+  | { kind: 'set'; physical: number };
+
+/**
+ * Apply one operation across a set of cells as a SINGLE undo entry.
+ *
+ * `moved` counts cells whose stored byte actually changed — a small percentage
+ * on a coarse table can round to no change, and saying "4 cells changed" when
+ * none did would be a lie the user cannot see.
+ */
+export function applyRegionDelta(
+  m: MapDef,
+  cells: readonly { row: number; col: number }[],
+  op: RegionOp
+): { moved: number; clamped: number } {
+  const image = get(bin);
+  const working = get(workingBytes);
+  if (image === null || working === null) return { moved: 0, clamped: 0 };
+  let moved = 0;
+  let clamped = 0;
+  undoTransaction('edit region', () => {
+    const journal = get(editJournal);
+    for (const c of cells) {
+      const offset = cellOffset(m, c.row, c.col);
+      if (offset < 0 || offset + m.format.width > working.length) continue;
+      const before = readValue(working, offset, m.format);
+      const target =
+        op.kind === 'step'
+          ? toPhysical(before + op.steps, m.scaling)
+          : op.kind === 'percent'
+            ? toPhysical(before, m.scaling) * (1 + op.percent / 100)
+            : op.physical;
+      const q = quantise(target, m.scaling, m.format);
+      if (!q.editable) continue;
+      if (q.clamped) clamped++;
+      if (q.stored === before) continue;
+      applyEdit({ working, original: image.bytes, journal, offset, format: m.format, raw: q.stored });
+      moved++;
+    }
+    workingBytes.set(working);
+    editJournal.set(journal);
+  });
+  return { moved, clamped };
 }
 
 export function setSelection(start: number, end: number, cols?: number): void {

@@ -126,3 +126,6 @@ export const framePromptAnswered: Writable<boolean> = writable(false);
 
 /** Checksum verdict for the loaded bin; undefined until a bin is loaded. */
 export const checksumReport: Writable<ChecksumReport | undefined> = writable(undefined);
+
+/** F11: show the ORIGINAL (pre-edit) value instead of the working one where edited (Task 8). */
+export const showOriginal: Writable<boolean> = writable(false);

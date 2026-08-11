@@ -18,7 +18,8 @@
   import { isCurveShaped } from './lib/curvedata.js';
   import { isSwitch } from './lib/switchdata.js';
   import * as actions from './store/actions.js';
-  import { bin, maps, modalOpen, potentialMaps, selection, viewParams } from './store/stores.js';
+  import type { MapDef } from '@binanalyzer/core';
+  import { bin, maps, modalOpen, potentialMaps, selection, showOriginal, viewParams } from './store/stores.js';
   import { tauriHost } from './platform/tauri.js';
   import { loadBinFromPath, saveProjectFlow } from './platform/flows.js';
   import { runScan } from './worker/controller.js';
@@ -36,6 +37,21 @@
       target instanceof HTMLElement &&
       (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
     );
+  }
+
+  /** '+'/'-' (spec 2026-08-09-map-value-editing): step every cell of the map
+   *  currently shown in the map view by one raw LSB, as one undo entry. */
+  function stepSelectedMapValues(steps: 1 | -1): void {
+    const sel = $selection;
+    if (sel?.mapId === undefined) return;
+    const m: MapDef | undefined = [...$maps, ...$potentialMaps].find((x) => x.id === sel.mapId);
+    if (m === undefined) return;
+    const cells: { row: number; col: number }[] = [];
+    for (let row = 0; row < m.rows; row++) {
+      for (let col = 0; col < m.cols; col++) cells.push({ row, col });
+    }
+    const { moved, clamped } = actions.applyRegionDelta(m, cells, { kind: 'step', steps });
+    actions.pushToast('info', `${moved} cells changed${clamped > 0 ? `, ${clamped} clamped` : ''}`);
   }
 
   function onKeydown(e: KeyboardEvent): void {
@@ -64,6 +80,9 @@
       case 'toggle-preview': actions.togglePreview(); break;
       case 'undo': undo(); break;
       case 'redo': redo(); break;
+      case 'value-inc': stepSelectedMapValues(1); break;
+      case 'value-dec': stepSelectedMapValues(-1); break;
+      case 'toggle-original': showOriginal.update((v) => !v); break;
     }
   }
 

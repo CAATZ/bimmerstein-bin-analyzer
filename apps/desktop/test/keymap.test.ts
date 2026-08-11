@@ -40,10 +40,17 @@ describe('resolveKey — the frozen v1 map (spec §7)', () => {
     expect(resolveKey(key({ key: 'b' }))).toBeUndefined();
   });
 
-  it('RESERVED v2 keys resolve to nothing: + - F11', () => {
-    expect(resolveKey(key({ key: '+' }))).toBeUndefined();
-    expect(resolveKey(key({ key: '-' }))).toBeUndefined();
-    expect(resolveKey(key({ key: 'F11' }))).toBeUndefined();
+  it('binds the keys v1 reserved for v2', () => {
+    const base = { ctrl: false, shift: false, alt: false, meta: false, inEditable: false };
+    expect(resolveKey({ ...base, key: '+' })).toBe('value-inc');
+    expect(resolveKey({ ...base, key: '-' })).toBe('value-dec');
+    expect(resolveKey({ ...base, key: 'F11' })).toBe('toggle-original');
+  });
+
+  it('still ignores them while typing in a field', () => {
+    const base = { ctrl: false, shift: false, alt: false, meta: false, inEditable: true };
+    expect(resolveKey({ ...base, key: '+' })).toBeUndefined();
+    expect(resolveKey({ ...base, key: 'F11' })).toBeUndefined();
   });
 
   it('suppressed while typing in an editable control', () => {
