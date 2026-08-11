@@ -2,8 +2,9 @@
 <script lang="ts">
   import { formatPhysical } from '@binanalyzer/core';
   import type { MapDef } from '@binanalyzer/core';
-  import { maps, potentialMaps, selection, workingBytes } from '../store/stores.js';
+  import { cellRange, editJournal, maps, potentialMaps, selection, showOriginal, workingBytes } from '../store/stores.js';
   import { axisLabels, gridFromMap } from '../lib/griddata.js';
+  import { isCellChanged, originalGrid } from '../lib/diffcells.js';
   import * as actions from '../store/actions.js';
 
   const map = $derived.by((): MapDef | undefined => {
@@ -12,9 +13,10 @@
     return [...$maps, ...$potentialMaps].find((m) => m.id === sel.mapId);
   });
   const grid = $derived.by(() => {
-    const wb = $workingBytes;
     const m = map;
-    return wb && m ? gridFromMap(wb, m) : null;
+    const w = $workingBytes;
+    if (m === undefined || w === null) return null;
+    return $showOriginal ? originalGrid(w, $editJournal, m) : gridFromMap(w, m);
   });
   const xLabels = $derived.by((): string[] => {
     const wb = $workingBytes;
@@ -29,29 +31,60 @@
     return axisLabels(wb, m.yAxis, m.orientation === 'row-major' ? m.rows : m.cols);
   });
 
-  // Cell selection (spec §7 "cell selection") — view-local display state only;
-  // nothing else in the app needs it, so it stays here. Double-click opens an
-  // in-cell editor (below); selection alone is still read-only.
-  let selectedCell = $state<{ r: number; c: number } | null>(null);
+  // Cell RANGE selection (2026-08-09 amendment) — lives in the store
+  // (../store/stores.js `cellRange`), not view-local `$state`: App.svelte's
+  // global `+`/`-` handlers need to read it too, to bound a step to the cells
+  // the user actually picked instead of the whole map. Double-click still
+  // opens the in-cell editor (below), independent of the range.
   let shownMapId: string | undefined = $state(undefined);
   $effect(() => {
-    // Clear the cell selection whenever the shown map changes.
+    // Clear the range whenever the shown map changes.
     if (map?.id !== shownMapId) {
       shownMapId = map?.id;
-      selectedCell = null;
+      actions.clearCellRange();
     }
   });
+
+  /** Cells covered by the current range, as a fast membership set for the grid — empty when the range belongs to a different map (or there is none). */
+  const rangeCells = $derived.by((): Set<string> => {
+    const cr = $cellRange;
+    const m = map;
+    if (cr === null || m === undefined || cr.mapId !== m.id) return new Set();
+    return new Set(actions.cellsInRange(cr).map((c) => `${c.row},${c.col}`));
+  });
+
+  function inRange(r: number, c: number): boolean {
+    return rangeCells.has(`${r},${c}`);
+  }
+
+  /** Plain click sets a 1×1 range; shift-click extends it from the existing anchor. */
+  function clickCell(r: number, c: number, shiftKey: boolean): void {
+    const m = map;
+    if (m === undefined) return;
+    const cr = $cellRange;
+    if (shiftKey && cr !== null && cr.mapId === m.id) {
+      actions.setCellRange(m.id, cr.r0, cr.c0, r, c);
+    } else {
+      actions.setCellRange(m.id, r, c, r, c);
+    }
+  }
+
+  // Info panel shows the range's FOCUS cell (r1,c1) — the far corner of a drag,
+  // or the single clicked cell for a 1×1 range.
   const selectedInfo = $derived.by(() => {
     const g = grid;
-    const c = selectedCell;
+    const cr = $cellRange;
     const m = map;
-    if (!g || !c || !m || c.r >= g.rows || c.c >= g.cols) return null;
-    const raw = g.values[c.r]![c.c]!;
+    if (!g || !cr || !m || cr.mapId !== m.id) return null;
+    const r = cr.r1;
+    const c = cr.c1;
+    if (r < 0 || c < 0 || r >= g.rows || c >= g.cols) return null;
+    const raw = g.values[r]![c]!;
     return {
       raw,
       phys: formatPhysical(raw, m.scaling),
-      x: xLabels[c.c] ?? String(c.c),
-      y: yLabels[c.r] ?? String(c.r),
+      x: xLabels[c] ?? String(c),
+      y: yLabels[r] ?? String(r),
     };
   });
 
@@ -97,6 +130,9 @@
           (raw {selectedInfo.raw})
         </span>
       {/if}
+      {#if $showOriginal}
+        <span class="origbadge">showing ORIGINAL values (F11)</span>
+      {/if}
     </header>
     {#if map.scaling.rawExpression !== undefined}
       <div class="banner">
@@ -119,8 +155,9 @@
               <th>{yLabels[r] ?? String(r)}</th>
               {#each row as v, c (c)}
                 <td
-                  class:sel={selectedCell?.r === r && selectedCell?.c === c}
-                  onclick={() => (selectedCell = { r, c })}
+                  class:inrange={inRange(r, c)}
+                  class:changed={isCellChanged($editJournal, actions.cellOffset(map, r, c), map.format.width)}
+                  onclick={(ev) => clickCell(r, c, ev.shiftKey)}
                   ondblclick={() => beginEdit(r, c)}
                 >{#if editing?.r === r && editing?.c === c}<input
                       class="celledit"
@@ -162,13 +199,24 @@
     font-size: 12px;
     font-family: Consolas, monospace;
   }
+  .origbadge {
+    font-size: 12px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: #4a3a17;
+    border-left: 3px solid var(--warn);
+  }
   td {
     cursor: cell;
   }
-  td.sel {
+  td.inrange {
+    /* Outline only — no background — so a changed cell inside a range still
+       shows td.changed's amber background underneath, legible as both. */
     outline: 2px solid var(--accent);
     outline-offset: -2px;
-    background: #2a3f63;
+  }
+  td.changed {
+    background: #3a2f14;
   }
   .celledit {
     width: 6em;

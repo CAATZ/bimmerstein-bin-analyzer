@@ -2,13 +2,14 @@
 <script lang="ts">
   import type { ValueFormat } from '@binanalyzer/core';
   import { readValue } from '@binanalyzer/core';
-  import { bin, maps, potentialMaps, regions, scrollRequest, selection, viewParams, workingBytes } from '../store/stores.js';
+  import { bin, editJournal, maps, potentialMaps, regions, scrollRequest, selection, viewParams, workingBytes } from '../store/stores.js';
   import * as actions from '../store/actions.js';
   import {
     barFraction, bytesPerRow, cellAtPoint, cellOfOffset, chipsForRows, defaultRawRange,
     hexCell, offsetOfCell, regionKindAt, rowCount, rowOfOffset, visibleRows, type GridGeometry,
   } from '../lib/hexlayout.js';
   import { snapSelection } from '../lib/snap.js';
+  import { isCellChanged } from '../lib/diffcells.js';
 
   const ROW_H = 20;
   const GUTTER_W = 88;
@@ -71,6 +72,12 @@
         const off = offsetOfCell(g, row, col);
         if (off + g.width > image.size) break;
         const x = GUTTER_W + col * cellWidth;
+        // Diff highlight (Task 8) — same td.changed background as MapView; any
+        // byte of a multi-byte cell counts, per isCellChanged's per-byte journal.
+        if (isCellChanged($editJournal, off, g.width)) {
+          ctx.fillStyle = '#3a2f14';
+          ctx.fillRect(x, y, cellWidth, ROW_H);
+        }
         const raw = readValue(wb, off, txtFmt);
         const value = fmt.float === true ? readValue(wb, off, fmt) : raw;
         // value bar (bottom-anchored)

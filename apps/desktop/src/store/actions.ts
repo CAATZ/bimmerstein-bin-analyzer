@@ -5,12 +5,13 @@ import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
 import type { ChecksumReport } from '@binanalyzer/families';
 import { checksumsFor } from '@binanalyzer/families';
 import {
-  DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, checksumReport, editJournal, framePromptAnswered, maps,
+  DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, cellRange, checksumReport, editJournal, framePromptAnswered,
+  maps,
   modalOpen,
   potentialMaps,
   proposals, regions,
   scanStatus, scrollRequest, selection, toasts, viewParams, workingBytes,
-  type Selection, type Toast, type ViewMode,
+  type CellRange, type Selection, type Toast, type ViewMode,
 } from './stores.js';
 import { detachedAxis, libraryAxis, stampAxis } from '../lib/axislib.js';
 import { clearUndo, pushUndo, undoTransaction } from './undo.js';
@@ -75,6 +76,7 @@ export function resetStores(): void {
   checksumReport.set(undefined);
   workingBytes.set(null);
   editJournal.set(new Map());
+  cellRange.set(null);
   modalDepth = 0;
   modalOpen.set(false);
   clearUndo();
@@ -96,6 +98,7 @@ export function setBin(image: BinImage): void {
   checksumReport.set(undefined); // a new bin is a new checksum verdict — the old one would be fabricated data
   workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
   editJournal.set(new Map());
+  cellRange.set(null); // a new bin is a new address space — a stale range's mapId would be meaningless
   clearUndo();
 }
 
@@ -225,6 +228,34 @@ export function applyRegionDelta(
     editJournal.set(journal);
   });
   return { moved, clamped };
+}
+
+/** Plain click (1×1) or drag-select; `MapView` also passes the same anchor for shift-click extension. */
+export function setCellRange(mapId: string, r0: number, c0: number, r1: number, c1: number): void {
+  cellRange.set({ mapId, r0, c0, r1, c1 });
+}
+
+/** Clears the cell range — called when the shown map changes, so a stale range never survives it. */
+export function clearCellRange(): void {
+  cellRange.set(null);
+}
+
+/**
+ * Normalises a range's corners (a drag up-and-left yields the same set as
+ * down-and-right) and returns the covered cells in row-major order. `null`
+ * (no range) yields no cells — callers fall back to their own default.
+ */
+export function cellsInRange(range: CellRange | null): { row: number; col: number }[] {
+  if (range === null) return [];
+  const rMin = Math.min(range.r0, range.r1);
+  const rMax = Math.max(range.r0, range.r1);
+  const cMin = Math.min(range.c0, range.c1);
+  const cMax = Math.max(range.c0, range.c1);
+  const cells: { row: number; col: number }[] = [];
+  for (let row = rMin; row <= rMax; row++) {
+    for (let col = cMin; col <= cMax; col++) cells.push({ row, col });
+  }
+  return cells;
 }
 
 export function setSelection(start: number, end: number, cols?: number): void {
@@ -614,6 +645,7 @@ export function applyProject(image: BinImage, project: Project): ApplyProjectRep
   checksumReport.set(undefined); // a new bin is a new checksum verdict — the old one would be fabricated data
   workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
   editJournal.set(new Map());
+  cellRange.set(null); // a new bin is a new address space — a stale range's mapId would be meaningless
   axisLibrary.set(lib);
   maps.set(keep(project.maps, droppedMaps).map(clearDangling).sort(byAddress));
   potentialMaps.set(keep(project.potentialMaps, droppedPotentials).map(clearDangling)); // ENGINE RANK ORDER — never re-sort

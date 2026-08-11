@@ -19,7 +19,7 @@
   import { isSwitch } from './lib/switchdata.js';
   import * as actions from './store/actions.js';
   import type { MapDef } from '@binanalyzer/core';
-  import { bin, maps, modalOpen, potentialMaps, selection, showOriginal, viewParams } from './store/stores.js';
+  import { bin, cellRange, maps, modalOpen, potentialMaps, selection, showOriginal, viewParams } from './store/stores.js';
   import { tauriHost } from './platform/tauri.js';
   import { loadBinFromPath, saveProjectFlow } from './platform/flows.js';
   import { runScan } from './worker/controller.js';
@@ -39,16 +39,24 @@
     );
   }
 
-  /** '+'/'-' (spec 2026-08-09-map-value-editing): step every cell of the map
-   *  currently shown in the map view by one raw LSB, as one undo entry. */
+  /** '+'/'-' (spec 2026-08-09-map-value-editing, amended 2026-08-09): step the
+   *  cells in the current range selection by one raw LSB, as one undo entry.
+   *  A keypress with no explicit range falls back to the whole shown map, so
+   *  today's whole-map behavior survives when nothing was picked. */
   function stepSelectedMapValues(steps: 1 | -1): void {
     const sel = $selection;
     if (sel?.mapId === undefined) return;
     const m: MapDef | undefined = [...$maps, ...$potentialMaps].find((x) => x.id === sel.mapId);
     if (m === undefined) return;
-    const cells: { row: number; col: number }[] = [];
-    for (let row = 0; row < m.rows; row++) {
-      for (let col = 0; col < m.cols; col++) cells.push({ row, col });
+    const cr = $cellRange;
+    let cells: { row: number; col: number }[];
+    if (cr !== null && cr.mapId === m.id) {
+      cells = actions.cellsInRange(cr);
+    } else {
+      cells = [];
+      for (let row = 0; row < m.rows; row++) {
+        for (let col = 0; col < m.cols; col++) cells.push({ row, col });
+      }
     }
     const { moved, clamped } = actions.applyRegionDelta(m, cells, { kind: 'step', steps });
     actions.pushToast('info', `${moved} cells changed${clamped > 0 ? `, ${clamped} clamped` : ''}`);

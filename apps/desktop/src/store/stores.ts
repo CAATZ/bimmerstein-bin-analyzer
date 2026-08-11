@@ -129,3 +129,24 @@ export const checksumReport: Writable<ChecksumReport | undefined> = writable(und
 
 /** F11: show the ORIGINAL (pre-edit) value instead of the working one where edited (Task 8). */
 export const showOriginal: Writable<boolean> = writable(false);
+
+/**
+ * Rectangular cell selection inside the shown map, or null. Inclusive bounds.
+ * (r0,c0) is the anchor (where the drag/click started); (r1,c1) is the focus
+ * (the far corner, or the same cell for a plain click) — shift-click moves the
+ * focus while keeping the anchor. `cellsInRange` (actions.ts) normalises the
+ * corners into the covered cells.
+ *
+ * Lives in the store, not view-local `$state`, because `App.svelte`'s global
+ * `+`/`-` handlers need to read it too (2026-08-09 amendment: `MapView`'s old
+ * component-local `selectedCell` could never bound a keypress dispatched from
+ * outside the component).
+ */
+export interface CellRange {
+  mapId: string;
+  r0: number;
+  c0: number;
+  r1: number;
+  c1: number;
+}
+export const cellRange: Writable<CellRange | null> = writable(null);
