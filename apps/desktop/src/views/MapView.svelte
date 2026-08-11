@@ -43,6 +43,12 @@
     if (map?.id !== shownMapId) {
       shownMapId = map?.id;
       actions.clearCellRange();
+      // A shared-axis notice named for the previous map must not survive onto
+      // this one — it's the tuner's safety affordance, so a stale name is
+      // worse than no name. `sharedNotified` also resets so the new map's
+      // axes announce fresh, once each, on their own first edit.
+      sharedNames = [];
+      sharedNotified.clear();
     }
   });
 
