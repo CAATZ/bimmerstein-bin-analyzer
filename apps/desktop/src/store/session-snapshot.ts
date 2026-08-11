@@ -1,9 +1,9 @@
 import { get } from 'svelte/store';
-import type { AxisLibEntry, BinImage, MapDef } from '@binanalyzer/core';
+import { materialize, type AxisLibEntry, type BinImage, type EditJournal, type MapDef } from '@binanalyzer/core';
 import type { Region } from '@binanalyzer/engine';
 import {
-  addressFrame, axisLibrary, bin, binPath, framePromptAnswered, maps, potentialMaps, regions,
-  scanStatus, selection, viewParams,
+  addressFrame, axisLibrary, bin, binPath, editJournal, framePromptAnswered, maps, potentialMaps,
+  regions, scanStatus, selection, viewParams, workingBytes,
   type AddressFrame, type ScanState, type Selection, type ViewParams,
 } from './stores.js';
 
@@ -39,6 +39,14 @@ export interface SessionSnapshot {
   selection: Selection | null;
   addressFrame: AddressFrame;
   framePromptAnswered: boolean;
+  /**
+   * The edit journal, BY VALUE. workingBytes is deliberately NOT snapshotted:
+   * edits mutate it in place, so a captured reference would see them and
+   * restore nothing. The buffer is rebuilt from bin + this journal instead,
+   * which also keeps a snapshot proportional to what changed rather than a
+   * 256 KB copy per undo entry.
+   */
+  editJournal: EditJournal;
 }
 
 /**
@@ -59,6 +67,7 @@ export function captureSession(): SessionSnapshot {
     selection: get(selection),
     addressFrame: get(addressFrame),
     framePromptAnswered: get(framePromptAnswered),
+    editJournal: new Map(get(editJournal)),
   };
 }
 
@@ -74,4 +83,6 @@ export function restoreSession(s: SessionSnapshot): void {
   selection.set(s.selection);
   addressFrame.set(s.addressFrame);
   framePromptAnswered.set(s.framePromptAnswered);
+  editJournal.set(new Map(s.editJournal));
+  workingBytes.set(s.bin === null ? null : materialize(s.bin.bytes, s.editJournal));
 }

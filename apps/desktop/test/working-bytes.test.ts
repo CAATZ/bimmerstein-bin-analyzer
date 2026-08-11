@@ -62,6 +62,7 @@ describe('no view reads the original buffer', () => {
       .filter((p) => !p.endsWith('src/copilot/dispatch.ts'))
       .filter((p) => !p.endsWith('src/store/stores.ts'))
       .filter((p) => !p.endsWith('src/store/actions.ts'))
+      .filter((p) => !p.endsWith('src/store/session-snapshot.ts'))
       .filter((p) => !p.endsWith('src/platform/flows.ts'));
     expect(offenders).toEqual([]);
   });

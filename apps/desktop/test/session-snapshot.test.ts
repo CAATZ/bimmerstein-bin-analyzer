@@ -5,8 +5,8 @@ import { createBinImage } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
 import { captureSession, restoreSession } from '../src/store/session-snapshot.js';
 import {
-  addressFrame, axisLibrary, bin, binPath, framePromptAnswered, maps, potentialMaps, regions,
-  scanStatus, selection, viewParams,
+  addressFrame, axisLibrary, bin, binPath, editJournal, framePromptAnswered, maps, potentialMaps,
+  regions, scanStatus, selection, viewParams, workingBytes,
 } from '../src/store/stores.js';
 
 function testBin() {
@@ -107,5 +107,24 @@ describe('captureSession / restoreSession', () => {
     const captured = snap.maps.length;
     a.addImportedMaps([mapAt('i3', 0x400, 'imported')]);
     expect(snap.maps).toHaveLength(captured);
+  });
+
+  it('restores the BUFFER, not just the journal — a reference snapshot would pass the journal check and still be broken', () => {
+    a.setBin(createBinImage(new Uint8Array(32).fill(3), 'u.bin'));
+    const before = captureSession();
+    const w = get(workingBytes)!;
+    w[5] = 0x99;
+    get(editJournal).set(5, { original: 3, current: 0x99 });
+    restoreSession(before);
+    expect(get(editJournal).size).toBe(0);
+    expect(get(workingBytes)![5]).toBe(3);
+  });
+
+  it('snapshots the journal BY VALUE, so later edits do not leak into it', () => {
+    a.setBin(createBinImage(new Uint8Array(32).fill(3), 'u.bin'));
+    get(editJournal).set(5, { original: 3, current: 9 });
+    const snap = captureSession();
+    get(editJournal).set(6, { original: 3, current: 8 });
+    expect(snap.editJournal.size).toBe(1);
   });
 });
