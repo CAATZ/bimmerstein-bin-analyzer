@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import type { AxisDef, AxisLibEntry, BinImage, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
-import { applyEdit, quantise, readAxisValues, readValue, toPhysical, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
+import { applyEdit, quantise, readAxisValues, readValue, revertOffsets, toPhysical, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
 import type { ChecksumReport } from '@binanalyzer/families';
 import { checksumsFor } from '@binanalyzer/families';
@@ -15,7 +15,7 @@ import {
 } from './stores.js';
 import { detachedAxis, libraryAxis, stampAxis } from '../lib/axislib.js';
 import { axisEditability, isMonotonic } from '../lib/axisedit.js';
-import { clearUndo, pushUndo, undoTransaction } from './undo.js';
+import { clearUndo, pushUndo, redo as redoInternal, undo as undoInternal, undoTransaction } from './undo.js';
 
 /**
  * Every store mutation in the app lives here.
@@ -121,6 +121,14 @@ export function runChecksumVerify(bytes: Uint8Array): void {
   setChecksumReport(mod ? mod.verify(bytes) : undefined);
 }
 
+/** Re-verify against the CURRENT buffer — an edit can invalidate a checksum. */
+function reverifyChecksums(): void {
+  const working = get(workingBytes);
+  if (working === null) return setChecksumReport(undefined);
+  const mod = checksumsFor(working);
+  setChecksumReport(mod ? mod.verify(working) : undefined);
+}
+
 export function setScanRunning(): void {
   scanStatus.set({ state: 'running', stage: 'regions', fraction: 0 });
 }
@@ -181,6 +189,7 @@ export function editCell(
   applyEdit({ working, original: image.bytes, journal, offset, format: m.format, raw: q.stored });
   workingBytes.set(working);
   editJournal.set(journal);
+  reverifyChecksums();
   return { ok: true, physical: q.physical, clamped: q.clamped };
 }
 
@@ -228,6 +237,7 @@ export function applyRegionDelta(
     workingBytes.set(working);
     editJournal.set(journal);
   });
+  reverifyChecksums();
   return { moved, clamped };
 }
 
@@ -260,6 +270,7 @@ export function editAxisValue(
   applyEdit({ working, original: image.bytes, journal, offset, format, raw: q.stored });
   workingBytes.set(working);
   editJournal.set(journal);
+  reverifyChecksums();
   if (!isMonotonic(readAxisValues(working, axis!))) {
     pushToast('info', 'This axis is no longer in order. The ECU will still interpolate across it.');
   }
@@ -712,4 +723,40 @@ export function applyProject(image: BinImage, project: Project): ApplyProjectRep
   framePromptAnswered.set(false); // a project load brings a new bin — the frame prompt re-arms
   clearUndo(); // ...and a new bin is a new address space: undoing across it would restore a foreign session
   return { droppedMaps, droppedPotentials, droppedAxisEntries, clearedStamps };
+}
+
+/** Restore the file-as-opened bytes at these offsets. */
+export function revertOffsetsAction(offsets: readonly number[]): void {
+  const working = get(workingBytes);
+  if (working === null || offsets.length === 0) return;
+  undoTransaction('revert', () => {
+    const journal = get(editJournal);
+    revertOffsets({ working, journal, offsets });
+    workingBytes.set(working);
+    editJournal.set(journal);
+  });
+  reverifyChecksums();
+}
+
+/** Restore every edited byte. */
+export function revertAll(): void {
+  revertOffsetsAction([...get(editJournal).keys()]);
+}
+
+/**
+ * Undo/redo restore a whole session snapshot, including the working buffer —
+ * wrapped here (rather than in undo.ts, which must not import this module)
+ * so the ONE re-verify call covers both without duplicating the buffer-vs-
+ * checksum wiring at each of App.svelte's two call sites.
+ */
+export function undo(): boolean {
+  const did = undoInternal();
+  if (did) reverifyChecksums();
+  return did;
+}
+
+export function redo(): boolean {
+  const did = redoInternal();
+  if (did) reverifyChecksums();
+  return did;
 }

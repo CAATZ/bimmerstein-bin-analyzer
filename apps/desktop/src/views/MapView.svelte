@@ -164,6 +164,20 @@
     if (!res.ok) actions.pushToast('error', res.reason);
     else if (res.clamped) actions.pushToast('info', 'Clamped to the format limit.');
   }
+
+  /** "Revert selection" undoes only the bytes under the current range (or the
+   *  whole map with no usable range — same fallback as a step keypress). */
+  function revertSelection(): void {
+    const m = map;
+    if (m === undefined) return;
+    const cells = actions.cellsForDelta(m, $cellRange);
+    const offsets: number[] = [];
+    for (const c of cells) {
+      const off = actions.cellOffset(m, c.row, c.col);
+      for (let i = 0; i < m.format.width; i++) offsets.push(off + i);
+    }
+    actions.revertOffsetsAction(offsets);
+  }
 </script>
 
 {#if map === undefined || grid === null}
@@ -189,6 +203,9 @@
       {#if sharedNames.length > 0}
         <span class="origbadge">axis shared with {sharedNames.length} other map(s): {sharedNames.join(', ')}</span>
       {/if}
+      <span class="grow"></span>
+      <button disabled={$editJournal.size === 0} onclick={revertSelection}>Revert selection</button>
+      <button disabled={$editJournal.size === 0} onclick={() => actions.revertAll()}>Revert all changes</button>
     </header>
     {#if map.scaling.rawExpression !== undefined}
       <div class="banner">
@@ -267,6 +284,9 @@
   .meta {
     color: var(--fg-dim);
     font-size: 12px;
+  }
+  header .grow {
+    flex: 1;
   }
   .cell {
     color: var(--accent);

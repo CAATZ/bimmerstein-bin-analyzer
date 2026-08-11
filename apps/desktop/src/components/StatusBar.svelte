@@ -1,6 +1,6 @@
 <!-- apps/desktop/src/components/StatusBar.svelte -->
 <script lang="ts">
-  import { bin, checksumReport, coPilotStatus, scanStatus, selection, viewParams } from '../store/stores.js';
+  import { bin, checksumReport, coPilotStatus, editJournal, scanStatus, selection, viewParams } from '../store/stores.js';
 
   let { onShowChecksums }: { onShowChecksums: () => void } = $props();
 </script>
@@ -24,6 +24,9 @@
       {:else}Co-pilot: disconnected — retrying
       {/if}
     </span>
+  {/if}
+  {#if $editJournal.size > 0}
+    <span class="chip">{$editJournal.size} bytes changed</span>
   {/if}
   {#if $checksumReport}
     <button
