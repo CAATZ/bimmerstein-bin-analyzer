@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { AxisDef, MapDef } from '@binanalyzer/core';
 import { createBinImage, readValue } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
-import { toasts, workingBytes } from '../src/store/stores.js';
+import { axisByteOffset } from '../src/lib/axisedit.js';
+import { isCellChanged } from '../src/lib/diffcells.js';
+import { editJournal, toasts, workingBytes } from '../src/store/stores.js';
 
 const u8 = { width: 1, signed: false, endianness: 'little' } as const;
 const axis: AxisDef = {
@@ -46,5 +48,31 @@ describe('editAxisValue', () => {
     const lit: AxisDef = { kind: 'literal', count: 2, values: [1, 2] };
     const r = a.editAxisValue(withAxis({ xAxis: lit }), 'x', 0, 5);
     expect(r).toEqual({ ok: false, reason: 'A literal axis is stored in the definition, not the bin. Edit it in map properties.' });
+  });
+});
+
+/**
+ * I3 (final whole-branch review): after editing an axis breakpoint,
+ * `isCellChanged` at that value's `axisByteOffset` must agree with the
+ * journal — this is what lets the axis header `<th>` carry `class:changed`
+ * the same way a `<td>` already does.
+ */
+describe('axisByteOffset + isCellChanged (I3 — axis header diff highlighting)', () => {
+  it('marks the edited index changed and leaves an untouched index alone', () => {
+    const m = withAxis();
+    a.editAxisValue(m, 'x', 1, 25);
+    const journal = get(editJournal);
+    const editedOff = axisByteOffset(axis, 1)!;
+    const untouchedOff = axisByteOffset(axis, 2)!;
+    expect(isCellChanged(journal, editedOff, axis.format!.width)).toBe(true);
+    expect(isCellChanged(journal, untouchedOff, axis.format!.width)).toBe(false);
+  });
+
+  it('editing back to the original clears the highlight', () => {
+    const m = withAxis();
+    a.editAxisValue(m, 'x', 1, 25); // was 20 at index 1
+    a.editAxisValue(m, 'x', 1, 20); // back to the original
+    const journal = get(editJournal);
+    expect(isCellChanged(journal, axisByteOffset(axis, 1)!, axis.format!.width)).toBe(false);
   });
 });

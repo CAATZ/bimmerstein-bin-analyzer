@@ -16,6 +16,13 @@ export function axisEditability(axis: AxisDef | undefined): { editable: boolean;
   return { editable: true };
 }
 
+/** Byte offset of axis value `index`, or null when the axis is not byte-backed. */
+export function axisByteOffset(axis: AxisDef | undefined, index: number): number | null {
+  if (axis === undefined || axis.kind !== 'referenced') return null;
+  if (axis.address === undefined || axis.format === undefined) return null;
+  return axis.address + index * axis.format.width;
+}
+
 const span = (a: AxisDef): { start: number; end: number } | null => {
   if (a.kind !== 'referenced' || a.address === undefined || a.format === undefined) return null;
   return { start: a.address, end: a.address + a.count * a.format.width };

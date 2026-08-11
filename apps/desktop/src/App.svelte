@@ -38,16 +38,21 @@
     );
   }
 
-  /** '+'/'-' (spec 2026-08-09-map-value-editing, amended 2026-08-09): step the
-   *  cells in the current range selection by one raw LSB, as one undo entry.
-   *  A keypress with no explicit range falls back to the whole shown map, so
-   *  today's whole-map behavior survives when nothing was picked. */
+  /** '+'/'-' (spec 2026-08-09-map-value-editing; amended 2026-08-09 for ranges,
+   *  amended again by the I1 whole-branch-review fix): step the cells in the
+   *  current range selection by one raw LSB, as one undo entry. No range
+   *  means no target — a stray keypress must never rewrite the whole map, so
+   *  the user is told to select a range first instead. */
   function stepSelectedMapValues(steps: 1 | -1): void {
     const sel = $selection;
     if (sel?.mapId === undefined) return;
     const m: MapDef | undefined = [...$maps, ...$potentialMaps].find((x) => x.id === sel.mapId);
     if (m === undefined) return;
     const cells = actions.cellsForDelta(m, $cellRange);
+    if (cells.length === 0) {
+      actions.pushToast('info', "'+'/'-' steps the current cell range — select a range first");
+      return;
+    }
     const { moved, clamped } = actions.applyRegionDelta(m, cells, { kind: 'step', steps });
     actions.pushToast('info', `${moved} cells changed${clamped > 0 ? `, ${clamped} clamped` : ''}`);
   }

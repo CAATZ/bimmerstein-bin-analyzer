@@ -36,10 +36,16 @@
       <!-- `valid` covers only the checksums the family module stands behind —
            on MS41 the program checksum is always skipped. A bare "OK" would
            read as "everything checked out", so the count of not-checked blocks
-           rides along; the dialog names them and says why. -->
-      Checksums: {$checksumReport.valid
-        ? 'OK'
-        : `${$checksumReport.blocks.filter((b) => !b.ok).length} mismatched`}{$checksumReport.skipped
+           rides along; the dialog names them and says why.
+           `applies === false` (I4): an edit broke the family's structural
+           activation gate — `blocks` is empty, so falling through to the
+           mismatch-count branch would misleadingly read "0 mismatched" on a
+           modified image the module no longer recognises at all. -->
+      Checksums: {!$checksumReport.applies
+        ? 'structure changed — not recognised'
+        : $checksumReport.valid
+          ? 'OK'
+          : `${$checksumReport.blocks.filter((b) => !b.ok).length} mismatched`}{$checksumReport.skipped
         .length > 0
         ? ` · ${$checksumReport.skipped.length} not checked`
         : ''}

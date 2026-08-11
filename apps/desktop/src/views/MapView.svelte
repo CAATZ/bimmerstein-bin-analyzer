@@ -4,8 +4,8 @@
   import type { MapDef } from '@binanalyzer/core';
   import { cellRange, editJournal, maps, potentialMaps, selection, showOriginal, workingBytes } from '../store/stores.js';
   import { axisLabels, gridFromMap } from '../lib/griddata.js';
-  import { isCellChanged, originalGrid } from '../lib/diffcells.js';
-  import { axisEditability, mapsSharingAxis } from '../lib/axisedit.js';
+  import { isCellChanged, isUnchangedEdit, originalBytes } from '../lib/diffcells.js';
+  import { axisByteOffset, axisEditability, mapsSharingAxis } from '../lib/axisedit.js';
   import * as actions from '../store/actions.js';
 
   const map = $derived.by((): MapDef | undefined => {
@@ -13,24 +13,46 @@
     if (sel?.mapId === undefined) return undefined;
     return [...$maps, ...$potentialMaps].find((m) => m.id === sel.mapId);
   });
+
+  // I2 (final whole-branch review): ONE decision — $showOriginal — drives
+  // every byte-derived thing F11 shows. The grid AND both axis label lists
+  // read this same buffer, so they can never disagree about which state
+  // (edited or file-as-opened) is on screen.
+  const displayBytes = $derived.by((): Uint8Array | null => {
+    const w = $workingBytes;
+    if (w === null) return null;
+    return $showOriginal ? originalBytes(w, $editJournal) : w;
+  });
   const grid = $derived.by(() => {
     const m = map;
-    const w = $workingBytes;
-    if (m === undefined || w === null) return null;
-    return $showOriginal ? originalGrid(w, $editJournal, m) : gridFromMap(w, m);
+    const db = displayBytes;
+    if (m === undefined || db === null) return null;
+    return gridFromMap(db, m);
   });
   const xLabels = $derived.by((): string[] => {
-    const wb = $workingBytes;
+    const db = displayBytes;
     const m = map;
-    if (!wb || !m) return [];
-    return axisLabels(wb, m.xAxis, m.orientation === 'row-major' ? m.cols : m.rows);
+    if (!db || !m) return [];
+    return axisLabels(db, m.xAxis, m.orientation === 'row-major' ? m.cols : m.rows);
   });
   const yLabels = $derived.by((): string[] => {
-    const wb = $workingBytes;
+    const db = displayBytes;
     const m = map;
-    if (!wb || !m) return [];
-    return axisLabels(wb, m.yAxis, m.orientation === 'row-major' ? m.rows : m.cols);
+    if (!db || !m) return [];
+    return axisLabels(db, m.yAxis, m.orientation === 'row-major' ? m.rows : m.cols);
   });
+
+  /** I3: is the axis breakpoint at `index` on side `which` changed vs the file
+   *  as opened? Mirrors `<td>`'s own `isCellChanged` check, keyed on the
+   *  axis's own byte offset rather than a cell offset. */
+  function axisChanged(which: 'x' | 'y', index: number): boolean {
+    const m = map;
+    if (m === undefined) return false;
+    const axis = which === 'x' ? m.xAxis : m.yAxis;
+    const off = axisByteOffset(axis, index);
+    if (off === null) return false;
+    return isCellChanged($editJournal, off, axis!.format!.width);
+  }
 
   // Cell RANGE selection (2026-08-09 amendment) — lives in the store
   // (../store/stores.js `cellRange`), not view-local `$state`: App.svelte's
@@ -95,13 +117,20 @@
     };
   });
 
-  let editing = $state<{ r: number; c: number; text: string } | null>(null);
+  // `seed` is the exact text the input opened with (C1, final whole-branch
+  // review). commitEdit MUST compare the committed text to `seed` by TEXT —
+  // never by parsing both to numbers — because the seed is a display string
+  // rounded to `scaling.digits`, and re-quantising it does not reliably land
+  // back on the raw byte it was seeded from. Opening a cell and clicking away
+  // must never rewrite the byte it merely displayed.
+  let editing = $state<{ r: number; c: number; seed: string; text: string } | null>(null);
 
   function beginEdit(r: number, c: number): void {
     const g = grid;
     const m = map;
     if (!g || !m) return;
-    editing = { r, c, text: formatPhysical(g.values[r]![c]!, m.scaling) };
+    const seed = formatPhysical(g.values[r]![c]!, m.scaling);
+    editing = { r, c, seed, text: seed };
   }
 
   function commitEdit(): void {
@@ -109,6 +138,11 @@
     const m = map;
     editing = null;
     if (e === null || m === undefined) return;
+    if (isUnchangedEdit(e.seed, e.text)) return; // C1: no-op edit — never rewrites the byte
+    if (e.text.trim() === '') {
+      actions.pushToast('error', `"${e.text}" is not a number.`); // M9: Number('') is 0, not NaN
+      return;
+    }
     const typed = Number(e.text);
     if (!Number.isFinite(typed)) {
       actions.pushToast('error', `"${e.text}" is not a number.`);
@@ -123,7 +157,8 @@
   // which axis and its index instead of a row/col. `axisEditability` gates
   // 'literal'/'index' axes and referenced axes with no format; those show
   // their `reason` on attempt rather than opening an editor.
-  let axisEditing = $state<{ which: 'x' | 'y'; index: number; text: string } | null>(null);
+  // Same C1 seed-text guard as `editing` above.
+  let axisEditing = $state<{ which: 'x' | 'y'; index: number; seed: string; text: string } | null>(null);
   /** Names of other maps whose axis storage overlaps this one, shown once per
    * axis+side before its first edit this session — component-local, not a
    * store, so it never survives a reload and never needs its own reset hook. */
@@ -146,8 +181,8 @@
     } else {
       sharedNames = [];
     }
-    const label = which === 'x' ? xLabels[index] : yLabels[index];
-    axisEditing = { which, index, text: label ?? String(index) };
+    const seed = (which === 'x' ? xLabels[index] : yLabels[index]) ?? String(index);
+    axisEditing = { which, index, seed, text: seed };
   }
 
   function commitAxisEdit(): void {
@@ -155,6 +190,11 @@
     const m = map;
     axisEditing = null;
     if (e === null || m === undefined) return;
+    if (isUnchangedEdit(e.seed, e.text)) return; // C1: no-op edit — never rewrites the byte
+    if (e.text.trim() === '') {
+      actions.pushToast('error', `"${e.text}" is not a number.`); // M9: Number('') is 0, not NaN
+      return;
+    }
     const typed = Number(e.text);
     if (!Number.isFinite(typed)) {
       actions.pushToast('error', `"${e.text}" is not a number.`);
@@ -165,8 +205,9 @@
     else if (res.clamped) actions.pushToast('info', 'Clamped to the format limit.');
   }
 
-  /** "Revert selection" undoes only the bytes under the current range (or the
-   *  whole map with no usable range — same fallback as a step keypress). */
+  /** "Revert selection" undoes only the bytes under the current range. No
+   *  usable range means no target (I1) — nothing is reverted, matching what
+   *  a '+'/'-' keypress does with nothing selected. */
   function revertSelection(): void {
     const m = map;
     if (m === undefined) return;
@@ -218,7 +259,10 @@
           <tr>
             <th class="corner">{map.yAxis?.name ?? ''} \ {map.xAxis?.name ?? ''}</th>
             {#each xLabels as label, i (i)}
-              <th class="axishdr" ondblclick={() => beginAxisEdit('x', i)}
+              <th
+                class="axishdr"
+                class:changed={axisChanged('x', i)}
+                ondblclick={() => beginAxisEdit('x', i)}
                 >{#if axisEditing?.which === 'x' && axisEditing?.index === i}<input
                     class="celledit"
                     bind:value={axisEditing.text}
@@ -234,7 +278,10 @@
         <tbody>
           {#each grid.values as row, r (r)}
             <tr>
-              <th class="axishdr" ondblclick={() => beginAxisEdit('y', r)}
+              <th
+                class="axishdr"
+                class:changed={axisChanged('y', r)}
+                ondblclick={() => beginAxisEdit('y', r)}
                 >{#if axisEditing?.which === 'y' && axisEditing?.index === r}<input
                     class="celledit"
                     bind:value={axisEditing.text}
@@ -312,7 +359,8 @@
     outline: 2px solid var(--accent);
     outline-offset: -2px;
   }
-  td.changed {
+  td.changed,
+  th.axishdr.changed {
     background: #3a2f14;
   }
   .celledit {

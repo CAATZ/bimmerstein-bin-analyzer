@@ -2,7 +2,7 @@ import { get } from 'svelte/store';
 import type { AxisDef, AxisLibEntry, BinImage, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
 import { applyEdit, quantise, readAxisValues, readValue, revertOffsets, toPhysical, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
-import type { ChecksumReport } from '@binanalyzer/families';
+import type { ChecksumReport, FamilyChecksums } from '@binanalyzer/families';
 import { checksumsFor } from '@binanalyzer/families';
 import {
   DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, cellRange, checksumReport, editJournal, framePromptAnswered,
@@ -29,6 +29,17 @@ let toastSeq = 0;
 let scrollSeq = 0;
 let manualSeq = 0;
 let modalDepth = 0;
+
+/**
+ * The family checksum module resolved for the LOADED bin (I4, final
+ * whole-branch review). Resolved ONCE, at load — an edit does not change
+ * what family the image belongs to, even if it perturbs the checksum
+ * module's own structural activation gate. `reverifyChecksums` re-verifies
+ * with THIS module rather than re-resolving via `checksumsFor`, so a
+ * gate-breaking edit produces an honest `applies: false` report instead of
+ * making the checksum chip vanish.
+ */
+let activeChecksums: FamilyChecksums | undefined;
 
 export function pushToast(kind: Toast['kind'], text: string): number {
   const id = ++toastSeq;
@@ -75,6 +86,7 @@ export function resetStores(): void {
   framePromptAnswered.set(false);
   proposals.set([]);
   checksumReport.set(undefined);
+  activeChecksums = undefined;
   workingBytes.set(null);
   editJournal.set(new Map());
   cellRange.set(null);
@@ -97,6 +109,7 @@ export function setBin(image: BinImage): void {
   framePromptAnswered.set(false);
   proposals.set([]); // a proposal is about maps in the bin that just went away
   checksumReport.set(undefined); // a new bin is a new checksum verdict — the old one would be fabricated data
+  activeChecksums = undefined; // a new bin means a new (or no) family module — never carry the old one over
   workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
   editJournal.set(new Map());
   cellRange.set(null); // a new bin is a new address space — a stale range's mapId would be meaningless
@@ -117,16 +130,26 @@ export function setChecksumReport(r: ChecksumReport | undefined): void {
  * milliseconds, so this runs inline on load — no worker needed.
  */
 export function runChecksumVerify(bytes: Uint8Array): void {
-  const mod = checksumsFor(bytes);
-  setChecksumReport(mod ? mod.verify(bytes) : undefined);
+  activeChecksums = checksumsFor(bytes);
+  setChecksumReport(activeChecksums ? activeChecksums.verify(bytes) : undefined);
 }
 
-/** Re-verify against the CURRENT buffer — an edit can invalidate a checksum. */
+/**
+ * Re-verify against the CURRENT buffer — an edit can invalidate a checksum.
+ *
+ * Uses `activeChecksums` (resolved once, at load) rather than re-resolving
+ * via `checksumsFor(working)`. `checksumsFor` re-runs the family's structural
+ * ACTIVATION GATE against the edited bytes; an edit that perturbs the cal
+ * descriptor can fail that gate even though the family of a loaded file does
+ * not change because someone edited a table. Re-gating would make the
+ * checksum chip vanish instead of turning red. `activeChecksums.verify`
+ * still handles a gate-breaking edit correctly — it reports `applies: false`
+ * rather than throwing — so the report is never fabricated, only honest.
+ */
 function reverifyChecksums(): void {
   const working = get(workingBytes);
   if (working === null) return setChecksumReport(undefined);
-  const mod = checksumsFor(working);
-  setChecksumReport(mod ? mod.verify(working) : undefined);
+  setChecksumReport(activeChecksums ? activeChecksums.verify(working) : undefined);
 }
 
 export function setScanRunning(): void {
@@ -312,16 +335,13 @@ export function cellsInRange(range: CellRange | null): { row: number; col: numbe
  * view clears the range when the shown map changes, but this makes a stale
  * range harmless even if that clearing ever fails, which is the difference
  * between a cosmetic bug and editing cells the user never selected.
- * With no usable range, the whole map is the target, preserving the behaviour
- * a keypress had before ranges existed.
+ * No range means no target: an accidental '+'/'-' must never rewrite an
+ * entire table just because nothing was selected — callers must tell the
+ * user to select a range first rather than fall back to "everything".
  */
 export function cellsForDelta(m: MapDef, range: CellRange | null): { row: number; col: number }[] {
   if (range !== null && range.mapId === m.id) return cellsInRange(range);
-  const all: { row: number; col: number }[] = [];
-  for (let row = 0; row < m.rows; row++) {
-    for (let col = 0; col < m.cols; col++) all.push({ row, col });
-  }
-  return all;
+  return [];
 }
 
 export function setSelection(start: number, end: number, cols?: number): void {
@@ -709,6 +729,7 @@ export function applyProject(image: BinImage, project: Project): ApplyProjectRep
   };
   bin.set(image);
   checksumReport.set(undefined); // a new bin is a new checksum verdict — the old one would be fabricated data
+  activeChecksums = undefined; // a new bin means a new (or no) family module — never carry the old one over
   workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
   editJournal.set(new Map());
   cellRange.set(null); // a new bin is a new address space — a stale range's mapId would be meaningless

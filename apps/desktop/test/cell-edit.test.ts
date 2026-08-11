@@ -1,8 +1,9 @@
 import { get } from 'svelte/store';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { MapDef } from '@binanalyzer/core';
-import { createBinImage, readValue } from '@binanalyzer/core';
+import { createBinImage, formatPhysical, readValue } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
+import { isUnchangedEdit } from '../src/lib/diffcells.js';
 import { editJournal, workingBytes } from '../src/store/stores.js';
 import { undo } from '../src/store/undo.js';
 
@@ -55,5 +56,37 @@ describe('editCell', () => {
     expect(undo()).toBe(true);
     expect(get(editJournal).size).toBe(0);
     expect(get(workingBytes)![0x10]).toBe(100);
+  });
+});
+
+/**
+ * C1/M9 (final whole-branch review): MapView's commit handler must guard a
+ * no-op edit with `isUnchangedEdit(seed, text)` BEFORE ever calling `editCell`
+ * — this is the exact call pattern the component uses. Reproduces the
+ * measured hazard (factor 0.1, digits 0) at the store level: opening the
+ * editor and committing the unedited seed text must leave the journal empty,
+ * even though parsing that seed back would land on a different raw byte.
+ */
+describe('commit-guard pattern (C1): a no-op display round-trip must not rewrite the byte', () => {
+  it('leaves the journal empty when the committed text is the unchanged seed', () => {
+    const bytes = new Uint8Array(64);
+    bytes[0x10] = 2; // raw value 2
+    a.setBin(createBinImage(bytes, 'seed.bin'));
+    const m = map({ scaling: { factor: 0.1, offset: 0, units: '', digits: 0 } });
+    const seed = formatPhysical(2, m.scaling); // rounds away the true value
+    // MapView's commitEdit: guard first, only call editCell when the guard says "changed".
+    if (!isUnchangedEdit(seed, seed)) a.editCell(m, 0, 0, Number(seed));
+    expect(get(editJournal).size).toBe(0);
+    expect(get(workingBytes)![0x10]).toBe(2); // byte is untouched
+  });
+
+  it('WITHOUT the guard, committing that same seed text would have rewritten the byte — proves the hazard is real', () => {
+    const bytes = new Uint8Array(64);
+    bytes[0x10] = 2;
+    a.setBin(createBinImage(bytes, 'seed2.bin'));
+    const m = map({ scaling: { factor: 0.1, offset: 0, units: '', digits: 0 } });
+    const seed = formatPhysical(2, m.scaling);
+    a.editCell(m, 0, 0, Number(seed)); // the old, unguarded commit path
+    expect(get(workingBytes)![0x10]).not.toBe(2);
   });
 });

@@ -115,23 +115,19 @@ describe('cellsForDelta', () => {
     expect(a.cellsForDelta(m, range)).toEqual(a.cellsInRange(range));
   });
 
-  it('a range whose mapId is a DIFFERENT map is ignored — the whole map is returned', () => {
+  // I1 (final whole-branch review, approved behaviour change): a stray '+'/'-'
+  // must never rewrite an entire map. No usable range now means NO target —
+  // not "every cell" — so both a foreign-map range and no range at all yield
+  // an empty cell list, and the caller (App.svelte) tells the user to select
+  // a range first instead of calling applyRegionDelta.
+  it('a range whose mapId is a DIFFERENT map is ignored — no cells, not the whole map', () => {
     const m = map({ id: 'm1', rows: 3, cols: 3 });
     const range = { mapId: 'm2', r0: 0, c0: 0, r1: 0, c1: 0 };
-    const whole: { row: number; col: number }[] = [];
-    for (let row = 0; row < m.rows; row++) {
-      for (let col = 0; col < m.cols; col++) whole.push({ row, col });
-    }
-    expect(a.cellsForDelta(m, range)).toEqual(whole);
+    expect(a.cellsForDelta(m, range)).toEqual([]);
   });
 
-  it('a null range returns the whole map, in row-major order, with the right count', () => {
+  it('a null range yields no cells — no target, not the whole map', () => {
     const m = map({ id: 'm1', rows: 2, cols: 3 });
-    const cells = a.cellsForDelta(m, null);
-    expect(cells).toEqual([
-      { row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 2 },
-      { row: 1, col: 0 }, { row: 1, col: 1 }, { row: 1, col: 2 },
-    ]);
-    expect(cells).toHaveLength(6);
+    expect(a.cellsForDelta(m, null)).toEqual([]);
   });
 });

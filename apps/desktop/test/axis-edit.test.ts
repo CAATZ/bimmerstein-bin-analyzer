@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AxisDef, MapDef, ValueFormat } from '@binanalyzer/core';
-import { axisEditability, isMonotonic, mapsSharingAxis } from '../src/lib/axisedit.js';
+import { axisByteOffset, axisEditability, isMonotonic, mapsSharingAxis } from '../src/lib/axisedit.js';
 
 // `format` is typed `format?: ValueFormat | undefined` here (rather than
 // `Partial<AxisDef>`'s `format?: ValueFormat`) so the "no format" test below
@@ -54,6 +54,41 @@ describe('mapsSharingAxis', () => {
   it('excludes the map being edited', () => {
     const a = ref();
     expect(mapsSharingAxis([m('self', a)], a, 'self')).toEqual([]);
+  });
+});
+
+/**
+ * I3 (final whole-branch review): the axis header cells need the same
+ * offset-keyed diff check `<td>` already uses. `axisByteOffset` is the
+ * missing piece — it must agree with `editAxisValue`'s own offset math
+ * (`axis.address + index * axis.format.width`) exactly, or the highlight and
+ * the actual write would disagree.
+ */
+describe('axisByteOffset', () => {
+  it('returns the byte offset for a referenced axis, matching editAxisValue\'s own math', () => {
+    expect(axisByteOffset(ref({ address: 0x100 }), 0)).toBe(0x100);
+    expect(axisByteOffset(ref({ address: 0x100 }), 3)).toBe(0x103);
+  });
+
+  it('honours a wider format', () => {
+    const wide = ref({ address: 0x200, format: { width: 2, signed: false, endianness: 'little' } });
+    expect(axisByteOffset(wide, 2)).toBe(0x200 + 2 * 2);
+  });
+
+  it('is null for a literal axis — nothing is stored in the bin', () => {
+    expect(axisByteOffset({ kind: 'literal', count: 2, values: [1, 2] }, 0)).toBeNull();
+  });
+
+  it('is null for an index axis — nothing is stored anywhere', () => {
+    expect(axisByteOffset({ kind: 'index', count: 4 }, 0)).toBeNull();
+  });
+
+  it('is null for a referenced axis with no format', () => {
+    expect(axisByteOffset(ref({ format: undefined }), 0)).toBeNull();
+  });
+
+  it('is null when the axis itself is undefined', () => {
+    expect(axisByteOffset(undefined, 0)).toBeNull();
   });
 });
 
