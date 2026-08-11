@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import type { AxisDef, AxisLibEntry, BinImage, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
-import { readValue, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
+import { applyEdit, quantise, readValue, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
 import type { ChecksumReport } from '@binanalyzer/families';
 import { checksumsFor } from '@binanalyzer/families';
@@ -142,6 +142,42 @@ export function setScanCanceled(): void {
 
 export function byteSpanOf(map: MapDef): { start: number; end: number } {
   return { start: map.address, end: map.address + map.rows * map.cols * map.format.width };
+}
+
+/** Byte offset of one grid cell, honouring orientation. Exported: the map view
+ * needs it to ask whether a cell is in the diff. */
+export function cellOffset(m: MapDef, row: number, col: number): number {
+  const index = m.orientation === 'row-major' ? row * m.cols + col : col * m.rows + row;
+  return m.address + index * m.format.width;
+}
+
+/**
+ * Edit one cell to a PHYSICAL value. Returns what was actually stored so the
+ * caller can redisplay it — the typed value is usually not exactly storable.
+ */
+export function editCell(
+  m: MapDef,
+  row: number,
+  col: number,
+  physical: number
+): { ok: true; physical: number; clamped: boolean } | { ok: false; reason: string } {
+  const image = get(bin);
+  const working = get(workingBytes);
+  if (image === null || working === null) return { ok: false, reason: 'No bin is loaded.' };
+  const q = quantise(physical, m.scaling, m.format);
+  if (!q.editable) {
+    return { ok: false, reason: 'This map’s scaling factor is 0, so a physical value cannot be converted to a raw one.' };
+  }
+  const offset = cellOffset(m, row, col);
+  if (offset < 0 || offset + m.format.width > working.length) {
+    return { ok: false, reason: 'That cell lies outside the loaded bin.' };
+  }
+  pushUndo('edit cell');
+  const journal = get(editJournal);
+  applyEdit({ working, original: image.bytes, journal, offset, format: m.format, raw: q.stored });
+  workingBytes.set(working);
+  editJournal.set(journal);
+  return { ok: true, physical: q.physical, clamped: q.clamped };
 }
 
 export function setSelection(start: number, end: number, cols?: number): void {

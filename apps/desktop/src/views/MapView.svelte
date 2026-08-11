@@ -4,6 +4,7 @@
   import type { MapDef } from '@binanalyzer/core';
   import { maps, potentialMaps, selection, workingBytes } from '../store/stores.js';
   import { axisLabels, gridFromMap } from '../lib/griddata.js';
+  import * as actions from '../store/actions.js';
 
   const map = $derived.by((): MapDef | undefined => {
     const sel = $selection;
@@ -28,8 +29,9 @@
     return axisLabels(wb, m.yAxis, m.orientation === 'row-major' ? m.rows : m.cols);
   });
 
-  // Cell selection (spec §7 "cell selection", read-only in v1) — view-local
-  // display state only; nothing else in the app needs it, so it stays here.
+  // Cell selection (spec §7 "cell selection") — view-local display state only;
+  // nothing else in the app needs it, so it stays here. Double-click opens an
+  // in-cell editor (below); selection alone is still read-only.
   let selectedCell = $state<{ r: number; c: number } | null>(null);
   let shownMapId: string | undefined = $state(undefined);
   $effect(() => {
@@ -52,6 +54,30 @@
       y: yLabels[c.r] ?? String(c.r),
     };
   });
+
+  let editing = $state<{ r: number; c: number; text: string } | null>(null);
+
+  function beginEdit(r: number, c: number): void {
+    const g = grid;
+    const m = map;
+    if (!g || !m) return;
+    editing = { r, c, text: formatPhysical(g.values[r]![c]!, m.scaling) };
+  }
+
+  function commitEdit(): void {
+    const e = editing;
+    const m = map;
+    editing = null;
+    if (e === null || m === undefined) return;
+    const typed = Number(e.text);
+    if (!Number.isFinite(typed)) {
+      actions.pushToast('error', `"${e.text}" is not a number.`);
+      return;
+    }
+    const res = actions.editCell(m, e.r, e.c, typed);
+    if (!res.ok) actions.pushToast('error', res.reason);
+    else if (res.clamped) actions.pushToast('info', 'Clamped to the format limit.');
+  }
 </script>
 
 {#if map === undefined || grid === null}
@@ -95,7 +121,16 @@
                 <td
                   class:sel={selectedCell?.r === r && selectedCell?.c === c}
                   onclick={() => (selectedCell = { r, c })}
-                >{formatPhysical(v, map.scaling)}</td>
+                  ondblclick={() => beginEdit(r, c)}
+                >{#if editing?.r === r && editing?.c === c}<input
+                      class="celledit"
+                      bind:value={editing.text}
+                      onblur={commitEdit}
+                      onkeydown={(ev) => {
+                        if (ev.key === 'Enter') commitEdit();
+                        if (ev.key === 'Escape') editing = null;
+                      }}
+                    />{:else}{formatPhysical(v, map.scaling)}{/if}</td>
               {/each}
             </tr>
           {/each}
@@ -134,6 +169,14 @@
     outline: 2px solid var(--accent);
     outline-offset: -2px;
     background: #2a3f63;
+  }
+  .celledit {
+    width: 6em;
+    font: inherit;
+    text-align: right;
+    background: var(--bg-raise);
+    color: inherit;
+    border: 1px solid var(--accent);
   }
   .banner {
     margin: 0 12px 8px;
