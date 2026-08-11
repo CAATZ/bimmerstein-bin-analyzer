@@ -50,6 +50,7 @@ describe('resolveKey — the frozen v1 map (spec §7)', () => {
   it('still ignores them while typing in a field', () => {
     const base = { ctrl: false, shift: false, alt: false, meta: false, inEditable: true };
     expect(resolveKey({ ...base, key: '+' })).toBeUndefined();
+    expect(resolveKey({ ...base, key: '-' })).toBeUndefined();
     expect(resolveKey({ ...base, key: 'F11' })).toBeUndefined();
   });
 
