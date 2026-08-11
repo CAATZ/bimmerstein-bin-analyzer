@@ -52,7 +52,29 @@ export function originalGrid(
  * from — so comparing the PARSED number to the original value is not a safe
  * guard against a phantom write. Only exact TEXT identity between the seed
  * and the committed text proves nothing was typed.
+ *
+ * Compared TRIMMED (C1 residual): a seed of "15" and a committed " 15" is the
+ * same no-op edit to the user — clicking into the cell and adding only
+ * leading/trailing whitespace before clicking away must not rewrite the byte,
+ * even though the raw strings differ.
  */
 export function isUnchangedEdit(seed: string, text: string): boolean {
-  return seed === text;
+  return seed.trim() === text.trim();
+}
+
+/**
+ * The bytes a view should display: the working buffer, or the file-as-opened
+ * reconstruction when the original-values toggle is on.
+ *
+ * Deliberately a plain function, NOT a `$derived`. A derived returning the
+ * store's own buffer memoizes on reference equality, so a later in-place edit
+ * would never propagate and the view would render pre-edit numbers while the
+ * bytes said otherwise. Callers must read the stores themselves.
+ */
+export function bytesForDisplay(
+  working: Uint8Array,
+  showOriginal: boolean,
+  journal: EditJournal
+): Uint8Array {
+  return showOriginal ? originalBytes(working, journal) : working;
 }

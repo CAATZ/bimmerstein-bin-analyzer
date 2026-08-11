@@ -20,7 +20,7 @@ beforeEach(() => {
   a.resetStores();
   const img = createBinImage(ms41TuneImage(), 'cal.bin');
   a.setBin(img);
-  a.runChecksumVerify(img.bytes); // load-time verdict, as flows.ts does
+  a.runChecksumVerify(); // load-time verdict, as flows.ts does
 });
 
 describe('checksum verdict after an edit', () => {

@@ -128,10 +128,23 @@ export function setChecksumReport(r: ChecksumReport | undefined): void {
 /**
  * Verify the loaded bytes. Table-driven CRC over ~160 KB is single-digit
  * milliseconds, so this runs inline on load — no worker needed.
+ *
+ * Reads `bin` itself rather than taking a buffer parameter: both real callers
+ * (flows.ts) already call this right after `setBin`/`applyProject` land the
+ * image in the store, so an explicit parameter only invited a future caller
+ * to pass the WORKING buffer instead of the original — silently re-resolving
+ * and re-gating the family module against edited bytes, which is exactly
+ * what `reverifyChecksums` exists to avoid.
  */
-export function runChecksumVerify(bytes: Uint8Array): void {
-  activeChecksums = checksumsFor(bytes);
-  setChecksumReport(activeChecksums ? activeChecksums.verify(bytes) : undefined);
+export function runChecksumVerify(): void {
+  const image = get(bin);
+  if (image === null) {
+    activeChecksums = undefined;
+    setChecksumReport(undefined);
+    return;
+  }
+  activeChecksums = checksumsFor(image.bytes);
+  setChecksumReport(activeChecksums ? activeChecksums.verify(image.bytes) : undefined);
 }
 
 /**

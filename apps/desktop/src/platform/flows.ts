@@ -41,7 +41,7 @@ export async function loadBinFromPath(host: PlatformHost, path: string): Promise
     }
     actions.setBin(createBinImage(bytes, basename(path)));
     actions.setBinPath(path); // AFTER setBin — setBin clears it
-    actions.runChecksumVerify(bytes); // raw bytes still in hand here
+    actions.runChecksumVerify(); // reads the bin the setBin call just landed
     return true;
   } catch (e) {
     actions.pushToast('error', `Cannot read ${basename(path)}: ${errText(e)}`);
@@ -125,7 +125,7 @@ export async function openProjectFlow(host: PlatformHost): Promise<void> {
     }
   }
   const { droppedMaps, droppedPotentials, droppedAxisEntries, clearedStamps } = actions.applyProject(image, project);
-  actions.runChecksumVerify(image.bytes); // applyProject cleared the old verdict — recompute for this bin
+  actions.runChecksumVerify(); // applyProject cleared the old verdict — recompute for this bin
   const dropped = droppedMaps.length + droppedPotentials.length;
   if (dropped > 0) {
     actions.pushToast(

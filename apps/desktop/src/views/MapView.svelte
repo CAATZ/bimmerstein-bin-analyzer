@@ -4,7 +4,7 @@
   import type { MapDef } from '@binanalyzer/core';
   import { cellRange, editJournal, maps, potentialMaps, selection, showOriginal, workingBytes } from '../store/stores.js';
   import { axisLabels, gridFromMap } from '../lib/griddata.js';
-  import { isCellChanged, isUnchangedEdit, originalBytes } from '../lib/diffcells.js';
+  import { bytesForDisplay, isCellChanged, isUnchangedEdit } from '../lib/diffcells.js';
   import { axisByteOffset, axisEditability, mapsSharingAxis } from '../lib/axisedit.js';
   import * as actions from '../store/actions.js';
 
@@ -18,28 +18,55 @@
   // every byte-derived thing F11 shows. The grid AND both axis label lists
   // read this same buffer, so they can never disagree about which state
   // (edited or file-as-opened) is on screen.
-  const displayBytes = $derived.by((): Uint8Array | null => {
-    const w = $workingBytes;
-    if (w === null) return null;
-    return $showOriginal ? originalBytes(w, $editJournal) : w;
-  });
+  //
+  // C2 (CRITICAL regression fix): there is deliberately no intermediate
+  // `displayBytes` derived here. `$workingBytes` is mutated IN PLACE by
+  // `applyEdit` (same `Uint8Array` reference, just written into) and reset
+  // via `workingBytes.set(working)` — so a derived that reads `$workingBytes`
+  // and hands back that same reference (the F11-off path) never changes
+  // reference. Svelte 5's `$derived` memoizes on `derived.equals`, which
+  // defaults to `===`, so its write version would never bump and nothing
+  // downstream would ever recompute: the grid would show pre-edit numbers
+  // forever, self-correcting only when the buffer reference itself changes
+  // (e.g. undo). `bytesForDisplay` is a plain function for exactly this
+  // reason — each view-facing derived below calls it directly against the
+  // stores it just read, so THIS derived's own recompute (driven by
+  // `$workingBytes`/`$showOriginal`/`$editJournal` changing) is what
+  // refreshes the screen, not a memoized middle step.
+  //
+  // `$editJournal` is read UNCONDITIONALLY, before any branch, into a local —
+  // never merely inside the F11-on arm of a ternary. `bytesForDisplay` only
+  // *uses* the journal when `showOriginal` is true, but Svelte's dependency
+  // tracking is per-`$derived`, not per-branch: if the journal read were
+  // reachable only from the F11-on side, the F11-off derived would still
+  // ostensibly "depend" on it only when that branch runs — and since F11 is
+  // off by default, an edit's journal write would never even be visited to
+  // discover the dependency, leaving this derived silently stale for the
+  // common case. Reading it up front makes it undeniable that every recompute
+  // of `grid`/`xLabels`/`yLabels` observes the journal too.
   const grid = $derived.by(() => {
+    const w = $workingBytes;
+    const showOrig = $showOriginal;
+    const journal = $editJournal;
     const m = map;
-    const db = displayBytes;
-    if (m === undefined || db === null) return null;
-    return gridFromMap(db, m);
+    if (m === undefined || w === null) return null;
+    return gridFromMap(bytesForDisplay(w, showOrig, journal), m);
   });
   const xLabels = $derived.by((): string[] => {
-    const db = displayBytes;
+    const w = $workingBytes;
+    const showOrig = $showOriginal;
+    const journal = $editJournal;
     const m = map;
-    if (!db || !m) return [];
-    return axisLabels(db, m.xAxis, m.orientation === 'row-major' ? m.cols : m.rows);
+    if (!w || !m) return [];
+    return axisLabels(bytesForDisplay(w, showOrig, journal), m.xAxis, m.orientation === 'row-major' ? m.cols : m.rows);
   });
   const yLabels = $derived.by((): string[] => {
-    const db = displayBytes;
+    const w = $workingBytes;
+    const showOrig = $showOriginal;
+    const journal = $editJournal;
     const m = map;
-    if (!db || !m) return [];
-    return axisLabels(db, m.yAxis, m.orientation === 'row-major' ? m.rows : m.cols);
+    if (!w || !m) return [];
+    return axisLabels(bytesForDisplay(w, showOrig, journal), m.yAxis, m.orientation === 'row-major' ? m.rows : m.cols);
   });
 
   /** I3: is the axis breakpoint at `index` on side `which` changed vs the file
@@ -207,11 +234,17 @@
 
   /** "Revert selection" undoes only the bytes under the current range. No
    *  usable range means no target (I1) — nothing is reverted, matching what
-   *  a '+'/'-' keypress does with nothing selected. */
+   *  a '+'/'-' keypress does with nothing selected; the button stays enabled
+   *  whenever the journal is non-empty (it doesn't know about the range), so
+   *  this must tell the user why nothing happened rather than fail silently. */
   function revertSelection(): void {
     const m = map;
     if (m === undefined) return;
     const cells = actions.cellsForDelta(m, $cellRange);
+    if (cells.length === 0) {
+      actions.pushToast('info', 'Revert selection needs a cell range — select a range first');
+      return;
+    }
     const offsets: number[] = [];
     for (const c of cells) {
       const off = actions.cellOffset(m, c.row, c.col);
