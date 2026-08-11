@@ -68,4 +68,36 @@ describe('quantise', () => {
     expect(r.editable).toBe(false);
     expect(Number.isFinite(r.stored)).toBe(true);
   });
+
+  it('clamps a float cell to the float32 maximum instead of going infinite', () => {
+    const r = quantise(1e39, scale(), f32);
+    expect(r.stored).toBe(3.4028234663852886e38);
+    expect(Number.isFinite(r.stored)).toBe(true);
+    expect(r.clamped).toBe(true);
+  });
+
+  it('clamps a float cell to the negative float32 limit instead of going infinite', () => {
+    const r = quantise(-1e39, scale(), f32);
+    expect(r.stored).toBe(-3.4028234663852886e38);
+    expect(Number.isFinite(r.stored)).toBe(true);
+    expect(r.clamped).toBe(true);
+  });
+
+  it('clamps a float cell that overflows via a very small factor', () => {
+    const r = quantise(5, scale({ factor: 1e-40 }), f32);
+    expect(Number.isFinite(r.stored)).toBe(true);
+    expect(r.clamped).toBe(true);
+  });
+
+  it('does NOT report ordinary float32 precision loss as clamping', () => {
+    const r = quantise(14.73, scale(), f32);
+    expect(r.stored).toBeCloseTo(14.73, 5);
+    expect(r.clamped).toBe(false);
+  });
+
+  it('substitutes a finite value and reports clamped when raw arrives non-finite', () => {
+    const r = quantise(Infinity, scale(), f32);
+    expect(Number.isFinite(r.stored)).toBe(true);
+    expect(r.clamped).toBe(true);
+  });
 });

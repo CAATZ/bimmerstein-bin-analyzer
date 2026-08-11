@@ -37,6 +37,9 @@ function integerRange(format: ValueFormat): { min: number; max: number } {
 const roundHalfAway = (v: number): number =>
   v < 0 ? -Math.round(-v) : Math.round(v);
 
+/** Largest finite magnitude representable in IEEE-754 float32. */
+const FLOAT32_MAX = 3.4028234663852886e38;
+
 /**
  * What will ACTUALLY be stored for a typed physical value.
  *
@@ -44,7 +47,12 @@ const roundHalfAway = (v: number): number =>
  * exactly storable (with a factor of 0.0078125 almost nothing a human types
  * is), so the caller must redisplay `physical` rather than echoing the input.
  *
- * - float cells are continuous: no integer rounding, only finite clamping.
+ * - float cells are continuous: no integer rounding, only finite clamping —
+ *   `raw` is bounded to the finite float32 range BEFORE `Math.fround` runs
+ *   (fround alone maps any out-of-range finite magnitude, or a non-finite
+ *   `raw`, to +/-Infinity), so `stored` is always finite. `clamped` is true
+ *   exactly when that bounding changed the value (including a non-finite
+ *   `raw`); ordinary float32 rounding error is not clamping.
  * - a zero factor cannot be inverted; `editable: false` says so instead of
  *   producing Infinity.
  */
@@ -58,8 +66,16 @@ export function quantise(
   }
   const raw = toRaw(physical, scaling);
   if (format.float === true) {
-    const stored = Number.isFinite(raw) ? Math.fround(raw) : 0;
-    return { stored, physical: toPhysical(stored, scaling), clamped: false, editable: true };
+    const bounded = Number.isFinite(raw)
+      ? Math.min(FLOAT32_MAX, Math.max(-FLOAT32_MAX, raw))
+      : 0;
+    const stored = Math.fround(bounded);
+    return {
+      stored,
+      physical: toPhysical(stored, scaling),
+      clamped: bounded !== raw,
+      editable: true,
+    };
   }
   const { min, max } = integerRange(format);
   const rounded = roundHalfAway(raw);
