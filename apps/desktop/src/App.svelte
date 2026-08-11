@@ -48,16 +48,7 @@
     if (sel?.mapId === undefined) return;
     const m: MapDef | undefined = [...$maps, ...$potentialMaps].find((x) => x.id === sel.mapId);
     if (m === undefined) return;
-    const cr = $cellRange;
-    let cells: { row: number; col: number }[];
-    if (cr !== null && cr.mapId === m.id) {
-      cells = actions.cellsInRange(cr);
-    } else {
-      cells = [];
-      for (let row = 0; row < m.rows; row++) {
-        for (let col = 0; col < m.cols; col++) cells.push({ row, col });
-      }
-    }
+    const cells = actions.cellsForDelta(m, $cellRange);
     const { moved, clamped } = actions.applyRegionDelta(m, cells, { kind: 'step', steps });
     actions.pushToast('info', `${moved} cells changed${clamped > 0 ? `, ${clamped} clamped` : ''}`);
   }

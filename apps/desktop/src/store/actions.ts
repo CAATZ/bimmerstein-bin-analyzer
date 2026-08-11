@@ -258,6 +258,25 @@ export function cellsInRange(range: CellRange | null): { row: number; col: numbe
   return cells;
 }
 
+/**
+ * Which cells a region delta should touch for `m`.
+ *
+ * A range belonging to a DIFFERENT map is ignored rather than applied — the
+ * view clears the range when the shown map changes, but this makes a stale
+ * range harmless even if that clearing ever fails, which is the difference
+ * between a cosmetic bug and editing cells the user never selected.
+ * With no usable range, the whole map is the target, preserving the behaviour
+ * a keypress had before ranges existed.
+ */
+export function cellsForDelta(m: MapDef, range: CellRange | null): { row: number; col: number }[] {
+  if (range !== null && range.mapId === m.id) return cellsInRange(range);
+  const all: { row: number; col: number }[] = [];
+  for (let row = 0; row < m.rows; row++) {
+    for (let col = 0; col < m.cols; col++) all.push({ row, col });
+  }
+  return all;
+}
+
 export function setSelection(start: number, end: number, cols?: number): void {
   if (end <= start) {
     selection.set(null);

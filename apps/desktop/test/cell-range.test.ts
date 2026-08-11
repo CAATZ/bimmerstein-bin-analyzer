@@ -107,3 +107,31 @@ describe('applyRegionDelta over cellsInRange', () => {
     expect([...wb.slice(6, 9)]).toEqual([100, 100, 100]); // row 2 entirely untouched
   });
 });
+
+describe('cellsForDelta', () => {
+  it('a range for the SHOWN map yields exactly that range\'s cells', () => {
+    const m = map({ id: 'm1' });
+    const range = { mapId: 'm1', r0: 0, c0: 0, r1: 1, c1: 1 };
+    expect(a.cellsForDelta(m, range)).toEqual(a.cellsInRange(range));
+  });
+
+  it('a range whose mapId is a DIFFERENT map is ignored — the whole map is returned', () => {
+    const m = map({ id: 'm1', rows: 3, cols: 3 });
+    const range = { mapId: 'm2', r0: 0, c0: 0, r1: 0, c1: 0 };
+    const whole: { row: number; col: number }[] = [];
+    for (let row = 0; row < m.rows; row++) {
+      for (let col = 0; col < m.cols; col++) whole.push({ row, col });
+    }
+    expect(a.cellsForDelta(m, range)).toEqual(whole);
+  });
+
+  it('a null range returns the whole map, in row-major order, with the right count', () => {
+    const m = map({ id: 'm1', rows: 2, cols: 3 });
+    const cells = a.cellsForDelta(m, null);
+    expect(cells).toEqual([
+      { row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 2 },
+      { row: 1, col: 0 }, { row: 1, col: 1 }, { row: 1, col: 2 },
+    ]);
+    expect(cells).toHaveLength(6);
+  });
+});
