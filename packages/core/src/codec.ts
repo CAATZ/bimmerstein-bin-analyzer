@@ -61,3 +61,41 @@ export function readAxisValues(bytes: Uint8Array, axis: AxisDef): number[] {
   const { address, format } = axis;
   return Array.from({ length: axis.count }, (_, i) => readValue(bytes, address + i * format.width, format));
 }
+
+/**
+ * Mirror of readValue: lay a raw integer (or float) down at `offset`.
+ * Same range contract — an offset that would run past the buffer is a
+ * programming error, not something to silently truncate.
+ */
+export function writeValue(
+  bytes: Uint8Array,
+  offset: number,
+  format: ValueFormat,
+  raw: number
+): void {
+  const { width } = format;
+  if (offset < 0 || offset + width > bytes.length) {
+    throw new RangeError(`writeValue out of range: offset ${offset}, width ${width}, size ${bytes.length}`);
+  }
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const little = format.endianness === 'little';
+  if (format.float === true) {
+    if (width !== 4) throw new RangeError('float requires width 4');
+    view.setFloat32(offset, raw, little);
+    return;
+  }
+  switch (width) {
+    case 1:
+      if (format.signed) view.setInt8(offset, raw);
+      else view.setUint8(offset, raw);
+      return;
+    case 2:
+      if (format.signed) view.setInt16(offset, raw, little);
+      else view.setUint16(offset, raw, little);
+      return;
+    case 4:
+      if (format.signed) view.setInt32(offset, raw, little);
+      else view.setUint32(offset, raw, little);
+      return;
+  }
+}
