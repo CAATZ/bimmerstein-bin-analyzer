@@ -5,6 +5,7 @@
   import { cellRange, editJournal, maps, potentialMaps, selection, showOriginal, workingBytes } from '../store/stores.js';
   import { axisLabels, gridFromMap } from '../lib/griddata.js';
   import { isCellChanged, originalGrid } from '../lib/diffcells.js';
+  import { axisEditability, mapsSharingAxis } from '../lib/axisedit.js';
   import * as actions from '../store/actions.js';
 
   const map = $derived.by((): MapDef | undefined => {
@@ -111,6 +112,52 @@
     if (!res.ok) actions.pushToast('error', res.reason);
     else if (res.clamped) actions.pushToast('info', 'Clamped to the format limit.');
   }
+
+  // Axis breakpoint editing (Task 9) — same editing shape as a cell, keyed on
+  // which axis and its index instead of a row/col. `axisEditability` gates
+  // 'literal'/'index' axes and referenced axes with no format; those show
+  // their `reason` on attempt rather than opening an editor.
+  let axisEditing = $state<{ which: 'x' | 'y'; index: number; text: string } | null>(null);
+  /** Names of other maps whose axis storage overlaps this one, shown once per
+   * axis+side before its first edit this session — component-local, not a
+   * store, so it never survives a reload and never needs its own reset hook. */
+  let sharedNames = $state<string[]>([]);
+  const sharedNotified = new Set<string>();
+
+  function beginAxisEdit(which: 'x' | 'y', index: number): void {
+    const m = map;
+    if (m === undefined) return;
+    const axis = which === 'x' ? m.xAxis : m.yAxis;
+    const can = axisEditability(axis);
+    if (!can.editable) {
+      actions.pushToast('error', can.reason ?? 'This axis cannot be edited.');
+      return;
+    }
+    const key = `${m.id}:${which}`;
+    if (!sharedNotified.has(key)) {
+      sharedNotified.add(key);
+      sharedNames = mapsSharingAxis([...$maps, ...$potentialMaps], axis!, m.id);
+    } else {
+      sharedNames = [];
+    }
+    const label = which === 'x' ? xLabels[index] : yLabels[index];
+    axisEditing = { which, index, text: label ?? String(index) };
+  }
+
+  function commitAxisEdit(): void {
+    const e = axisEditing;
+    const m = map;
+    axisEditing = null;
+    if (e === null || m === undefined) return;
+    const typed = Number(e.text);
+    if (!Number.isFinite(typed)) {
+      actions.pushToast('error', `"${e.text}" is not a number.`);
+      return;
+    }
+    const res = actions.editAxisValue(m, e.which, e.index, typed);
+    if (!res.ok) actions.pushToast('error', res.reason);
+    else if (res.clamped) actions.pushToast('info', 'Clamped to the format limit.');
+  }
 </script>
 
 {#if map === undefined || grid === null}
@@ -133,6 +180,9 @@
       {#if $showOriginal}
         <span class="origbadge">showing ORIGINAL values (F11)</span>
       {/if}
+      {#if sharedNames.length > 0}
+        <span class="origbadge">axis shared with {sharedNames.length} other map(s): {sharedNames.join(', ')}</span>
+      {/if}
     </header>
     {#if map.scaling.rawExpression !== undefined}
       <div class="banner">
@@ -145,14 +195,32 @@
           <tr>
             <th class="corner">{map.yAxis?.name ?? ''} \ {map.xAxis?.name ?? ''}</th>
             {#each xLabels as label, i (i)}
-              <th>{label}</th>
+              <th class="axishdr" ondblclick={() => beginAxisEdit('x', i)}
+                >{#if axisEditing?.which === 'x' && axisEditing?.index === i}<input
+                    class="celledit"
+                    bind:value={axisEditing.text}
+                    onblur={commitAxisEdit}
+                    onkeydown={(ev) => {
+                      if (ev.key === 'Enter') commitAxisEdit();
+                      if (ev.key === 'Escape') axisEditing = null;
+                    }}
+                  />{:else}{label}{/if}</th>
             {/each}
           </tr>
         </thead>
         <tbody>
           {#each grid.values as row, r (r)}
             <tr>
-              <th>{yLabels[r] ?? String(r)}</th>
+              <th class="axishdr" ondblclick={() => beginAxisEdit('y', r)}
+                >{#if axisEditing?.which === 'y' && axisEditing?.index === r}<input
+                    class="celledit"
+                    bind:value={axisEditing.text}
+                    onblur={commitAxisEdit}
+                    onkeydown={(ev) => {
+                      if (ev.key === 'Enter') commitAxisEdit();
+                      if (ev.key === 'Escape') axisEditing = null;
+                    }}
+                  />{:else}{yLabels[r] ?? String(r)}{/if}</th>
               {#each row as v, c (c)}
                 <td
                   class:inrange={inRange(r, c)}
@@ -207,6 +275,9 @@
     border-left: 3px solid var(--warn);
   }
   td {
+    cursor: cell;
+  }
+  th.axishdr {
     cursor: cell;
   }
   td.inrange {

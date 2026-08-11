@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import type { AxisDef, AxisLibEntry, BinImage, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
-import { applyEdit, quantise, readValue, toPhysical, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
+import { applyEdit, quantise, readAxisValues, readValue, toPhysical, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
 import type { ChecksumReport } from '@binanalyzer/families';
 import { checksumsFor } from '@binanalyzer/families';
@@ -14,6 +14,7 @@ import {
   type CellRange, type Selection, type Toast, type ViewMode,
 } from './stores.js';
 import { detachedAxis, libraryAxis, stampAxis } from '../lib/axislib.js';
+import { axisEditability, isMonotonic } from '../lib/axisedit.js';
 import { clearUndo, pushUndo, undoTransaction } from './undo.js';
 
 /**
@@ -228,6 +229,41 @@ export function applyRegionDelta(
     editJournal.set(journal);
   });
   return { moved, clamped };
+}
+
+/**
+ * Edit one axis breakpoint. Same quantise path as a cell, using the AXIS's own
+ * format and scaling. Warns — never blocks — when the result is not monotonic.
+ */
+export function editAxisValue(
+  m: MapDef,
+  which: 'x' | 'y',
+  index: number,
+  physical: number
+): { ok: true; physical: number; clamped: boolean } | { ok: false; reason: string } {
+  const axis = which === 'x' ? m.xAxis : m.yAxis;
+  const can = axisEditability(axis);
+  if (!can.editable) return { ok: false, reason: can.reason ?? 'This axis cannot be edited.' };
+  const image = get(bin);
+  const working = get(workingBytes);
+  if (image === null || working === null) return { ok: false, reason: 'No bin is loaded.' };
+  const format = axis!.format!;
+  const scaling = axis!.scaling ?? { factor: 1, offset: 0, units: '', digits: 0 };
+  const q = quantise(physical, scaling, format);
+  if (!q.editable) return { ok: false, reason: 'This axis’s scaling factor is 0.' };
+  const offset = axis!.address! + index * format.width;
+  if (offset < 0 || offset + format.width > working.length) {
+    return { ok: false, reason: 'That axis value lies outside the loaded bin.' };
+  }
+  pushUndo('edit axis value');
+  const journal = get(editJournal);
+  applyEdit({ working, original: image.bytes, journal, offset, format, raw: q.stored });
+  workingBytes.set(working);
+  editJournal.set(journal);
+  if (!isMonotonic(readAxisValues(working, axis!))) {
+    pushToast('info', 'This axis is no longer in order. The ECU will still interpolate across it.');
+  }
+  return { ok: true, physical: q.physical, clamped: q.clamped };
 }
 
 /** Plain click (1×1) or drag-select; `MapView` also passes the same anchor for shift-click extension. */
