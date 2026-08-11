@@ -1,6 +1,6 @@
 <!-- apps/desktop/src/views/CurveView.svelte -->
 <script lang="ts">
-  import { bin, maps, potentialMaps, selection } from '../store/stores.js';
+  import { maps, potentialMaps, selection, workingBytes } from '../store/stores.js';
   import { curveSeries } from '../lib/curvedata.js';
   import { formatPhysical } from '@binanalyzer/core';
   import type { MapDef } from '@binanalyzer/core';
@@ -13,10 +13,10 @@
     return [...$maps, ...$potentialMaps].find((x) => x.id === sel.mapId);
   });
   const series = $derived.by(() => {
-    const image = $bin;
+    const wb = $workingBytes;
     const m = map;
-    if (!image || !m) return undefined;
-    return curveSeries(image.bytes, m);
+    if (!wb || !m) return undefined;
+    return curveSeries(wb, m);
   });
 
   const W = 640;

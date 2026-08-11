@@ -167,6 +167,8 @@ export async function dispatchOp(op: string, rawArgs: unknown): Promise<Dispatch
         return fail('the app has a different bin open now — call get_session again');
       }
       let binary = '';
+      // ORIGINAL bytes on purpose: the agent verifies sha256 against bin's
+      // identity, so edited bytes under the original's hash would fail that check.
       for (const byte of image.bytes) binary += String.fromCharCode(byte);
       return okv({ base64: btoa(binary), sha256: image.sha256 });
     }

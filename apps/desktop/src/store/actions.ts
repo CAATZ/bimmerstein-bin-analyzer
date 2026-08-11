@@ -5,10 +5,11 @@ import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
 import type { ChecksumReport } from '@binanalyzer/families';
 import { checksumsFor } from '@binanalyzer/families';
 import {
-  DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, checksumReport, framePromptAnswered, maps, modalOpen,
+  DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, checksumReport, editJournal, framePromptAnswered, maps,
+  modalOpen,
   potentialMaps,
   proposals, regions,
-  scanStatus, scrollRequest, selection, toasts, viewParams,
+  scanStatus, scrollRequest, selection, toasts, viewParams, workingBytes,
   type Selection, type Toast, type ViewMode,
 } from './stores.js';
 import { detachedAxis, libraryAxis, stampAxis } from '../lib/axislib.js';
@@ -72,6 +73,8 @@ export function resetStores(): void {
   framePromptAnswered.set(false);
   proposals.set([]);
   checksumReport.set(undefined);
+  workingBytes.set(null);
+  editJournal.set(new Map());
   modalDepth = 0;
   modalOpen.set(false);
   clearUndo();
@@ -91,6 +94,8 @@ export function setBin(image: BinImage): void {
   framePromptAnswered.set(false);
   proposals.set([]); // a proposal is about maps in the bin that just went away
   checksumReport.set(undefined); // a new bin is a new checksum verdict — the old one would be fabricated data
+  workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
+  editJournal.set(new Map());
   clearUndo();
 }
 
@@ -433,10 +438,11 @@ export function optimizeValueRange(): void {
     pushToast('info', 'Selection is smaller than one cell at the current word size');
     return;
   }
+  const bytes = get(workingBytes) ?? image.bytes;
   let min = Infinity;
   let max = -Infinity;
   for (let off = sel.start; off <= last; off += w) {
-    const v = readValue(image.bytes, off, vp.format);
+    const v = readValue(bytes, off, vp.format);
     if (v < min) min = v;
     if (v > max) max = v;
   }
@@ -523,6 +529,8 @@ export function applyProject(image: BinImage, project: Project): ApplyProjectRep
   };
   bin.set(image);
   checksumReport.set(undefined); // a new bin is a new checksum verdict — the old one would be fabricated data
+  workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
+  editJournal.set(new Map());
   axisLibrary.set(lib);
   maps.set(keep(project.maps, droppedMaps).map(clearDangling).sort(byAddress));
   potentialMaps.set(keep(project.potentialMaps, droppedPotentials).map(clearDangling)); // ENGINE RANK ORDER — never re-sort

@@ -1,5 +1,5 @@
 import { writable, type Writable } from 'svelte/store';
-import type { AxisLibEntry, BinImage, MapDef, ValueFormat } from '@binanalyzer/core';
+import type { AxisLibEntry, BinImage, EditJournal, MapDef, ValueFormat } from '@binanalyzer/core';
 import type { Region, ScanProgress } from '@binanalyzer/engine';
 import type { ChecksumReport } from '@binanalyzer/families';
 
@@ -55,6 +55,18 @@ export const DEFAULT_VIEW_PARAMS: ViewParams = {
 };
 
 export const bin: Writable<BinImage | null> = writable(null);
+/**
+ * The editable copy of the loaded bin. EVERY view reads this, never
+ * `bin.bytes` — showing the original after an edit would render pre-edit data
+ * while claiming to show the bin. `bin` stays the untouched original so its
+ * sha256 remains the identity of the file on disk.
+ *
+ * The one deliberate exception is copilot/dispatch.ts, which transfers bytes
+ * the agent verifies against that sha.
+ */
+export const workingBytes: Writable<Uint8Array | null> = writable(null);
+/** Offsets edited since load. Empty ⇒ the buffer matches the file as opened. */
+export const editJournal: Writable<EditJournal> = writable(new Map());
 /**
  * Absolute path the loaded bin was read from, or null when it is unknown.
  * Session state, NOT identity: deliberately absent from BinImage and from the

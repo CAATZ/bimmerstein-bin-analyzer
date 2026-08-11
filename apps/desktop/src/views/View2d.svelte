@@ -1,6 +1,6 @@
 <!-- apps/desktop/src/views/View2d.svelte -->
 <script lang="ts">
-  import { bin, scrollRequest, selection, viewParams } from '../store/stores.js';
+  import { bin, scrollRequest, selection, viewParams, workingBytes } from '../store/stores.js';
   import * as actions from '../store/actions.js';
   import { barFraction, defaultRawRange } from '../lib/hexlayout.js';
   import { seriesFromRange } from '../lib/griddata.js';
@@ -27,8 +27,8 @@
   }
 
   function draw(): void {
-    const image = $bin;
-    if (!canvas || !image || viewportW <= 0 || viewportH <= 0) return;
+    const wb = $workingBytes;
+    if (!canvas || !wb || viewportW <= 0 || viewportH <= 0) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const dpr = window.devicePixelRatio || 1;
@@ -43,7 +43,7 @@
     const firstIndex = Math.max(0, Math.floor(scrollLeft / PPV));
     const visible = Math.min(cellCount - firstIndex, Math.ceil(viewportW / PPV) + 1);
     if (visible <= 0) return;
-    const values = seriesFromRange(image.bytes, indexToOffset(firstIndex), visible, $viewParams.format);
+    const values = seriesFromRange(wb, indexToOffset(firstIndex), visible, $viewParams.format);
     const range = $viewParams.valueRange ?? defaultRawRange($viewParams.format);
     const h = viewportH - 20;
     const sel = $selection;
@@ -126,13 +126,13 @@
   function onMouseUp(): void {
     const anchor = dragAnchor;
     dragAnchor = null;
-    const image = $bin;
+    const wb = $workingBytes;
     const sel = $selection;
-    if (anchor === null || !image || !sel) return;
+    if (anchor === null || !wb || !sel) return;
     // Selection assist (spec §7) — same engine snap as the hexdump; snap
     // returns null for ranges too small to frame, so tiny drags stay as-is.
     const { float: _float, ...intFmt } = $viewParams.format;
-    const snap = snapSelection(image.bytes, sel.start, sel.end, intFmt);
+    const snap = snapSelection(wb, sel.start, sel.end, intFmt);
     if (snap !== null) actions.setSelection(snap.start, snap.end, snap.cols);
   }
 </script>

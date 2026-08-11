@@ -2,7 +2,7 @@
 <script lang="ts">
   import type { ValueFormat } from '@binanalyzer/core';
   import { readValue } from '@binanalyzer/core';
-  import { bin, maps, potentialMaps, regions, scrollRequest, selection, viewParams } from '../store/stores.js';
+  import { bin, maps, potentialMaps, regions, scrollRequest, selection, viewParams, workingBytes } from '../store/stores.js';
   import * as actions from '../store/actions.js';
   import {
     barFraction, bytesPerRow, cellAtPoint, cellOfOffset, chipsForRows, defaultRawRange,
@@ -43,7 +43,8 @@
   function draw(): void {
     const g = geometry;
     const image = $bin;
-    if (!canvas || !g || !image || viewportW <= 0 || viewportH <= 0) return;
+    const wb = $workingBytes;
+    if (!canvas || !g || !image || !wb || viewportW <= 0 || viewportH <= 0) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const dpr = window.devicePixelRatio || 1;
@@ -70,8 +71,8 @@
         const off = offsetOfCell(g, row, col);
         if (off + g.width > image.size) break;
         const x = GUTTER_W + col * cellWidth;
-        const raw = readValue(image.bytes, off, txtFmt);
-        const value = fmt.float === true ? readValue(image.bytes, off, fmt) : raw;
+        const raw = readValue(wb, off, txtFmt);
+        const value = fmt.float === true ? readValue(wb, off, fmt) : raw;
         // value bar (bottom-anchored)
         const frac = barFraction(value, range);
         if (frac > 0) {
@@ -174,13 +175,13 @@
   function onMouseUp(): void {
     if (dragAnchor === null) return;
     dragAnchor = null;
-    const image = $bin;
+    const wb = $workingBytes;
     const sel = $selection;
     const g = geometry;
-    if (!image || !sel || !g) return;
+    if (!wb || !sel || !g) return;
     if (sel.end - sel.start <= bytesPerRow(g)) return; // sub-row drags stay as dragged
     // Selection assist (spec §7): snap to the engine's best framing.
-    const snap = snapSelection(image.bytes, sel.start, sel.end, intFormat);
+    const snap = snapSelection(wb, sel.start, sel.end, intFormat);
     if (snap !== null) actions.setSelection(snap.start, snap.end, snap.cols);
   }
 </script>

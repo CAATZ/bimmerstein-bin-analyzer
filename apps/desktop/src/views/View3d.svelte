@@ -1,6 +1,6 @@
 <!-- apps/desktop/src/views/View3d.svelte -->
 <script lang="ts">
-  import { bin, maps, potentialMaps, selection, viewParams } from '../store/stores.js';
+  import { maps, potentialMaps, selection, viewParams, workingBytes } from '../store/stores.js';
   import { gridFromMap, gridFromSelection, type SurfaceGrid } from '../lib/griddata.js';
   import { SurfaceRenderer } from './surface.js';
 
@@ -10,14 +10,14 @@
   let renderer: SurfaceRenderer | null = null;
 
   const grid = $derived.by((): SurfaceGrid | null => {
-    const image = $bin;
+    const wb = $workingBytes;
     const sel = $selection;
-    if (!image || !sel) return null;
+    if (!wb || !sel) return null;
     if (sel.mapId !== undefined) {
       const m = [...$maps, ...$potentialMaps].find((x) => x.id === sel.mapId);
-      if (m) return gridFromMap(image.bytes, m);
+      if (m) return gridFromMap(wb, m);
     }
-    return gridFromSelection(image.bytes, sel.start, sel.end, sel.cols ?? $viewParams.columns, $viewParams.format);
+    return gridFromSelection(wb, sel.start, sel.end, sel.cols ?? $viewParams.columns, $viewParams.format);
   });
 
   $effect(() => {

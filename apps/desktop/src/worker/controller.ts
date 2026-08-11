@@ -2,7 +2,7 @@ import { get } from 'svelte/store';
 import {
   applyScanResult, pushToast, setScanCanceled, setScanError, setScanProgress, setScanRunning,
 } from '../store/actions.js';
-import { bin } from '../store/stores.js';
+import { bin, workingBytes } from '../store/stores.js';
 import { ScanClient, type WorkerLike } from './client.js';
 
 /**
@@ -19,7 +19,8 @@ const client = new ScanClient(
 
 export function runScan(): void {
   const image = get(bin);
-  if (!image) {
+  const wb = get(workingBytes);
+  if (!image || !wb) {
     pushToast('info', 'Open a bin first');
     return;
   }
@@ -29,7 +30,9 @@ export function runScan(): void {
   // rests on 'running', not 'canceled', for the scan that is actually live
   // (reachable via drag-drop mid-scan; Toolbar's Cancel button calls
   // cancelScan() directly and is unaffected).
-  client.start(image.bytes, undefined, {
+  // On Rescan the user is asking to analyse the current state — the working
+  // buffer is the only reading that makes Rescan useful after an edit.
+  client.start(wb, undefined, {
     onProgress: setScanProgress,
     onResult: applyScanResult,
     onError: setScanError,

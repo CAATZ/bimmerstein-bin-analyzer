@@ -4,7 +4,7 @@
   import { get } from 'svelte/store';
   import type { AxisDef, AxisLibEntry } from '@binanalyzer/core';
   import { DEFAULT_SCAN_CONFIG, saToFo, scanPrefixedAxes, type PrefixedAxis } from '@binanalyzer/engine';
-  import { axisLibrary, bin, maps, potentialMaps } from '../store/stores.js';
+  import { axisLibrary, bin, maps, potentialMaps, workingBytes } from '../store/stores.js';
   import * as actions from '../store/actions.js';
   import { attachTargets, axisIdentityKey, fanOutCount, stampAxis, type AttachTarget } from '../lib/axislib.js';
   import { axisSaRepresentable, isMs41FullRead } from '@binanalyzer/appkit';
@@ -23,8 +23,9 @@
   onMount(() => {
     actions.pushModal();
     const image = get(bin);
-    if (image) {
-      pool = scanPrefixedAxes(image.bytes, [{ start: 0, end: image.size, kind: 'data' }], DEFAULT_SCAN_CONFIG);
+    const wb = get(workingBytes);
+    if (image && wb) {
+      pool = scanPrefixedAxes(wb, [{ start: 0, end: image.size, kind: 'data' }], DEFAULT_SCAN_CONFIG);
     }
     return () => actions.popModal();
   });

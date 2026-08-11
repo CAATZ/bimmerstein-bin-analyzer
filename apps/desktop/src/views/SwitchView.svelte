@@ -1,6 +1,6 @@
 <!-- apps/desktop/src/views/SwitchView.svelte -->
 <script lang="ts">
-  import { bin, maps, potentialMaps, selection } from '../store/stores.js';
+  import { maps, potentialMaps, selection, workingBytes } from '../store/stores.js';
   import { isSwitch, matchSwitchState } from '../lib/switchdata.js';
   import type { MapDef } from '@binanalyzer/core';
 
@@ -10,10 +10,10 @@
     return [...$maps, ...$potentialMaps].find((x) => x.id === sel.mapId);
   });
   const match = $derived.by(() => {
-    const image = $bin;
+    const wb = $workingBytes;
     const m = map;
-    if (!image || !m || !isSwitch(m)) return undefined;
-    return matchSwitchState(image.bytes, m);
+    if (!wb || !m || !isSwitch(m)) return undefined;
+    return matchSwitchState(wb, m);
   });
   /** Index of the row to highlight — the FIRST state whose DATA equals the
    *  actual bytes (matchSwitchState matches by data; duplicate NAMES may

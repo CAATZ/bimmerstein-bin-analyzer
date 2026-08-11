@@ -2,7 +2,7 @@
 <script lang="ts">
   import { formatPhysical } from '@binanalyzer/core';
   import type { MapDef } from '@binanalyzer/core';
-  import { bin, maps, potentialMaps, selection } from '../store/stores.js';
+  import { maps, potentialMaps, selection, workingBytes } from '../store/stores.js';
   import { axisLabels, gridFromMap } from '../lib/griddata.js';
 
   const map = $derived.by((): MapDef | undefined => {
@@ -11,21 +11,21 @@
     return [...$maps, ...$potentialMaps].find((m) => m.id === sel.mapId);
   });
   const grid = $derived.by(() => {
-    const image = $bin;
+    const wb = $workingBytes;
     const m = map;
-    return image && m ? gridFromMap(image.bytes, m) : null;
+    return wb && m ? gridFromMap(wb, m) : null;
   });
   const xLabels = $derived.by((): string[] => {
-    const image = $bin;
+    const wb = $workingBytes;
     const m = map;
-    if (!image || !m) return [];
-    return axisLabels(image.bytes, m.xAxis, m.orientation === 'row-major' ? m.cols : m.rows);
+    if (!wb || !m) return [];
+    return axisLabels(wb, m.xAxis, m.orientation === 'row-major' ? m.cols : m.rows);
   });
   const yLabels = $derived.by((): string[] => {
-    const image = $bin;
+    const wb = $workingBytes;
     const m = map;
-    if (!image || !m) return [];
-    return axisLabels(image.bytes, m.yAxis, m.orientation === 'row-major' ? m.rows : m.cols);
+    if (!wb || !m) return [];
+    return axisLabels(wb, m.yAxis, m.orientation === 'row-major' ? m.rows : m.cols);
   });
 
   // Cell selection (spec §7 "cell selection", read-only in v1) — view-local
