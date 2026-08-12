@@ -32,6 +32,11 @@ export const openBinTool: ToolSpec = {
       size: image.size,
       isFullRead: isMs41FullRead(image.size),
       bytes: image.bytes,
+      // Headless has no working buffer: one image, one reference, no branch
+      // anywhere downstream.
+      originalBytes: image.bytes,
+      contentSha256: image.sha256,
+      changedBytes: 0,
     });
     const e = opened.entry;
     return ok({

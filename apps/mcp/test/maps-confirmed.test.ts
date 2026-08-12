@@ -4,9 +4,11 @@ import { findMap, sourcedMaps } from '../src/maps.js';
 import type { OpenBin } from '../src/session.js';
 
 function baseEntry(): OpenBin {
+  const buf = new Uint8Array(256);
   return {
     binId: 'a'.repeat(64), sha256: 'a'.repeat(64), name: 'live.bin', path: 'C:/live.bin',
-    size: 256, isFullRead: false, bytes: new Uint8Array(256),
+    size: 256, isFullRead: false, bytes: buf,
+    originalBytes: buf, contentSha256: 'a'.repeat(64), changedBytes: 0,
   };
 }
 

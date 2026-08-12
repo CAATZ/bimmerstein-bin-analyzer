@@ -83,6 +83,9 @@ describe('sourcedMaps / findMap', () => {
   const entry: OpenBin = {
     binId: 'a', sha256: 'a', name: 'a.bin', path: '/a.bin', size: 64, isFullRead: false,
     bytes: new Uint8Array(64),
+    originalBytes: new Uint8Array(64),
+    contentSha256: 'a',
+    changedBytes: 0,
     scan: { configVersion: 'v', durationMs: 1, result: { regions: [], potentialMaps: [map({ id: 'p1', provenance: 'auto', confidence: 0.5 })] } },
     imported: { romId: 'R', warnings: [], frameApplied: 'none', maps: [map({ id: 'i1' })] },
   };
@@ -99,6 +102,8 @@ describe('sourcedMaps / findMap', () => {
     const bare: OpenBin = {
       binId: entry.binId, sha256: entry.sha256, name: entry.name, path: entry.path,
       size: entry.size, isFullRead: entry.isFullRead, bytes: entry.bytes,
+      originalBytes: entry.originalBytes, contentSha256: entry.contentSha256,
+      changedBytes: entry.changedBytes,
     };
     expect(sourcedMaps(bare, 'potential')).toEqual({ ok: false, error: expect.stringContaining('scan_bin') });
     expect(sourcedMaps(bare, 'imported')).toEqual({ ok: false, error: expect.stringContaining('import_definition') });

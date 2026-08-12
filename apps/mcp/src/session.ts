@@ -28,7 +28,21 @@ export interface OpenBin {
   path: string;
   size: number;
   isFullRead: boolean;
+  /**
+   * What VALUE reads see. In co-pilot mode this is the app's WORKING buffer;
+   * in headless mode it is the same reference as `originalBytes`.
+   */
   bytes: Uint8Array;
+  /**
+   * The file as opened. DETECTION reads this and nothing else (Part C §3.5):
+   * P4's "same bytes -> byte-identical maps with the same ids" premise breaks
+   * the moment a scan sees edited bytes.
+   */
+  originalBytes: Uint8Array;
+  /** sha256(bytes). Equals binId exactly while the session is clean. */
+  contentSha256: string;
+  /** How many bytes differ from the file as opened; always 0 in headless mode. */
+  changedBytes: number;
   scan?: CachedScan;
   imported?: ImportedDefs;
   detectedAxes?: PrefixedAxis[];
@@ -44,6 +58,18 @@ export interface OpenResult {
   entry: OpenBin;
   alreadyOpen: boolean;
   evicted: OpenBin[];
+}
+
+/**
+ * The buffer a tool should read. Value reads take 'working' (the default);
+ * DETECTION takes 'original' (Part C §3.5).
+ *
+ * Every read routes through here so that `originalBytes` itself stays confined
+ * to the three files that declare or construct it, and so the guard test can
+ * pin the two call sites that deliberately read pre-edit bytes.
+ */
+export function bufferFor(entry: OpenBin, which: 'working' | 'original'): Uint8Array {
+  return which === 'original' ? entry.originalBytes : entry.bytes;
 }
 
 /**

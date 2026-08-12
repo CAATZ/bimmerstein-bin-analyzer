@@ -50,6 +50,9 @@ export class LiveSessionStore implements SessionStore {
       size: bin.size,
       isFullRead: isMs41FullRead(bin.size),
       bytes,
+      originalBytes: bytes,
+      contentSha256: bin.sha256,
+      changedBytes: 0,
       confirmed: state.maps,
     };
     const scan = this.scans.get(bin.sha256);

@@ -130,7 +130,7 @@ describe('LiveSessionStore', () => {
   it('open() is not reachable in co-pilot mode and says so', async () => {
     const s = new LiveSessionStore(fakeLink(null), new FakeFileIo());
     await expect(
-      s.open({ binId: SHA, sha256: SHA, name: 'x', path: 'x', size: 1, isFullRead: false, bytes: BYTES })
+      s.open({ binId: SHA, sha256: SHA, name: 'x', path: 'x', size: 1, isFullRead: false, bytes: BYTES, originalBytes: BYTES, contentSha256: SHA, changedBytes: 0 })
     ).rejects.toThrow(/user opens bins/i);
   });
 });

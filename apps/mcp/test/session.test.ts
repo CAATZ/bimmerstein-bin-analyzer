@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { MemorySessionStore, type OpenBin } from '../src/session.js';
+import { MemorySessionStore, bufferFor, type OpenBin } from '../src/session.js';
 
 function entry(id: string, size = 16): OpenBin {
+  const buf = new Uint8Array(size);
   return {
     binId: id, sha256: id, name: `${id}.bin`, path: `C:/bins/${id}.bin`,
-    size, isFullRead: false, bytes: new Uint8Array(size),
+    size, isFullRead: false, bytes: buf, originalBytes: buf, contentSha256: id, changedBytes: 0,
   };
 }
 
@@ -104,5 +105,22 @@ describe('MemorySessionStore', () => {
     await expect(
       s.setScan('nope', { configVersion: 'v1', result: { regions: [], potentialMaps: [] }, durationMs: 0 })
     ).resolves.toBeUndefined();
+  });
+});
+
+describe('OpenBin buffers', () => {
+  const twoBuffer = (): OpenBin => ({
+    binId: 'aa', sha256: 'aa', name: 'x.bin', path: 'C:/x.bin', size: 4,
+    isFullRead: false,
+    bytes: Uint8Array.of(9, 9, 9, 9),
+    originalBytes: Uint8Array.of(1, 2, 3, 4),
+    contentSha256: 'bb',
+    changedBytes: 4,
+  });
+
+  it('bufferFor returns the working buffer by default and the original on demand', () => {
+    const e = twoBuffer();
+    expect(bufferFor(e, 'working')).toBe(e.bytes);
+    expect(bufferFor(e, 'original')).toBe(e.originalBytes);
   });
 });
