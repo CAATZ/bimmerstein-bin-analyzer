@@ -31,6 +31,17 @@ export const NO_BIN_OPEN =
  * "more than one map -> he proposes"; without this an agent could decompose a
  * bulk change into N single calls and never show the user a panel.
  */
+/**
+ * Every op this dispatcher will act on. An ALLOWLIST, on the side that would
+ * actually execute a change — a save op cannot be added without a test failing
+ * and a human deciding (Part C §7). `dispatchOp`'s default branch already
+ * refuses anything absent here; this constant makes the set assertable.
+ */
+export const DISPATCH_OPS = [
+  'select', 'show', 'open_map', 'change_map', 'change_axis_entry',
+  'propose', 'save_project', 'getBinBytes',
+] as const;
+
 export const SINGLE_CHANGE_BURST = 5;
 export const SINGLE_CHANGE_WINDOW_MS = 10_000;
 let recentChanges: number[] = [];
@@ -206,6 +217,12 @@ function changeToastText(
 
 /** Applies ONE change through the matching actions.ts mutator. */
 export function applyChange(op: string, args: Record<string, unknown>): DispatchResult {
+  if (op === 'map_edit') {
+    const r = actions.applyProposedEdit(args as unknown as actions.ProposedEdit);
+    return r.ok
+      ? okv({ offset: r.value.offset, stored: r.value.stored, clamped: r.value.clamped })
+      : fail(r.error);
+  }
   if (op === 'change_map') return applyMapChange(args);
   if (op === 'change_axis_entry') return applyAxisEntryChange(args);
   if (args['addMap'] !== undefined) {
@@ -294,14 +311,23 @@ export function applyProposal(
   const failed: Array<{ id: string; error: string }> = [];
   const wanted = new Set(acceptedIds);
 
+  let touchedBytes = false;
   undoTransaction(`co-pilot: ${proposal.title}`, () => {
     for (const change of proposal.changes) {
       if (!wanted.has(change.id)) continue;
-      const r = applyChange(kindOf(change), change);
-      if (r.ok) accepted.push(change.id);
-      else failed.push({ id: change.id, error: r.error });
+      const kind = kindOf(change);
+      const r = applyChange(kind, change);
+      if (r.ok) {
+        accepted.push(change.id);
+        if (kind === 'map_edit') touchedBytes = true;
+      } else {
+        failed.push({ id: change.id, error: r.error });
+      }
     }
   });
+  // ONCE, after the batch (Part C §6.1) — a 200-row proposal must not run 200
+  // verifications, and the chip must not be stale for the 199 in between.
+  if (touchedBytes) actions.reverifyChecksums();
 
   const rejected = proposal.changes.map((c) => c.id).filter((id) => !wanted.has(id));
   return { accepted, rejected, failed };
@@ -309,8 +335,16 @@ export function applyProposal(
 
 /** A change carries its op explicitly when escalated; otherwise infer from shape. */
 function kindOf(change: Record<string, unknown>): string {
+  // `kind` FIRST, before any shape inference. An edit row has a mapId and none
+  // of the other discriminators, so the fall-through below would send it to
+  // applyMapChange, which would build an empty patch, apply nothing and return
+  // ok — a byte edit silently dropped and reported as applied (Part C §4.4).
+  if (change['kind'] === 'cell' || change['kind'] === 'axis') return 'map_edit';
   if (typeof change['op'] === 'string') return change['op'];
   if (change['addMap'] !== undefined) return 'addMap';
   if (change['entryId'] !== undefined || change['create'] !== undefined) return 'change_axis_entry';
   return 'change_map';
 }
+
+/** Test hook: routing is the contract, and the wrong route looks like success. */
+export const kindOfForTest = kindOf;

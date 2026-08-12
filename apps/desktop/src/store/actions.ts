@@ -192,7 +192,13 @@ export function runChecksumVerify(): void {
  * still handles a gate-breaking edit correctly — it reports `applies: false`
  * rather than throwing — so the report is never fabricated, only honest.
  */
-function reverifyChecksums(): void {
+/**
+ * Exported for the co-pilot's batch apply, which must verify ONCE after the
+ * whole proposal rather than 200 times inside it. Zero-argument on purpose (the
+ * B1 review's lesson): it reads `bin` internally, so no caller can hand it the
+ * wrong buffer and re-gate the family module.
+ */
+export function reverifyChecksums(): void {
   const working = get(workingBytes);
   if (working === null) return setChecksumReport(undefined);
   setChecksumReport(activeChecksums ? activeChecksums.verify(working) : undefined);
@@ -408,6 +414,107 @@ export function editAxisValue(
     pushToast('info', 'This axis is no longer in order. The ECU will still interpolate across it.');
   }
   return { ok: true, physical: q.physical, clamped: q.clamped };
+}
+
+/** One proposed byte edit, as it arrives from the co-pilot (Part C §4.1). */
+export interface ProposedEdit {
+  id: string;
+  kind: 'cell' | 'axis';
+  mapId: string;
+  row?: number;
+  col?: number;
+  axis?: 'x' | 'y';
+  index?: number;
+  /** PHYSICAL unless `raw` is true. */
+  value: number;
+  raw?: boolean;
+  /** The raw byte the agent based this edit on. */
+  expectedRaw: number;
+}
+
+const IDENTITY_SCALING: Scaling = { factor: 1, offset: 0, units: '', digits: 0 };
+
+function resolveEditTarget(
+  m: MapDef,
+  edit: ProposedEdit
+): Result<{ offset: number; format: ValueFormat; scaling: Scaling }> {
+  if (edit.kind === 'cell') {
+    const row = edit.row ?? -1;
+    const col = edit.col ?? -1;
+    if (!Number.isInteger(row) || row < 0 || row >= m.rows) {
+      return { ok: false, error: `row ${row} is outside this ${m.rows}x${m.cols} map` };
+    }
+    if (!Number.isInteger(col) || col < 0 || col >= m.cols) {
+      return { ok: false, error: `col ${col} is outside this ${m.rows}x${m.cols} map` };
+    }
+    return { ok: true, value: { offset: cellOffset(m, row, col), format: m.format, scaling: m.scaling } };
+  }
+  const axis = edit.axis === 'y' ? m.yAxis : m.xAxis;
+  const can = axisEditability(axis);
+  if (!can.editable) return { ok: false, error: can.reason ?? 'That axis cannot be edited.' };
+  const index = edit.index ?? -1;
+  if (!Number.isInteger(index) || index < 0 || index >= axis!.count) {
+    return { ok: false, error: `index ${index} is outside this ${axis!.count}-value axis` };
+  }
+  return {
+    ok: true,
+    value: {
+      offset: axis!.address! + index * axis!.format!.width,
+      format: axis!.format!,
+      scaling: axis!.scaling ?? IDENTITY_SCALING,
+    },
+  };
+}
+
+/**
+ * Apply ONE proposed byte edit.
+ *
+ * Called from the co-pilot dispatcher INSIDE the proposal's single
+ * undoTransaction, so it neither opens its own transaction nor pushes its own
+ * undo entry, and it does NOT re-verify checksums — the batch does that once
+ * (Part C §6.1). It writes through the same applyEdit a human edit uses, so the
+ * offset-keyed journal cannot tell the two apart, which is correct: the bytes
+ * are the bytes.
+ */
+export function applyProposedEdit(
+  edit: ProposedEdit
+): Result<{ offset: number; stored: number; clamped: boolean }> {
+  const image = get(bin);
+  const working = get(workingBytes);
+  if (image === null || working === null) return { ok: false, error: 'No bin is loaded.' };
+
+  const m = get(maps).find((x) => x.id === edit.mapId) ?? get(potentialMaps).find((x) => x.id === edit.mapId);
+  if (m === undefined) return { ok: false, error: `no map with id ${edit.mapId} in the app` };
+
+  const target = resolveEditTarget(m, edit);
+  if (!target.ok) return target;
+  const { offset, format, scaling } = target.value;
+
+  if (offset < 0 || offset + format.width > working.length) {
+    return { ok: false, error: 'That value lies outside the loaded bin.' };
+  }
+  if (!Number.isInteger(edit.expectedRaw)) {
+    return { ok: false, error: 'This edit carries no expectedRaw, so it cannot be checked against the buffer.' };
+  }
+  const current = readValue(working, offset, format);
+  if (current !== edit.expectedRaw) {
+    return {
+      ok: false,
+      error: `the byte moved since this was proposed: expected raw ${edit.expectedRaw}, found ${current}`,
+    };
+  }
+  // raw:true rides the SAME path with identity scaling, so rounding and
+  // clamping still apply and there is no second write path to keep honest.
+  const q = quantise(edit.value, edit.raw === true ? IDENTITY_SCALING : scaling, format);
+  if (!q.editable) {
+    return { ok: false, error: 'This scaling factor is 0, so a physical value cannot be converted to a raw one.' };
+  }
+
+  const journal = get(editJournal);
+  applyEdit({ working, original: image.bytes, journal, offset, format, raw: q.stored });
+  workingBytes.set(working);
+  editJournal.set(journal);
+  return { ok: true, value: { offset, stored: q.stored, clamped: q.clamped } };
 }
 
 /** Plain click (1×1) or drag-select; `MapView` also passes the same anchor for shift-click extension. */
