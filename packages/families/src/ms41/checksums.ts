@@ -29,6 +29,17 @@ const BOOT_STORE = 0x5c80;
 const PROG_STORE = 0x6050;
 const PROG_INIT_AT = 0x6066;
 
+/**
+ * The FILE ranges `programComputed` walks, at their nominal (untrimmed) extents.
+ * trimEnd() may shorten the tail of each; reporting the full extent is the
+ * conservative direction for "did an edit land inside this?".
+ */
+const PROGRAM_COVERS: { start: number; end: number }[] = [
+  { start: 0x0000, end: 0x4000 },
+  { start: 0x6100, end: 0x8000 },
+  { start: 0x20000, end: 0x40000 },
+];
+
 const SWITCH_ADDR = 0x605c;
 const SWITCH_ENABLED = 0x30;
 const SWITCH_DISABLED = 0xff;
@@ -118,7 +129,7 @@ function verifyImage(bytes: Uint8Array): ChecksumReport {
   if (!isCoherentWalk(walk)) return inapplicable();
 
   const blocks: ChecksumBlock[] = [];
-  const skipped: { id: string; reason: string }[] = [];
+  const skipped: ChecksumReport['skipped'] = [];
   const notes: string[] = [];
 
   if (bytes.length === FULL_ROM_SIZE) {
@@ -128,6 +139,9 @@ function verifyImage(bytes: Uint8Array): ChecksumReport {
     skipped.push({
       id: 'program',
       reason: `${PROGRAM_SKIP_REASON} — stored ${hex(ps)}, computed ${hex(pc)}`,
+      // Copied, never handed out by reference: verify() must not expose module
+      // state a caller could mutate.
+      covers: PROGRAM_COVERS.map((c) => ({ ...c })),
     });
     notes.push(switchNote(bytes));
   } else {

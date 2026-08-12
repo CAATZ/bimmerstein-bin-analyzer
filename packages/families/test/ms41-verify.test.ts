@@ -88,3 +88,30 @@ describe('ms41Checksums.verify — inapplicable', () => {
     expect(r).toMatchObject({ applies: false, valid: false, blocks: [] });
   });
 });
+
+describe('skipped checksums carry the ranges they cover', () => {
+  it('the program entry names its three regions on a full ROM', () => {
+    const r = ms41Checksums.verify(ms41Image(FULL));
+    const program = r.skipped.find((s) => s.id === 'program')!;
+    expect(program.covers).toEqual([
+      { start: 0x0000, end: 0x4000 },
+      { start: 0x6100, end: 0x8000 },
+      { start: 0x20000, end: 0x40000 },
+    ]);
+  });
+
+  it('does NOT overlap the MS41 full-read calibration window', () => {
+    // fo(SA) = (0x10000 + SA) ^ 0x4000 lands cal in [0x10000, 0x18000), which is
+    // disjoint from all three program regions. This is what lets a save tell a
+    // tuner their calibration edit did not disturb the checksum it will not fix.
+    const program = ms41Checksums.verify(ms41Image(FULL)).skipped.find((s) => s.id === 'program')!;
+    for (const c of program.covers!) {
+      expect(c.start >= 0x18000 || c.end <= 0x10000).toBe(true);
+    }
+  });
+
+  it('a 24 KB partial skips boot and program with NO ranges — they are absent, not unvouched', () => {
+    const r = ms41Checksums.verify(ms41Image(TUNE));
+    for (const s of r.skipped) expect(s.covers).toBeUndefined();
+  });
+});

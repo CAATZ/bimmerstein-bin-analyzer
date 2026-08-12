@@ -22,8 +22,14 @@ export interface ChecksumReport {
   blocks: ChecksumBlock[];
   /** true when every block is ok AND at least one block was evaluated. */
   valid: boolean;
-  /** Checksums deliberately NOT evaluated, each with a reason. */
-  skipped: { id: string; reason: string }[];
+  /**
+   * Checksums deliberately NOT evaluated, each with a reason — and, when the
+   * checksum exists in this image but is not vouched for, the FILE ranges it
+   * covers. A consumer needs those to answer "do my edits touch it?"; a
+   * checksum that is simply ABSENT from the image (boot, in a 24 KB partial)
+   * carries none, because there is nothing to touch.
+   */
+  skipped: { id: string; reason: string; covers?: { start: number; end: number }[] }[];
   /** Advisory facts that change what a result MEANS, not whether it passes. */
   notes: string[];
 }
