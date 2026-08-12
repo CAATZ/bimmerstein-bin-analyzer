@@ -146,7 +146,7 @@ describe('closing the app with unsaved byte changes', () => {
   it('does NOT ask after saving', async () => {
     const host = new FakeHost();
     await dirtySession(host);
-    host.saveAnswers = ['C:\bins\out.bin'];
+    host.saveAnswers = ['C:\\bins\\out.bin'];
     expect(await saveBinFlow(host, { promptAlways: true })).toBe(true);
     expect(await confirmCloseFlow(host)).toBe(true);
     expect(host.confirmMessages).toHaveLength(0);
