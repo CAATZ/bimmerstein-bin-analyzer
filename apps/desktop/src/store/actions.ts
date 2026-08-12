@@ -27,6 +27,8 @@ import { clearUndo, pushUndo, redo as redoInternal, undo as undoInternal, undoTr
 
 const VIEW_ORDER: ViewMode[] = ['hex', '2d', '3d', 'map'];
 const MAX_COLUMNS = 256;
+/** correct()'s `changed` list is per BYTE, so corrections are laid down one byte at a time. */
+const BYTE_FORMAT: ValueFormat = { width: 1, signed: false, endianness: 'little' };
 
 let toastSeq = 0;
 let scrollSeq = 0;
@@ -194,6 +196,70 @@ function reverifyChecksums(): void {
   const working = get(workingBytes);
   if (working === null) return setChecksumReport(undefined);
   setChecksumReport(activeChecksums ? activeChecksums.verify(working) : undefined);
+}
+
+export interface SaveCorrection {
+  /** The bytes to write: the working buffer with the module's corrections applied. */
+  bytes: Uint8Array;
+  /** Describes `bytes`. undefined ⇒ no family module was active when this bin loaded. */
+  report: ChecksumReport | undefined;
+  changed: { offset: number; from: number; to: number }[];
+  /** Journal keys BEFORE the correction: the user's own edits, not ours. */
+  editedOffsets: number[];
+}
+
+/**
+ * What a save WOULD write, computed without touching anything.
+ *
+ * `correct()` is pure and returns a new buffer, so the copy buys the property
+ * the whole write path rests on: a cancelled dialog, a failed write or a
+ * read-back mismatch leaves the session exactly as it was. The caller applies
+ * the result only after the file is on disk and verified.
+ *
+ * Uses `activeChecksums` (resolved once, at load) rather than re-resolving:
+ * re-gating the family module against edited bytes is the I4 hazard, and here
+ * it would silently downgrade a recognised image to "written verbatim".
+ */
+export function correctForSave(): SaveCorrection | null {
+  const working = get(workingBytes);
+  if (working === null) return null;
+  const editedOffsets = changedOffsets(get(editJournal));
+  if (activeChecksums === undefined) {
+    return { bytes: Uint8Array.from(working), report: undefined, changed: [], editedOffsets };
+  }
+  const c = activeChecksums.correct(working);
+  return { bytes: c.bytes, report: c.report, changed: c.changed, editedOffsets };
+}
+
+/**
+ * Land a verified save's checksum corrections in the working buffer.
+ *
+ * Goes through the ORDINARY edit path — `applyEdit` per byte, all inside ONE
+ * `undoTransaction` — so the corrected bytes are journalled against the file as
+ * opened (they show in the diff, because they genuinely differ from it), a save
+ * is a single undo step, and no second notion of "changed bytes" exists to
+ * disagree with the first.
+ */
+export function applySaveCorrection(changed: readonly { offset: number; to: number }[]): void {
+  const working = get(workingBytes);
+  const image = get(bin);
+  if (working === null || image === null || changed.length === 0) return;
+  undoTransaction('save correction', () => {
+    const journal = get(editJournal);
+    for (const ch of changed) {
+      applyEdit({
+        working,
+        original: image.bytes,
+        journal,
+        offset: ch.offset,
+        format: BYTE_FORMAT,
+        raw: ch.to,
+      });
+    }
+    workingBytes.set(working);
+    editJournal.set(journal);
+  });
+  reverifyChecksums();
 }
 
 export function setScanRunning(): void {
