@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import type { ScanResult } from '@binanalyzer/engine';
 import { call, errorText, fakeDeps, payload } from './helpers.js';
 import { openBinTool, scanBinTool } from '../src/tools/index.js';
+import { LIVE_SHA, WIPED_BYTES, dirtyLink, fakeLink, liveBins, liveState } from './link-fakes.js';
 import type { Scanner } from '../src/scanner.js';
 
 const SYNTH1 = new Uint8Array(readFileSync(new URL('../../../fixtures/synthetic/synth-1.bin', import.meta.url)));
@@ -65,4 +66,24 @@ describe('scan_bin', () => {
     const { binId } = payload<{ binId: string }>(await call(openBinTool, { path: '/b/s1.bin' }, deps));
     expect(errorText(await call(scanBinTool, { binId }, deps))).toContain('worker exploded');
   });
+});
+
+it('scans the ORIGINAL bytes, so detection survives an edit (P4 premise)', async () => {
+  // P4's premise is that the co-pilot's own scan yields byte-identical maps
+  // with the SAME ids as the app's. An edit breaks that unless the scan input
+  // is pinned — so the same bin, clean and dirty, must scan identically.
+  const clean = fakeDeps({ link: fakeLink(liveState()), bins: liveBins() });
+  const first = payload(await call(scanBinTool, { binId: LIVE_SHA }, clean));
+
+  // A WIPED working buffer, not a one-byte edit: a single flipped byte does not
+  // move detection at all, so this test could not fail without it.
+  const dirty = fakeDeps({ link: dirtyLink(1, WIPED_BYTES), bins: liveBins() });
+  const second = payload(await call(scanBinTool, { binId: LIVE_SHA }, dirty));
+
+  // potentialMapCount is the real key; asserting a misspelled one compared
+  // undefined to undefined and could never fail.
+  expect(first['potentialMapCount']).toBeGreaterThan(0);
+  expect(second['potentialMapCount']).toEqual(first['potentialMapCount']);
+  expect(second['byKind']).toEqual(first['byKind']);
+  expect(second['regionSummary']).toEqual(first['regionSummary']);
 });

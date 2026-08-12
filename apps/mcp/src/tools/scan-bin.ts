@@ -3,6 +3,7 @@ import { CONFIG_VERSION, MCP_CONFIG } from '../config.js';
 import { asArgs, optBool, reqString } from '../args.js';
 import { mapKind } from '../kind.js';
 import { err, ok, unknownBin, type ToolSpec } from '../result.js';
+import { bufferFor } from '../session.js';
 
 function regionSummary(regions: Region[]): Record<string, { count: number; bytes: number }> {
   const out: Record<string, { count: number; bytes: number }> = {};
@@ -48,7 +49,12 @@ export const scanBinTool: ToolSpec = {
       const started = Date.now();
       let result: ScanResult;
       try {
-        result = await deps.scanner.scan(entry.bytes);
+        // ORIGINAL bytes on purpose (Part C §3.5): P4's premise is that the
+        // co-pilot's own scan yields byte-identical maps with the SAME ids as
+        // the app's, and an edit breaks that unless the input is pinned. It
+        // also keeps the (sha256, configVersion) cache key honest — binId IS
+        // the hash of exactly the bytes that were scanned.
+        result = await deps.scanner.scan(bufferFor(entry, 'original'));
       } catch (e) {
         return err(`scan failed for "${entry.name}": ${e instanceof Error ? e.message : String(e)}`);
       }

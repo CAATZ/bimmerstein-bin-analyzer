@@ -2,6 +2,7 @@ import { DEFAULT_SCAN_CONFIG, scanPrefixedAxes } from '@binanalyzer/engine';
 import { MCP_CONFIG } from '../config.js';
 import { asArgs, optAddress, optBool, optInt, reqString } from '../args.js';
 import { err, ok, unknownBin, type ToolSpec } from '../result.js';
+import { bufferFor } from '../session.js';
 
 export const listDetectedAxesTool: ToolSpec = {
   name: 'list_detected_axes',
@@ -53,7 +54,8 @@ export const listDetectedAxesTool: ToolSpec = {
     // per bin because the input is fixed.
     let pool = entry.detectedAxes;
     if (pool === undefined) {
-      pool = scanPrefixedAxes(entry.bytes, [{ start: 0, end: entry.size, kind: 'data' }], DEFAULT_SCAN_CONFIG);
+      // ORIGINAL bytes: detection, not a value read (Part C §3.5).
+      pool = scanPrefixedAxes(bufferFor(entry, 'original'), [{ start: 0, end: entry.size, kind: 'data' }], DEFAULT_SCAN_CONFIG);
       await deps.store.setDetectedAxes(entry.binId, pool);
     }
 

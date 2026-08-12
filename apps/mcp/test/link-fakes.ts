@@ -47,17 +47,25 @@ export const EDITED_BYTES = (() => {
 export const EDITED_SHA = createHash('sha256').update(EDITED_BYTES).digest('hex');
 
 /**
+ * A working buffer that scans to something COMPLETELY different. Detection over
+ * this must never be mistaken for detection over LIVE_BYTES, which is what
+ * makes the pinned-scan test discriminating rather than vacuous.
+ */
+export const WIPED_BYTES = new Uint8Array(LIVE_BYTES.length);
+
+/**
  * A live state whose journal is non-empty, plus a link that serves BOTH
  * buffers and hashes whichever it sent — the app's side of Part C §3.4.
  */
-export function dirtyLink(changedBytes = 1): FakeLink {
+export function dirtyLink(changedBytes = 1, workingBytes: Uint8Array = EDITED_BYTES): FakeLink {
+  const workingSha = createHash('sha256').update(workingBytes).digest('hex');
   const state = liveState();
-  state.bin!.working = { sha256: EDITED_SHA, changedBytes };
+  state.bin!.working = { sha256: workingSha, changedBytes };
   return fakeLink(state, (op, args) => {
     if (op !== 'getBinBytes') return { ok: true, value: {} };
     const which = (args as { which?: string }).which === 'original' ? 'original' : 'working';
-    const bytes = which === 'original' ? LIVE_BYTES : EDITED_BYTES;
-    const sha = which === 'original' ? LIVE_SHA : EDITED_SHA;
+    const bytes = which === 'original' ? LIVE_BYTES : workingBytes;
+    const sha = which === 'original' ? LIVE_SHA : workingSha;
     return { ok: true, value: { base64: Buffer.from(bytes).toString('base64'), sha256: sha, which } };
   });
 }
