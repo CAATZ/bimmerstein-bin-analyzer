@@ -1,5 +1,5 @@
 import { confirm as dialogConfirm, open, save } from '@tauri-apps/plugin-dialog';
-import { exists, readFile, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
+import { exists, readFile, readTextFile, writeFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import type { FileFilter, PlatformHost } from './host.js';
 
@@ -22,6 +22,7 @@ export const tauriHost: PlatformHost = {
   readBinary: (path: string) => readFile(path),
   readText: (path: string) => readTextFile(path),
   writeText: (path: string, contents: string) => writeTextFile(path, contents),
+  writeBinary: (path: string, bytes: Uint8Array) => writeFile(path, bytes),
   exists: (path: string) => exists(path),
   /**
    * Uses the fs scope the app already has (`fs:scope **` plus

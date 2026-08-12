@@ -12,13 +12,14 @@ import {
 } from '../src/platform/flows.js';
 
 /** In-memory host: scripted dialog answers + a fake filesystem. */
-class FakeHost implements PlatformHost {
+export class FakeHost implements PlatformHost {
   files = new Map<string, Uint8Array | string>();
   openAnswers: Array<string | null> = [];
   saveAnswers: Array<string | null> = [];
   confirmAnswers: boolean[] = [];
   confirmMessages: string[] = [];
   existsError: Error | null = null;
+  writeBinaryError: Error | null = null;
 
   async openFile(): Promise<string | null> {
     return this.openAnswers.shift() ?? null;
@@ -38,6 +39,11 @@ class FakeHost implements PlatformHost {
   }
   async writeText(path: string, contents: string): Promise<void> {
     this.files.set(path, contents);
+  }
+  async writeBinary(path: string, bytes: Uint8Array): Promise<void> {
+    if (this.writeBinaryError) throw this.writeBinaryError;
+    // Copy: the flow hands us its buffer, and a real filesystem does not alias it.
+    this.files.set(path, Uint8Array.from(bytes));
   }
   async exists(path: string): Promise<boolean> {
     if (this.existsError) throw this.existsError;

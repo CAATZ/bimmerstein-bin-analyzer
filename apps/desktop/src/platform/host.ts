@@ -16,6 +16,12 @@ export interface PlatformHost {
   readBinary(path: string): Promise<Uint8Array>;
   readText(path: string): Promise<string>;
   writeText(path: string, contents: string): Promise<void>;
+  /**
+   * Write bytes, replacing any existing file. The ONLY binary write in the app
+   * (2026-08-11-binary-write-path §2) — every caller goes through the bin save
+   * flow, and a guard test pins that.
+   */
+  writeBinary(path: string, bytes: Uint8Array): Promise<void>;
   exists(path: string): Promise<boolean>;
   /** Read a text file, or null when it is absent/unreadable. Never throws. */
   readTextIfExists(path: string): Promise<string | null>;
@@ -41,6 +47,20 @@ export function joinPath(dir: string, name: string): string {
   if (dir === '') return name;
   if (dir.endsWith('/') || dir.endsWith('\\')) return dir + name;
   return dir + (dir.includes('\\') ? '\\' : '/') + name;
+}
+
+/**
+ * Do two paths name the same file? Separators are normalised and the comparison
+ * is ALSO case-insensitive, which over-matches on case-sensitive filesystems.
+ * That is deliberate: the only caller uses it to refuse overwriting the image
+ * the user opened, and a false "these are the same file" costs a rename while a
+ * false "these differ" costs the original firmware.
+ */
+export function samePath(a: string, b: string): boolean {
+  const norm = (p: string): string => p.replace(/\\/g, '/').replace(/\/+$/, '');
+  const x = norm(a);
+  const y = norm(b);
+  return x === y || x.toLowerCase() === y.toLowerCase();
 }
 
 /** 'dump.bin' → 'dump'; only the LAST extension is stripped. */
