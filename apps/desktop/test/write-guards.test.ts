@@ -27,6 +27,16 @@ describe('only one place can write a binary', () => {
       .map((f) => f.path.slice(f.path.indexOf('src/')));
     expect(importers).toEqual(['src/platform/tauri.ts']);
   });
+
+  it('host.writeBinary is CALLED from exactly one source file', () => {
+    // Matches a CALL (`host.writeBinary(`), which is why neither the declaration
+    // in host.ts nor the implementation in tauri.ts is a hit — both are property
+    // syntax with no leading dot.
+    const callers = sources()
+      .filter((f) => /\.writeBinary\(/.test(f.text))
+      .map((f) => f.path.slice(f.path.indexOf('src/')));
+    expect(callers).toEqual(['src/platform/flows.ts']);
+  });
 });
 
 describe('the bin never swaps without clearing undo', () => {

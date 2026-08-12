@@ -1,14 +1,15 @@
 import { get } from 'svelte/store';
-import { createBinImage } from '@binanalyzer/core';
+import { createBinImage, sha256Hex } from '@binanalyzer/core';
 import type { BinImage } from '@binanalyzer/core';
 import {
   exportMapListCsv, exportMapListJson, exportRomRaiderXml, exportXdf, importRomRaiderXml, parseProject, serializeProject,
 } from '@binanalyzer/formats';
 import * as actions from '../store/actions.js';
 import { listRomIds } from '../lib/romlist.js';
-import { addressFrame, bin, framePromptAnswered, maps, potentialMaps } from '../store/stores.js';
+import { addressFrame, bin, binPath, framePromptAnswered, maps, potentialMaps, saveTarget } from '../store/stores.js';
 import { frameDefMaps, isMs41FullRead, unframeDefMaps } from '@binanalyzer/appkit';
-import { basename, dirname, joinPath, stemOf, type FileFilter, type PlatformHost } from './host.js';
+import { saveVerdict, verdictHeadline } from '../lib/savereport.js';
+import { basename, dirname, joinPath, samePath, stemOf, type FileFilter, type PlatformHost } from './host.js';
 
 /**
  * File-flow orchestration (spec §7 data flow, §8 error handling). Pure
@@ -47,6 +48,93 @@ export async function loadBinFromPath(host: PlatformHost, path: string): Promise
     actions.pushToast('error', `Cannot read ${basename(path)}: ${errText(e)}`);
     return false;
   }
+}
+
+/**
+ * Write the edited image (spec 2026-08-11-binary-write-path §4). Resolves TRUE
+ * only when a file was written AND read back with a matching hash.
+ *
+ * Step order is the safety property: prompt, refuse the source file, correct
+ * PURELY, write, verify from disk, and only then mutate the session. Every
+ * early return leaves the buffer, the journal and the save target exactly as
+ * they were.
+ */
+export async function saveBinFlow(
+  host: PlatformHost,
+  opts: { promptAlways: boolean }
+): Promise<boolean> {
+  const image = get(bin);
+  if (!image) {
+    actions.pushToast('error', 'Open a bin first');
+    return false;
+  }
+  const existing = get(saveTarget);
+  const fail = (path: string | null, reason: string): false => {
+    actions.setLastSave({ ok: false, path, reason });
+    actions.pushToast('error', reason);
+    return false;
+  };
+
+  let path: string | null;
+  if (opts.promptAlways || existing === null) {
+    const suggested = existing?.name ?? `${stemOf(image.name)}-edited.bin`;
+    path = await host.saveFile('Save bin', suggested, BIN_FILTERS);
+  } else {
+    path = existing.path;
+  }
+  if (path === null) return false; // cancelled: not an outcome, nothing to report
+
+  const source = get(binPath);
+  if (source !== null && samePath(source, path)) {
+    return fail(
+      path,
+      `${basename(path)} is the file this bin was opened from — save under a different name; the original is never overwritten.`
+    );
+  }
+
+  const c = actions.correctForSave();
+  if (c === null) return fail(path, 'Nothing to save — no working buffer');
+  if (c.bytes.length !== image.size) {
+    return fail(path, `Refusing to write ${c.bytes.length} bytes for a ${image.size}-byte image`);
+  }
+
+  try {
+    await host.writeBinary(path, c.bytes);
+  } catch (e) {
+    return fail(path, `Save failed: ${errText(e)}`);
+  }
+
+  let onDisk: Uint8Array;
+  try {
+    onDisk = await host.readBinary(path);
+  } catch (e) {
+    return fail(path, `Wrote ${basename(path)} but could not read it back to verify: ${errText(e)}`);
+  }
+  const want = sha256Hex(c.bytes);
+  if (sha256Hex(onDisk) !== want) {
+    return fail(path, `${basename(path)} does not match what was written — do not flash it. Try a different location.`);
+  }
+
+  // Verified. NOW the session may change.
+  actions.applySaveCorrection(c.changed);
+  actions.setSaveTarget({ path, name: basename(path), sha256: want, size: c.bytes.length });
+  const verdict = saveVerdict({ report: c.report, editedOffsets: c.editedOffsets });
+  actions.setLastSave({
+    ok: true,
+    path,
+    name: basename(path),
+    size: c.bytes.length,
+    sha256: want,
+    verdict,
+    corrected: c.changed,
+    report: c.report,
+    editedBytes: c.editedOffsets.length,
+  });
+  // The toast half of §6; the modal half is the caller's, driven by isModalOutcome.
+  if (verdict.kind === 'corrected') {
+    actions.pushToast('info', `Saved ${basename(path)} — ${verdictHeadline(verdict)}`);
+  }
+  return true;
 }
 
 /**
