@@ -9,8 +9,14 @@ import type { ChecksumReport } from '@binanalyzer/families';
 export type SaveVerdict =
   /** A module recognised the image, everything it stands behind is valid, and the edits touch nothing it declines to correct. */
   | { kind: 'corrected' }
-  /** As above, but `bytes` edited bytes fall inside a checksum this tool will not recompute. */
-  | { kind: 'covered-by-uncorrected'; checksumId: string; bytes: number }
+  /**
+   * As above, but `coveredBytes` of the user's edited bytes fall inside a
+   * checksum this tool will not recompute. Deliberately NOT named `bytes`: the
+   * repo-wide guard that stops a view reading the ORIGINAL buffer scans for a
+   * bare byte-array property access, and an unrelated field spelled that way
+   * would force the guard to be loosened. Renaming here keeps it absolute.
+   */
+  | { kind: 'covered-by-uncorrected'; checksumId: string; coveredBytes: number }
   /** No family module ever recognised this image; bytes were written verbatim. */
   | { kind: 'unrecognised' }
   /** A module was active at load but no longer recognises the edited image — an edit hit structural bytes. */
@@ -63,7 +69,7 @@ export function saveVerdict(args: {
     const ranges = s.covers;
     if (ranges === undefined || ranges.length === 0) continue;
     const bytes = editedOffsets.filter((o) => covered(o, ranges)).length;
-    if (bytes > 0) return { kind: 'covered-by-uncorrected', checksumId: s.id, bytes };
+    if (bytes > 0) return { kind: 'covered-by-uncorrected', checksumId: s.id, coveredBytes: bytes };
   }
   return { kind: 'corrected' };
 }
@@ -73,7 +79,7 @@ export function verdictHeadline(v: SaveVerdict): string {
     case 'corrected':
       return 'Checksums corrected and verified on disk.';
     case 'covered-by-uncorrected':
-      return `Checksums corrected, but ${v.bytes} edited byte(s) fall inside the "${v.checksumId}" checksum, which this tool does not recompute.`;
+      return `Checksums corrected, but ${v.coveredBytes} edited byte(s) fall inside the "${v.checksumId}" checksum, which this tool does not recompute.`;
     case 'unrecognised':
       return 'Written verbatim — NOT checksum-corrected. No family module recognises this image.';
     case 'structure-changed':

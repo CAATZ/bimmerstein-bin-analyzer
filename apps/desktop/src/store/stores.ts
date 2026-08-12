@@ -2,6 +2,7 @@ import { writable, type Writable } from 'svelte/store';
 import type { AxisLibEntry, BinImage, EditJournal, MapDef, ValueFormat } from '@binanalyzer/core';
 import type { Region, ScanProgress } from '@binanalyzer/engine';
 import type { ChecksumReport } from '@binanalyzer/families';
+import type { SaveOutcome } from '../lib/savereport.js';
 
 /**
  * Single source of truth (spec §7). Views subscribe;
@@ -75,6 +76,24 @@ export const editJournal: Writable<EditJournal> = writable(new Map());
  * trusting it.
  */
 export const binPath: Writable<string | null> = writable(null);
+/**
+ * Where this session's bytes were last successfully written, and what landed
+ * there. `sha256` is READ BACK from the file, so "is the buffer dirty?" is a
+ * hash comparison against a measured fact.
+ *
+ * Distinct from `binPath`, which is where the bin was LOADED from and is never
+ * repointed by a save: the co-pilot resolves bytes by that path and verifies
+ * them against `bin`'s identity.
+ */
+export interface SaveTarget {
+  path: string;
+  name: string;
+  sha256: string;
+  size: number;
+}
+export const saveTarget: Writable<SaveTarget | null> = writable(null);
+/** The most recent save attempt — success or failure. Drives the report dialog and the status chip. */
+export const lastSave: Writable<SaveOutcome | null> = writable(null);
 /** User-confirmed maps (sorted by address). */
 export const maps: Writable<MapDef[]> = writable([]);
 /** Engine output, provenance 'auto' — ARRAY ORDER IS THE RANKING, never re-sort. */

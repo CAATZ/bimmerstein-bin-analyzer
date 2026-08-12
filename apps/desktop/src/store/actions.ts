@@ -1,18 +1,21 @@
 import { get } from 'svelte/store';
 import type { AxisDef, AxisLibEntry, BinImage, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
-import { applyEdit, quantise, readAxisValues, readValue, revertOffsets, toPhysical, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
+import { applyEdit, changedOffsets, quantise, readAxisValues, readValue, revertOffsets, sha256Hex, toPhysical, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 import type { ScanProgress, ScanResult } from '@binanalyzer/engine';
 import type { ChecksumReport, FamilyChecksums } from '@binanalyzer/families';
 import { checksumsFor } from '@binanalyzer/families';
 import {
   DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, cellRange, checksumReport, editJournal, framePromptAnswered,
+  lastSave,
   maps,
   modalOpen,
   potentialMaps,
   proposals, regions,
+  saveTarget,
   scanStatus, scrollRequest, selection, toasts, viewParams, workingBytes,
-  type CellRange, type Selection, type Toast, type ViewMode,
+  type CellRange, type SaveTarget, type Selection, type Toast, type ViewMode,
 } from './stores.js';
+import type { SaveOutcome } from '../lib/savereport.js';
 import { detachedAxis, libraryAxis, stampAxis } from '../lib/axislib.js';
 import { axisEditability, isMonotonic } from '../lib/axisedit.js';
 import { clearUndo, pushUndo, redo as redoInternal, undo as undoInternal, undoTransaction } from './undo.js';
@@ -89,6 +92,8 @@ export function resetStores(): void {
   activeChecksums = undefined;
   workingBytes.set(null);
   editJournal.set(new Map());
+  saveTarget.set(null); // a new bin has never been saved — carrying a target over would overwrite another image's file
+  lastSave.set(null);
   cellRange.set(null);
   modalDepth = 0;
   modalOpen.set(false);
@@ -112,6 +117,8 @@ export function setBin(image: BinImage): void {
   activeChecksums = undefined; // a new bin means a new (or no) family module — never carry the old one over
   workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
   editJournal.set(new Map());
+  saveTarget.set(null); // a new bin has never been saved — carrying a target over would overwrite another image's file
+  lastSave.set(null);
   cellRange.set(null); // a new bin is a new address space — a stale range's mapId would be meaningless
   clearUndo();
 }
@@ -119,6 +126,30 @@ export function setBin(image: BinImage): void {
 /** Records where the loaded bin came from. Call AFTER setBin, which clears it. */
 export function setBinPath(path: string | null): void {
   binPath.set(path);
+}
+
+export function setSaveTarget(t: SaveTarget | null): void {
+  saveTarget.set(t);
+}
+
+export function setLastSave(o: SaveOutcome | null): void {
+  lastSave.set(o);
+}
+
+/**
+ * Are there byte changes not yet on disk?
+ *
+ * Computed EXACTLY, on demand, and never cached in a flag: a flag set by every
+ * mutation would still claim "unsaved" after undoing back to the state that was
+ * saved. Hashing 256 KB costs low single-digit milliseconds and only happens
+ * where the user is about to lose something — the three discard prompts and the
+ * project-save warning.
+ */
+export function isDirty(): boolean {
+  const working = get(workingBytes);
+  if (working === null || get(editJournal).size === 0) return false;
+  const t = get(saveTarget);
+  return t === null || sha256Hex(working) !== t.sha256;
 }
 
 export function setChecksumReport(r: ChecksumReport | undefined): void {
@@ -685,11 +716,16 @@ export function projectSnapshot(): Result<Project> {
   const vp = get(viewParams);
   const frame = get(addressFrame);
   const lib = get(axisLibrary);
+  const t = get(saveTarget);
   return {
     ok: true,
     value: {
       schemaVersion: 2,
-      bin: { name: image.name, sha256: image.sha256, size: image.size },
+      // Spec §7: a project binds to the image as LAST SAVED, so reopening it
+      // finds the tune it describes rather than the pristine file it came from.
+      bin: t === null
+        ? { name: image.name, sha256: image.sha256, size: image.size }
+        : { name: t.name, sha256: t.sha256, size: t.size },
       valueDefaults: { ...vp.format },
       ...(frame === 'ms41full' ? { addressFrame: 'ms41full' as const } : {}),
       ...(lib.length > 0 ? { axisLibrary: lib } : {}),
@@ -745,6 +781,8 @@ export function applyProject(image: BinImage, project: Project): ApplyProjectRep
   activeChecksums = undefined; // a new bin means a new (or no) family module — never carry the old one over
   workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
   editJournal.set(new Map());
+  saveTarget.set(null); // a new bin has never been saved — carrying a target over would overwrite another image's file
+  lastSave.set(null);
   cellRange.set(null); // a new bin is a new address space — a stale range's mapId would be meaningless
   axisLibrary.set(lib);
   maps.set(keep(project.maps, droppedMaps).map(clearDangling).sort(byAddress));

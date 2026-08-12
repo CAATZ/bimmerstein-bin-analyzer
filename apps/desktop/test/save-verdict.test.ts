@@ -52,7 +52,7 @@ describe('saveVerdict', () => {
     expect(saveVerdict({ report: r, editedOffsets: [0x14000, 0x0002, 0x21000] })).toEqual({
       kind: 'covered-by-uncorrected',
       checksumId: 'program',
-      bytes: 2,
+      coveredBytes: 2,
     });
   });
 
@@ -78,7 +78,7 @@ describe('presentation', () => {
     expect(isModalOutcome(ok({ kind: 'corrected' }))).toBe(false);
     expect(isModalOutcome(ok({ kind: 'unrecognised' }))).toBe(true);
     expect(isModalOutcome(ok({ kind: 'structure-changed' }))).toBe(true);
-    expect(isModalOutcome(ok({ kind: 'covered-by-uncorrected', checksumId: 'program', bytes: 2 }))).toBe(true);
+    expect(isModalOutcome(ok({ kind: 'covered-by-uncorrected', checksumId: 'program', coveredBytes: 2 }))).toBe(true);
     expect(isModalOutcome(ok({ kind: 'invalid-after-correction', mismatched: 1 }))).toBe(true);
   });
 
@@ -90,8 +90,8 @@ describe('presentation', () => {
     expect(verdictHeadline({ kind: 'corrected' })).toMatch(/corrected/i);
     expect(verdictHeadline({ kind: 'unrecognised' })).toMatch(/not checksum-corrected/i);
     expect(verdictHeadline({ kind: 'structure-changed' })).toMatch(/no longer recognis/i);
-    expect(verdictHeadline({ kind: 'covered-by-uncorrected', checksumId: 'program', bytes: 3 })).toMatch(/program/);
-    expect(verdictHeadline({ kind: 'covered-by-uncorrected', checksumId: 'program', bytes: 3 })).toMatch(/3/);
+    expect(verdictHeadline({ kind: 'covered-by-uncorrected', checksumId: 'program', coveredBytes: 3 })).toMatch(/program/);
+    expect(verdictHeadline({ kind: 'covered-by-uncorrected', checksumId: 'program', coveredBytes: 3 })).toMatch(/3/);
     expect(verdictHeadline({ kind: 'invalid-after-correction', mismatched: 2 })).toMatch(/still/i);
   });
 });
