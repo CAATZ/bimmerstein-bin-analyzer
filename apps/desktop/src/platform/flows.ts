@@ -6,7 +6,7 @@ import {
 } from '@binanalyzer/formats';
 import * as actions from '../store/actions.js';
 import { listRomIds } from '../lib/romlist.js';
-import { addressFrame, bin, binPath, framePromptAnswered, maps, potentialMaps, saveTarget } from '../store/stores.js';
+import { addressFrame, bin, binPath, editJournal, framePromptAnswered, maps, potentialMaps, saveTarget } from '../store/stores.js';
 import { frameDefMaps, isMs41FullRead, unframeDefMaps } from '@binanalyzer/appkit';
 import { saveVerdict, verdictHeadline } from '../lib/savereport.js';
 import { basename, dirname, joinPath, samePath, stemOf, type FileFilter, type PlatformHost } from './host.js';
@@ -27,6 +27,29 @@ function errText(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
 }
 
+/**
+ * Ask before throwing away byte edits that are not on disk. Returns TRUE when
+ * it is safe to proceed. A confirm() that THROWS is treated as "do not
+ * proceed": the alternative is discarding a tune because a dialog failed.
+ *
+ * Called from the two choke points every bin load passes through —
+ * loadBinFromPath (toolbar Open Bin AND the OS file drop) and openProjectFlow —
+ * so there is exactly one prompt per load, never two.
+ */
+async function confirmDiscard(host: PlatformHost): Promise<boolean> {
+  if (!actions.isDirty()) return true;
+  const n = get(editJournal).size;
+  try {
+    return await host.confirm(
+      `This bin has ${n} unsaved byte change(s). Loading another image discards them.\n` +
+        `Save the bin first if you want to keep them. Discard and continue?`,
+      'Unsaved changes'
+    );
+  } catch {
+    return false;
+  }
+}
+
 export async function openBinFlow(host: PlatformHost): Promise<boolean> {
   const path = await host.openFile('Open ECU bin', BIN_FILTERS);
   if (path === null) return false;
@@ -34,6 +57,7 @@ export async function openBinFlow(host: PlatformHost): Promise<boolean> {
 }
 
 export async function loadBinFromPath(host: PlatformHost, path: string): Promise<boolean> {
+  if (!(await confirmDiscard(host))) return false;
   try {
     const bytes = await host.readBinary(path);
     if (bytes.length === 0) {
@@ -153,6 +177,14 @@ export async function saveProjectFlow(host: PlatformHost): Promise<boolean> {
   try {
     await host.writeText(path, serializeProject(snap.value));
     actions.pushToast('info', `Project saved to ${basename(path)}`);
+    if (actions.isDirty()) {
+      // A project binds to a FILE (spec §7). If the bytes on screen are not that
+      // file's bytes, say so rather than let the user assume otherwise.
+      actions.pushToast(
+        'error',
+        `The bin has unsaved byte changes — this project records ${snap.value.bin.name} as last saved, not what is on screen. Save the bin to keep them in step.`
+      );
+    }
     return true;
   } catch (e) {
     actions.pushToast('error', `Save failed: ${errText(e)}`);
@@ -161,6 +193,7 @@ export async function saveProjectFlow(host: PlatformHost): Promise<boolean> {
 }
 
 export async function openProjectFlow(host: PlatformHost): Promise<void> {
+  if (!(await confirmDiscard(host))) return;
   const projPath = await host.openFile('Open project', PROJECT_FILTERS);
   if (projPath === null) return;
   let text: string;
