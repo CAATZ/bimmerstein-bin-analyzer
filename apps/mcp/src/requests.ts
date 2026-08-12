@@ -4,7 +4,7 @@ export type RequestStatus = 'pending' | 'accepted' | 'rejected' | 'cancelled' | 
 
 export interface PendingRequest {
   requestId: string;
-  kind: 'proposal' | 'save';
+  kind: 'proposal' | 'save' | 'map-edits';
   status: RequestStatus;
   /** Proposals only: how many changes were submitted. */
   count?: number;
@@ -29,7 +29,7 @@ export class RequestTable {
 
   constructor(private readonly limit: number = MCP_CONFIG.maxTrackedRequests) {}
 
-  create(kind: 'proposal' | 'save', count?: number): PendingRequest {
+  create(kind: 'proposal' | 'save' | 'map-edits', count?: number): PendingRequest {
     const row: PendingRequest = {
       requestId: `r${++this.seq}`,
       kind,

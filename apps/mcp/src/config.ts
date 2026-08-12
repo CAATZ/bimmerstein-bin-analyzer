@@ -54,6 +54,14 @@ export const MCP_CONFIG = {
    * 306 maps. Past this, something has gone wrong upstream.
    */
   maxProposedChanges: 2_000,
+  /**
+   * Ceiling on one value-edit proposal. Pinned to the same number as
+   * readMapMaxCells on principle, not coincidence: expectedRaw is required, so
+   * an agent must READ a cell before it may propose writing it, and it cannot
+   * legitimately author more cells in one batch than a single read_map hands
+   * it. Real MS41 tables never exceed 20 columns.
+   */
+  maxProposedEdits: 4_096,
 } as const;
 
 /**

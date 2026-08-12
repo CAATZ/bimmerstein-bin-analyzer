@@ -14,6 +14,7 @@ import { getSessionTool } from './get-session.js';
 import { openMapTool, selectTool, showTool } from './point.js';
 import { changeAxisEntryTool, changeMapTool } from './change.js';
 import { getRequestTool, proposeChangesTool } from './propose.js';
+import { proposeMapEditsTool } from './propose-edits.js';
 import { saveProjectTool } from './save-project.js';
 
 export {
@@ -35,6 +36,7 @@ export {
   changeMapTool,
   changeAxisEntryTool,
   proposeChangesTool,
+  proposeMapEditsTool,
   getRequestTool,
   saveProjectTool,
 };
@@ -67,6 +69,8 @@ export const COPILOT_TOOLS: ToolSpec[] = [
   changeMapTool,
   changeAxisEntryTool,
   proposeChangesTool,
+  // Value edits only; NOT in HEADLESS_TOOLS — there is no app to propose to.
+  proposeMapEditsTool,
   getRequestTool,
   saveProjectTool,
   scanBinTool,
