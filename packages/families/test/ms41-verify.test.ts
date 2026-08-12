@@ -115,3 +115,26 @@ describe('skipped checksums carry the ranges they cover', () => {
     for (const s of r.skipped) expect(s.covers).toBeUndefined();
   });
 });
+
+describe('a skipped checksum reports its numbers as DATA, not only as prose', () => {
+  it('the program entry carries stored + computed alongside the reason', () => {
+    // The reason string has always embedded these, but only a regex could reach
+    // them. The acceptance harness pins the program CRC against real firmware,
+    // so it needs them structured — and the program path is the one checksum
+    // computation with no other real-bin coverage.
+    const d = ms41Image(FULL);
+    const program = ms41Checksums.verify(d).skipped.find((s) => s.id === 'program')!;
+    expect(program.stored).toBe(d[0x6050]! | (d[0x6051]! << 8));
+    expect(typeof program.computed).toBe('number');
+    // The prose and the fields cannot drift: both are rendered from the same values.
+    expect(program.reason).toContain(program.stored!.toString(16).toUpperCase().padStart(4, '0'));
+    expect(program.reason).toContain(program.computed!.toString(16).toUpperCase().padStart(4, '0'));
+  });
+
+  it('an ABSENT checksum reports no numbers — a 24 KB partial has nothing to report', () => {
+    for (const s of ms41Checksums.verify(ms41Image(TUNE)).skipped) {
+      expect(s.stored).toBeUndefined();
+      expect(s.computed).toBeUndefined();
+    }
+  });
+});

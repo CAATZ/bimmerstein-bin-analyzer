@@ -318,6 +318,19 @@ interface Ms41ChecksumCase {
    * two s52 images the identity of the stale entries IS the pin.
    */
   staleIds: readonly string[];
+  /**
+   * The program checksum, pinned as stored-vs-computed. Absent for a 24 KB
+   * partial, which carries no program checksum at all.
+   *
+   * This is the ONLY real-firmware coverage the program CRC has. It is never
+   * corrected and it is not vouched for, so nothing else exercises its chained
+   * three-region walk or its eight-entry bank map against a known-good image —
+   * a transcription regression there would otherwise be caught by nothing.
+   * `match` is pinned rather than asserted: the e36m3 full read genuinely
+   * matches, and the s52 MS41.3 image genuinely does not (its program layout
+   * differs, which is exactly why the module refuses to write this checksum).
+   */
+  program?: { stored: number; computed: number; match: boolean };
 }
 
 /**
@@ -337,8 +350,10 @@ interface Ms41ChecksumCase {
  * re-measured and re-pinned deliberately, not silently absorbed.
  */
 export const MS41_CHECKSUM_CASES: readonly Ms41ChecksumCase[] = [
-  { key: 'e36m3-full', bin: 'E36 M3 Stock Full Read.bin', bootOk: true, okBlocks: 17, totalBlocks: 17, staleIds: [] },
-  { key: 's52-full', bin: 'MS41.3 S52 Stock Full Read.bin', bootOk: true, okBlocks: 16, totalBlocks: 17, staleIds: ['cal-0'] },
+  { key: 'e36m3-full', bin: 'E36 M3 Stock Full Read.bin', bootOk: true, okBlocks: 17, totalBlocks: 17, staleIds: [],
+    program: { stored: 0x990f, computed: 0x990f, match: true } },
+  { key: 's52-full', bin: 'MS41.3 S52 Stock Full Read.bin', bootOk: true, okBlocks: 16, totalBlocks: 17, staleIds: ['cal-0'],
+    program: { stored: 0x27ed, computed: 0x214b, match: false } },
   { key: 'e36m3-partial', bin: 'partial/E36 M3 Stock partial.bin', bootOk: null, okBlocks: 16, totalBlocks: 16, staleIds: [] },
   { key: 's52-partial', bin: 'partial/MS41.3 S52 Stock partial.bin', bootOk: null, okBlocks: 13, totalBlocks: 16, staleIds: ['cal-4', 'cal-6', 'cal-14'] },
 ];
@@ -779,14 +794,30 @@ export function runAcceptance(repoRoot: string): number {
     // Report order, so the comparison is positional and the message reads like
     // the dialog: a permutation that keeps the COUNT identical still drifts.
     const staleIds = r.blocks.filter((b) => !b.ok).map((b) => b.id);
+    // The program checksum is REPORTED, never corrected, so it never appears in
+    // `blocks` — pin it from `skipped` or it stays untested against real firmware.
+    const prog = r.skipped.find((s) => s.id === 'program');
+    const progSeen =
+      prog?.stored === undefined || prog.computed === undefined
+        ? undefined
+        : { stored: prog.stored, computed: prog.computed, match: prog.stored === prog.computed };
+    const progDrift =
+      (progSeen === undefined) !== (c.program === undefined) ||
+      (progSeen !== undefined &&
+        c.program !== undefined &&
+        (progSeen.stored !== c.program.stored ||
+          progSeen.computed !== c.program.computed ||
+          progSeen.match !== c.program.match));
     const drift =
       bootOk !== c.bootOk ||
       okBlocks !== c.okBlocks ||
       totalBlocks !== c.totalBlocks ||
-      staleIds.join(',') !== c.staleIds.join(',');
+      staleIds.join(',') !== c.staleIds.join(',') ||
+      progDrift;
     if (drift) passed = false;
     checked++;
     const fmt = (v: boolean | null): string => (v === null ? 'n/a' : String(v));
+    const h4 = (v: number): string => `0x${v.toString(16).toUpperCase().padStart(4, '0')}`;
     const stale = (ids: readonly string[]): string => (ids.length > 0 ? ids.join(',') : 'none');
     console.log(
       `${drift ? 'FAIL' : 'PASS'} ${c.key.padEnd(14)} checksums  boot=${fmt(bootOk)} ` +
@@ -794,6 +825,11 @@ export function runAcceptance(repoRoot: string): number {
         `  pinned boot=${fmt(c.bootOk)} ${c.okBlocks}/${c.totalBlocks} stale=${stale(c.staleIds)}` +
         `  (skipped ${r.skipped.map((s) => s.id).join(',') || 'none'})`
     );
+    if (progSeen !== undefined || c.program !== undefined) {
+      const p = (v: { stored: number; computed: number; match: boolean } | undefined): string =>
+        v === undefined ? 'absent' : `stored ${h4(v.stored)} computed ${h4(v.computed)} ${v.match ? 'MATCH' : 'differs'}`;
+      console.log(`     program (never corrected): ${p(progSeen)}  pinned ${p(c.program)}`);
+    }
     // Notes change what a result MEANS without changing whether it passes —
     // "boot verification DISABLED" is the most consequential thing this module
     // can say about the s52 images, and the gate used to swallow it.

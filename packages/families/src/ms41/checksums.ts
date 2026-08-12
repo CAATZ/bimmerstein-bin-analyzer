@@ -142,6 +142,11 @@ function verifyImage(bytes: Uint8Array): ChecksumReport {
       // Copied, never handed out by reference: verify() must not expose module
       // state a caller could mutate.
       covers: PROGRAM_COVERS.map((c) => ({ ...c })),
+      // The same `ps`/`pc` the reason renders, as data. Not vouched for, but
+      // MEASURED — and the acceptance harness pins them against real firmware,
+      // which is the only regression coverage this computation has.
+      stored: ps,
+      computed: pc,
     });
     notes.push(switchNote(bytes));
   } else {
