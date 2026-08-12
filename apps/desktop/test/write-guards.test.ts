@@ -69,3 +69,16 @@ describe('samePath', () => {
     expect(samePath('C:\\bins\\a.bin', 'C:\\bins\\sub\\a.bin')).toBe(false);
   });
 });
+
+describe('the co-pilot cannot reach the save path', () => {
+  it('no save symbol appears anywhere under src/copilot/', () => {
+    // B2's guards above prove exactly one file CAN write. This one proves the
+    // agent's half of the app cannot reach it (Part C §7). Writing an image
+    // that gets flashed to an ECU is the user's action alone.
+    const offenders = sources()
+      .filter((f) => f.path.includes('/src/copilot/'))
+      .filter((f) => /\b(saveBinFlow|correctForSave|applySaveCorrection|writeBinary)\b/.test(f.text))
+      .map((f) => f.path.slice(f.path.indexOf('src/')));
+    expect(offenders).toEqual([]);
+  });
+});
