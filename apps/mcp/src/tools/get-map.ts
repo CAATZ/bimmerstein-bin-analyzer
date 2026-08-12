@@ -5,6 +5,7 @@ import { asArgs, reqString } from '../args.js';
 import { axisView } from '../axisview.js';
 import { mapKind } from '../kind.js';
 import { findMap } from '../maps.js';
+import { bufferFor } from '../session.js';
 import { err, ok, unknownBin, type ToolSpec } from '../result.js';
 
 export const getMapTool: ToolSpec = {
@@ -42,8 +43,8 @@ export const getMapTool: ToolSpec = {
     const m = found.map;
     const byteLength = m.rows * m.cols * m.format.width;
     const axes: Record<string, unknown> = {};
-    if (m.xAxis !== undefined) axes['x'] = axisView(entry.bytes, m.xAxis, 'x', entry.isFullRead);
-    if (m.yAxis !== undefined) axes['y'] = axisView(entry.bytes, m.yAxis, 'y', entry.isFullRead);
+    if (m.xAxis !== undefined) axes['x'] = axisView(bufferFor(entry, 'working'), m.xAxis, 'x', entry.isFullRead);
+    if (m.yAxis !== undefined) axes['y'] = axisView(bufferFor(entry, 'working'), m.yAxis, 'y', entry.isFullRead);
 
     let sa: Record<string, unknown> = {};
     if (entry.isFullRead) {
@@ -53,7 +54,7 @@ export const getMapTool: ToolSpec = {
 
     let states: Record<string, unknown> | undefined;
     if (m.states !== undefined) {
-      const matched = matchSwitchState(entry.bytes, m);
+      const matched = matchSwitchState(bufferFor(entry, 'working'), m);
       states = {
         defined: m.states.map((s) => s.name),
         actual: matched.actual,

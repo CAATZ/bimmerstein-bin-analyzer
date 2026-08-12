@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getSessionTool } from '../src/tools/get-session.js';
 import { errorText, fakeDeps, payload } from './helpers.js';
-import { LIVE_SHA, fakeLink, liveBins, liveState } from './link-fakes.js';
+import { LIVE_SHA, dirtyLink, fakeLink, liveBins, liveState } from './link-fakes.js';
 
 describe('get_session', () => {
   it('errors in headless mode and names the flag', async () => {
@@ -29,7 +29,7 @@ describe('get_session', () => {
       scanStatus: { state: 'done' },
     });
     expect(p['selection']).toMatchObject({ start: 4520, end: 4552 });
-    expect(p['coPilotScan']).toEqual({ scanned: false });
+    expect(p['coPilotScan']).toEqual({ scanned: false, scannedBuffer: 'original' });
   });
 
   it('returns bin:null when the app has nothing open', async () => {
@@ -49,7 +49,7 @@ describe('get_session', () => {
       result: { regions: [], potentialMaps: [{} as never, {} as never] },
     });
     const p = payload(await getSessionTool.handle({}, deps));
-    expect(p['coPilotScan']).toEqual({ scanned: true, potentialMaps: 2 });
+    expect(p['coPilotScan']).toEqual({ scanned: true, potentialMaps: 2, scannedBuffer: 'original' });
   });
 
   it('says so when the app is connected but has not pushed a session yet', async () => {
@@ -58,5 +58,22 @@ describe('get_session', () => {
     // the first state frame.
     const deps = fakeDeps({ link: { ...link, state: () => null } });
     expect(errorText(await getSessionTool.handle({}, deps))).toMatch(/has not sent its session/);
+  });
+});
+
+describe('get_session reports the working fingerprint', () => {
+  it('always, with a clean session reading 0 and binId', async () => {
+    const deps = fakeDeps({ link: fakeLink(liveState()), bins: liveBins() });
+    const p = payload(await getSessionTool.handle({}, deps));
+    expect(p['changedBytes']).toBe(0);
+    expect(p['workingSha256']).toBe(p['binId']);
+    expect(p['coPilotScan']).toMatchObject({ scannedBuffer: 'original' });
+  });
+
+  it('and reports a dirty buffer distinctly from the bin identity', async () => {
+    const deps = fakeDeps({ link: dirtyLink(3), bins: liveBins() });
+    const p = payload(await getSessionTool.handle({}, deps));
+    expect(p['changedBytes']).toBe(3);
+    expect(p['workingSha256']).not.toBe(p['binId']);
   });
 });

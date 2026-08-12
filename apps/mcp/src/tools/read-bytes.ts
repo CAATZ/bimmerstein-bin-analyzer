@@ -2,6 +2,7 @@ import { readValue, type ValueFormat } from '@binanalyzer/core';
 import { MCP_CONFIG } from '../config.js';
 import { asArgs, optEnum, optInt, reqAddress, reqString } from '../args.js';
 import { err, ok, unknownBin, type ToolSpec } from '../result.js';
+import { bufferFor } from '../session.js';
 
 const DEFAULT_FORMAT: ValueFormat = { width: 1, signed: false, endianness: 'little' };
 
@@ -34,6 +35,12 @@ export const readBytesTool: ToolSpec = {
     required: ['binId', 'address'],
     properties: {
       binId: { type: 'string', description: 'sha256 handle from open_bin.' },
+      buffer: {
+        enum: ['working', 'original'],
+        default: 'working',
+        description:
+          'Which bytes to read. "working" (default) is what the user is looking at, including their unsaved edits. "original" is the file as opened.',
+      },
       address: { type: ['integer', 'string'], description: 'File offset; integer or 0x-hex string.' },
       length: { type: 'integer', minimum: 1, maximum: MCP_CONFIG.readBytesMaxLength, default: MCP_CONFIG.readBytesDefaultLength, description: 'Bytes to read.' },
       as: { enum: ['hex', 'values', 'both'], default: 'hex' },
@@ -65,6 +72,8 @@ export const readBytesTool: ToolSpec = {
     if (!cols.ok) return err(cols.error);
     const format = parseFormat(a['format']);
     if (!format.ok) return err(format.error);
+    const buffer = optEnum(a, 'buffer', ['working', 'original'] as const, 'working');
+    if (!buffer.ok) return err(buffer.error);
 
     const entry = await deps.store.get(id.value);
     if (entry === undefined) return await unknownBin(deps, id.value);
@@ -72,6 +81,7 @@ export const readBytesTool: ToolSpec = {
       return err(`address 0x${address.value.toString(16)} is at or past the end of "${entry.name}" (${entry.size} bytes)`);
     }
 
+    const view = bufferFor(entry, buffer.value);
     const end = Math.min(address.value + length.value, entry.size);
     const actual = end - address.value;
     const body: Record<string, unknown> = {
@@ -81,13 +91,15 @@ export const readBytesTool: ToolSpec = {
       as: as.value,
       cols: cols.value,
       clamped: actual < length.value,
+      buffer: buffer.value,
+      changedBytes: entry.changedBytes,
     };
 
     if (as.value === 'hex' || as.value === 'both') {
       const rows: Array<{ address: number; bytes: string; ascii: string }> = [];
       for (let off = address.value; off < end; off += cols.value) {
         const stop = Math.min(off + cols.value, end);
-        const slice = entry.bytes.subarray(off, stop);
+        const slice = view.subarray(off, stop);
         rows.push({
           address: off,
           bytes: Array.from(slice, hex2).join(' '),
@@ -103,7 +115,7 @@ export const readBytesTool: ToolSpec = {
       const rows: number[][] = [];
       for (let i = 0; i < wholeCells; i += cols.value) {
         const row: number[] = [];
-        for (let c = i; c < Math.min(i + cols.value, wholeCells); c++) row.push(readValue(entry.bytes, address.value + c * w, format.value));
+        for (let c = i; c < Math.min(i + cols.value, wholeCells); c++) row.push(readValue(view, address.value + c * w, format.value));
         rows.push(row);
       }
       body['values'] = rows;

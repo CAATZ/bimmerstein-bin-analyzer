@@ -1,4 +1,5 @@
 import { checksumsFor, type ChecksumReport } from '@binanalyzer/families';
+import { bufferFor } from '../session.js';
 import { asArgs, reqString } from '../args.js';
 import { err, ok, unknownBin, type ToolSpec } from '../result.js';
 
@@ -42,8 +43,12 @@ export const verifyChecksumsTool: ToolSpec = {
     const entry = await deps.store.get(id.value);
     if (entry === undefined) return await unknownBin(deps, id.value);
 
-    const mod = checksumsFor(entry.bytes);
-    if (mod === undefined) return ok(unrecognised(entry.bytes.length));
-    return ok(mod.verify(entry.bytes));
+    // Working buffer on purpose: this mirrors the app's status chip, which
+    // re-verifies after every edit (B1 §6). An agent should be able to watch a
+    // calibration checksum go stale as it proposes.
+    const view = bufferFor(entry, 'working');
+    const mod = checksumsFor(view);
+    if (mod === undefined) return ok(unrecognised(view.length));
+    return ok(mod.verify(view));
   },
 };

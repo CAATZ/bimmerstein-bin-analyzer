@@ -33,6 +33,10 @@ export const getSessionTool: ToolSpec = {
         hasPath: state.bin.path !== null,
       },
       confirmedMaps: state.maps.length,
+      // Always present, never omitted: an agent should not have to infer a
+      // clean session from a missing field (Part C §4.3).
+      changedBytes: entry?.changedBytes ?? 0,
+      workingSha256: entry?.contentSha256 ?? state.bin.sha256,
       axisLibraryEntries: state.axisLibrary.length,
       addressFrame: state.addressFrame,
       selection: state.selection,
@@ -45,8 +49,8 @@ export const getSessionTool: ToolSpec = {
       scanStatus: state.scanStatus,
       coPilotScan:
         entry?.scan === undefined
-          ? { scanned: false }
-          : { scanned: true, potentialMaps: entry.scan.result.potentialMaps.length },
+          ? { scanned: false, scannedBuffer: 'original' }
+          : { scanned: true, potentialMaps: entry.scan.result.potentialMaps.length, scannedBuffer: 'original' },
     });
   },
 };

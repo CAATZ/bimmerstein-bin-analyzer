@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { call, errorText, fakeDeps, payload } from './helpers.js';
 import { openBinTool, readBytesTool, readMapTool } from '../src/tools/index.js';
+import { EDITED_BYTES, LIVE_BYTES, LIVE_SHA, dirtyLink, liveBins } from './link-fakes.js';
 
 // 0..63 so every decode is checkable by hand.
 const RAMP = new Uint8Array(64).map((_v, i) => i);
@@ -100,5 +101,36 @@ describe('read_bytes', () => {
   it('rejects a length above the cap', async () => {
     const { deps, binId } = await opened();
     expect(errorText(await call(readBytesTool, { binId, address: 0, length: 4097 }, deps))).toContain('between 1 and 4096');
+  });
+});
+
+describe('value reads see the working buffer', () => {
+  const dirty = (): ReturnType<typeof fakeDeps> => fakeDeps({ link: dirtyLink(), bins: liveBins() });
+  const oneByte = { address: 0, rows: 1, cols: 1, format: { width: 1 } };
+
+  it('read_map defaults to working and says so', async () => {
+    const p = payload(await call(readMapTool, { binId: LIVE_SHA, map: oneByte, values: 'raw' }, dirty()));
+    expect(p['buffer']).toBe('working');
+    expect(p['changedBytes']).toBe(1);
+    expect((p['values'] as number[][])[0]![0]).toBe(EDITED_BYTES[0]);
+  });
+
+  it('read_map buffer:"original" returns the file as opened', async () => {
+    const p = payload(
+      await call(readMapTool, { binId: LIVE_SHA, map: oneByte, values: 'raw', buffer: 'original' }, dirty())
+    );
+    expect(p['buffer']).toBe('original');
+    expect((p['values'] as number[][])[0]![0]).toBe(LIVE_BYTES[0]);
+  });
+
+  it('read_bytes takes the same selector', async () => {
+    const working = payload(await call(readBytesTool, { binId: LIVE_SHA, address: 0, length: 1 }, dirty()));
+    const original = payload(
+      await call(readBytesTool, { binId: LIVE_SHA, address: 0, length: 1, buffer: 'original' }, dirty())
+    );
+    expect(working['buffer']).toBe('working');
+    expect(original['buffer']).toBe('original');
+    // Byte 0 is the one the dirty fixture flips, so the hex differs.
+    expect(working['hex']).not.toEqual(original['hex']);
   });
 });

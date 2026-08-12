@@ -4,6 +4,7 @@ import { asArgs, optEnum, reqString } from '../args.js';
 import { axisView } from '../axisview.js';
 import { mapKind } from '../kind.js';
 import { findMap } from '../maps.js';
+import { bufferFor } from '../session.js';
 import { err, ok, unknownBin, type ToolSpec } from '../result.js';
 
 const IDENTITY: Scaling = { factor: 1, offset: 0, units: '', digits: 0 };
@@ -132,6 +133,12 @@ export const readMapTool: ToolSpec = {
         },
       },
       values: { enum: ['physical', 'raw', 'both'], default: 'physical' },
+      buffer: {
+        enum: ['working', 'original'],
+        default: 'working',
+        description:
+          'Which bytes to decode. "working" (default) is what the user is looking at, including their unsaved edits. "original" is the file as opened — use it to see what a value was before an edit.',
+      },
     },
   },
   async handle(raw, deps) {
@@ -140,6 +147,8 @@ export const readMapTool: ToolSpec = {
     if (!id.ok) return err(id.error);
     const mode = optEnum(a, 'values', ['physical', 'raw', 'both'] as const, 'physical');
     if (!mode.ok) return err(mode.error);
+    const buffer = optEnum(a, 'buffer', ['working', 'original'] as const, 'working');
+    if (!buffer.ok) return err(buffer.error);
 
     const hasMapId = a['mapId'] !== undefined;
     const hasAdhoc = a['map'] !== undefined;
@@ -175,9 +184,10 @@ export const readMapTool: ToolSpec = {
     const valid = validateMapDef(map, entry.size);
     if (!valid.ok) return err(valid.error);
 
+    const view = bufferFor(entry, buffer.value);
     let rawGrid: number[][];
     try {
-      rawGrid = readGrid(entry.bytes, map);
+      rawGrid = readGrid(view, map);
     } catch (e) {
       return err(`decode failed: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -196,13 +206,15 @@ export const readMapTool: ToolSpec = {
       orientation: map.orientation,
       kind: mapKind(map),
       cells,
+      buffer: buffer.value,
+      changedBytes: entry.changedBytes,
       values: mode.value === 'raw' ? rawGrid : physical,
     };
     if (mode.value === 'both') body['raw'] = rawGrid;
-    if (map.xAxis !== undefined) body['xAxis'] = axisView(entry.bytes, map.xAxis, 'x', entry.isFullRead);
-    if (map.yAxis !== undefined) body['yAxis'] = axisView(entry.bytes, map.yAxis, 'y', entry.isFullRead);
+    if (map.xAxis !== undefined) body['xAxis'] = axisView(view, map.xAxis, 'x', entry.isFullRead);
+    if (map.yAxis !== undefined) body['yAxis'] = axisView(view, map.yAxis, 'y', entry.isFullRead);
     if (map.states !== undefined) {
-      const matched = matchSwitchState(entry.bytes, map);
+      const matched = matchSwitchState(view, map);
       body['states'] = { defined: map.states.map((s) => s.name), actual: matched.actual, matched: matched.matched ?? null };
     }
     return ok(body);
