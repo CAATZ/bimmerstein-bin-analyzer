@@ -1,10 +1,12 @@
 <!-- apps/desktop/src/App.svelte -->
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import Toolbar from './components/Toolbar.svelte';
   import Sidebar from './components/Sidebar.svelte';
   import StatusBar from './components/StatusBar.svelte';
   import ChecksumDialog from './components/ChecksumDialog.svelte';
+  import SaveReportDialog from './components/SaveReportDialog.svelte';
   import Toasts from './components/Toasts.svelte';
   import HexdumpView from './views/HexdumpView.svelte';
   import View2d from './views/View2d.svelte';
@@ -18,9 +20,10 @@
   import { isSwitch } from './lib/switchdata.js';
   import * as actions from './store/actions.js';
   import type { MapDef } from '@binanalyzer/core';
-  import { bin, cellRange, maps, modalOpen, potentialMaps, selection, showOriginal, viewParams } from './store/stores.js';
+  import { bin, cellRange, lastSave, maps, modalOpen, potentialMaps, selection, showOriginal, viewParams } from './store/stores.js';
   import { tauriHost } from './platform/tauri.js';
-  import { loadBinFromPath, saveProjectFlow } from './platform/flows.js';
+  import { loadBinFromPath, saveBinFlow, saveProjectFlow } from './platform/flows.js';
+  import { isModalOutcome } from './lib/savereport.js';
   import { runScan } from './worker/controller.js';
   import ProposalPanel from './components/ProposalPanel.svelte';
   import { CoPilotClient, type SocketLike } from './copilot/client.js';
@@ -30,6 +33,16 @@
   import { homeDir, localDataDir } from '@tauri-apps/api/path';
 
   let showChecksums = $state(false);
+  let showSaveReport = $state(false);
+
+  /** Both toolbar save commands. The report opens modally for anything that is
+   *  not a clean correction, and for any failure (spec 2026-08-11 §6) — a
+   *  failed write must not vanish with an auto-dismissing toast. */
+  async function onSaveBin(promptAlways: boolean): Promise<void> {
+    await saveBinFlow(tauriHost, { promptAlways });
+    const o = get(lastSave);
+    if (o !== null && isModalOutcome(o)) showSaveReport = true;
+  }
 
   function isEditable(target: EventTarget | null): boolean {
     return (
@@ -154,7 +167,7 @@
 <ProposalPanel onDecide={(id, ids) => coPilot?.current()?.decideProposal(id, ids)} />
 
 <div class="app">
-  <Toolbar />
+  <Toolbar onSaveBin={(prompt: boolean) => void onSaveBin(prompt)} />
   <div class="body">
     <Sidebar />
     <main class="view">
@@ -175,12 +188,18 @@
       {/if}
     </main>
   </div>
-  <StatusBar onShowChecksums={() => (showChecksums = true)} />
+  <StatusBar
+    onShowChecksums={() => (showChecksums = true)}
+    onShowSaveReport={() => (showSaveReport = true)}
+  />
   <Toasts />
   {#if $viewParams.previewOpen}
     <PreviewPanel />
   {/if}
   {#if showChecksums}
     <ChecksumDialog onClose={() => (showChecksums = false)} />
+  {/if}
+  {#if showSaveReport}
+    <SaveReportDialog onClose={() => (showSaveReport = false)} />
   {/if}
 </div>

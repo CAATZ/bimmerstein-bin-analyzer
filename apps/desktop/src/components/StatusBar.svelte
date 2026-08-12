@@ -1,8 +1,11 @@
 <!-- apps/desktop/src/components/StatusBar.svelte -->
 <script lang="ts">
-  import { bin, checksumReport, coPilotStatus, editJournal, scanStatus, selection, viewParams } from '../store/stores.js';
+  import { bin, checksumReport, coPilotStatus, editJournal, lastSave, scanStatus, selection, viewParams } from '../store/stores.js';
 
-  let { onShowChecksums }: { onShowChecksums: () => void } = $props();
+  let {
+    onShowChecksums,
+    onShowSaveReport,
+  }: { onShowChecksums: () => void; onShowSaveReport: () => void } = $props();
 </script>
 
 <footer class="status">
@@ -27,6 +30,13 @@
   {/if}
   {#if $editJournal.size > 0}
     <span class="chip">{$editJournal.size} bytes changed</span>
+  {/if}
+  {#if $lastSave}
+    <!-- Counts against the file as OPENED, unlike the chip above; the report
+         says whether the buffer still matches what was written. -->
+    <button class="chip chip-{$lastSave.ok ? 'connected' : 'disconnected'}" onclick={onShowSaveReport}>
+      {$lastSave.ok ? `saved: ${$lastSave.name}` : 'last save FAILED'}
+    </button>
   {/if}
   {#if $checksumReport}
     <button

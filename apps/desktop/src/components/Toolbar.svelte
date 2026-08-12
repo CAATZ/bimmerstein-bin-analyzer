@@ -10,6 +10,8 @@
   import RomPickerDialog from './RomPickerDialog.svelte';
   import AxisLibraryDialog from './AxisLibraryDialog.svelte';
 
+  let { onSaveBin }: { onSaveBin: (promptAlways: boolean) => void } = $props();
+
   const VIEW_MODES: ViewMode[] = ['hex', '2d', '3d', 'map'];
   let exportKind: ExportKind = $state('csv');
   let pendingDef: { xml: string; romIds: string[] } | null = $state(null);
@@ -32,6 +34,8 @@
   <button onclick={() => void onImportDef()} disabled={$bin === null}>Import Def</button>
   <button onclick={() => void openProjectFlow(tauriHost)}>Open Project</button>
   <button onclick={() => void saveProjectFlow(tauriHost)} disabled={$bin === null}>Save Project</button>
+  <button onclick={() => onSaveBin(false)} disabled={$bin === null}>Save Bin</button>
+  <button onclick={() => onSaveBin(true)} disabled={$bin === null}>Save Bin As…</button>
   <button onclick={() => (axisLibOpen = true)} disabled={$bin === null}>Axes</button>
   <label class="copilot-toggle" title="Let a connected agent see this session, point at things, and propose changes. Off by default.">
     <input type="checkbox" bind:checked={$coPilotEnabled} />
