@@ -22,7 +22,7 @@
   import type { MapDef } from '@binanalyzer/core';
   import { bin, cellRange, lastSave, maps, modalOpen, potentialMaps, selection, showOriginal, viewParams } from './store/stores.js';
   import { tauriHost } from './platform/tauri.js';
-  import { loadBinFromPath, saveBinFlow, saveProjectFlow } from './platform/flows.js';
+  import { confirmCloseFlow, loadBinFromPath, saveBinFlow, saveProjectFlow } from './platform/flows.js';
   import { isModalOutcome } from './lib/savereport.js';
   import { runScan } from './worker/controller.js';
   import ProposalPanel from './components/ProposalPanel.svelte';
@@ -124,8 +124,15 @@
         if (ok) runScan();
       });
     });
+    // Closing the window discards unsaved byte edits, so it is guarded like every
+    // other path that would (2026-08-11 spec §8 + its close-protection amendment).
+    // Registering this handler is ALSO what closes the app — Tauri destroys the
+    // window from here when the handler does not prevent the default — hence
+    // `core:window:allow-destroy` in capabilities/default.json.
+    const closeGuard = tauriHost.onCloseRequested(() => confirmCloseFlow(tauriHost));
     return () => {
       void subscription.then((unlisten) => unlisten());
+      void closeGuard.then((unlisten) => unlisten());
     };
   });
   let coPilot: CoPilotMount | null = null;

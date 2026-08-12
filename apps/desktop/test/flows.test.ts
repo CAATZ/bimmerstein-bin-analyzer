@@ -60,6 +60,9 @@ export class FakeHost implements PlatformHost {
   async onFileDrop(): Promise<() => void> {
     return () => {};
   }
+  async onCloseRequested(): Promise<() => void> {
+    return () => {};
+  }
 }
 
 const BYTES = Uint8Array.from({ length: 64 }, (_, i) => i);

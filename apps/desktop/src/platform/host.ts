@@ -29,6 +29,17 @@ export interface PlatformHost {
   confirm(message: string, title: string): Promise<boolean>;
   /** OS file drops onto the window; resolves to an unsubscribe fn. */
   onFileDrop(handler: (paths: string[]) => void): Promise<() => void>;
+  /**
+   * The user asked to close the window. `handler` returns whether the close may
+   * proceed; resolves to an unsubscribe fn.
+   *
+   * Registering this TAKES OWNERSHIP of closing: Tauri's `onCloseRequested`
+   * destroys the window itself when the handler does not prevent the default,
+   * which is why the app needs `core:window:allow-destroy`. Without that
+   * permission this listener would make the app unquittable rather than merely
+   * unguarded.
+   */
+  onCloseRequested(handler: () => Promise<boolean>): Promise<() => void>;
 }
 
 /* Pure path helpers (Windows + POSIX separators) — no Node 'path' in the renderer. */

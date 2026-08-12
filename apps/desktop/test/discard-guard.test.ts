@@ -4,7 +4,7 @@ import { ms41TuneImage } from './ms41-image.js';
 import { FakeHost } from './flows.test.js';
 import * as a from '../src/store/actions.js';
 import { bin, toasts, workingBytes } from '../src/store/stores.js';
-import { loadBinFromPath, openProjectFlow, saveBinFlow, saveProjectFlow } from '../src/platform/flows.js';
+import { confirmCloseFlow, loadBinFromPath, openProjectFlow, saveBinFlow, saveProjectFlow } from '../src/platform/flows.js';
 
 const A = 'C:\\bins\\a.bin';
 const B = 'C:\\bins\\b.bin';
@@ -107,5 +107,60 @@ describe('saving a project while the bin is dirty', () => {
     host.saveAnswers = ['C:\\proj\\a.binproj.json'];
     await saveProjectFlow(host);
     expect(get(toasts).some((t) => /unsaved/i.test(t.text))).toBe(false);
+  });
+});
+
+describe('closing the app with unsaved byte changes', () => {
+  it('a clean session closes with no prompt', async () => {
+    const host = new FakeHost();
+    host.files.set(A, ms41TuneImage());
+    await loadBinFromPath(host, A);
+    expect(await confirmCloseFlow(host)).toBe(true);
+    expect(host.confirmMessages).toHaveLength(0);
+  });
+
+  it('with no bin at all it closes with no prompt', async () => {
+    const host = new FakeHost();
+    expect(await confirmCloseFlow(host)).toBe(true);
+    expect(host.confirmMessages).toHaveLength(0);
+  });
+
+  it('a dirty session asks, and declining BLOCKS the close', async () => {
+    const host = new FakeHost();
+    await dirtySession(host);
+    host.confirmAnswers = [false];
+    expect(await confirmCloseFlow(host)).toBe(false);
+    // The wording names closing, not loading — the load guard's message would be
+    // wrong here and the user is being asked about a different loss.
+    expect(host.confirmMessages[0]).toMatch(/unsaved/i);
+    expect(host.confirmMessages[0]).toMatch(/clos/i);
+  });
+
+  it('accepting allows the close', async () => {
+    const host = new FakeHost();
+    await dirtySession(host);
+    host.confirmAnswers = [true];
+    expect(await confirmCloseFlow(host)).toBe(true);
+  });
+
+  it('does NOT ask after saving', async () => {
+    const host = new FakeHost();
+    await dirtySession(host);
+    host.saveAnswers = ['C:\bins\out.bin'];
+    expect(await saveBinFlow(host, { promptAlways: true })).toBe(true);
+    expect(await confirmCloseFlow(host)).toBe(true);
+    expect(host.confirmMessages).toHaveLength(0);
+  });
+
+  it('ALLOWS the close when confirm throws — the opposite of the load guard, deliberately', async () => {
+    // An app that cannot be quit because a dialog broke is a worse defect than an
+    // edit the user can redo, and they can always close again. The load guard
+    // takes the other branch because there "safe" means keeping the edits.
+    const host = new FakeHost();
+    await dirtySession(host);
+    host.confirm = async (): Promise<boolean> => {
+      throw new Error('dialog unavailable');
+    };
+    expect(await confirmCloseFlow(host)).toBe(true);
   });
 });

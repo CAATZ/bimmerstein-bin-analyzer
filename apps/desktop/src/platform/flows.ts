@@ -29,25 +29,44 @@ function errText(e: unknown): string {
 
 /**
  * Ask before throwing away byte edits that are not on disk. Returns TRUE when
- * it is safe to proceed. A confirm() that THROWS is treated as "do not
- * proceed": the alternative is discarding a tune because a dialog failed.
+ * it is safe to proceed.
  *
- * Called from the two choke points every bin load passes through —
- * loadBinFromPath (toolbar Open Bin AND the OS file drop) and openProjectFlow —
- * so there is exactly one prompt per load, never two.
+ * Three callers, one dirty definition: the two choke points every bin load
+ * passes through — loadBinFromPath (toolbar Open Bin AND the OS file drop) and
+ * openProjectFlow, so there is exactly one prompt per load, never two — plus
+ * confirmCloseFlow. Only the sentence naming the loss differs.
  */
-async function confirmDiscard(host: PlatformHost): Promise<boolean> {
+async function confirmDiscard(host: PlatformHost, action: 'load' | 'close'): Promise<boolean> {
   if (!actions.isDirty()) return true;
   const n = get(editJournal).size;
+  const what =
+    action === 'load'
+      ? 'Loading another image discards them.'
+      : 'Closing the app discards them.';
   try {
     return await host.confirm(
-      `This bin has ${n} unsaved byte change(s). Loading another image discards them.\n` +
+      `This bin has ${n} unsaved byte change(s). ${what}\n` +
         `Save the bin first if you want to keep them. Discard and continue?`,
       'Unsaved changes'
     );
   } catch {
-    return false;
+    // The two callers take OPPOSITE branches here, and each is the safe one for
+    // its own action. Refusing to load keeps the edits. Refusing to CLOSE would
+    // leave an app that cannot be quit because a dialog broke — worse than an
+    // edit the user can redo, and they can always close again.
+    return action === 'close';
   }
+}
+
+/**
+ * The user asked to close the window. TRUE means the close may proceed.
+ *
+ * Same dirty definition and same prompt shape as the load guard (§8) — only the
+ * sentence naming the loss differs, because the user is being asked about a
+ * different one.
+ */
+export async function confirmCloseFlow(host: PlatformHost): Promise<boolean> {
+  return await confirmDiscard(host, 'close');
 }
 
 export async function openBinFlow(host: PlatformHost): Promise<boolean> {
@@ -57,7 +76,7 @@ export async function openBinFlow(host: PlatformHost): Promise<boolean> {
 }
 
 export async function loadBinFromPath(host: PlatformHost, path: string): Promise<boolean> {
-  if (!(await confirmDiscard(host))) return false;
+  if (!(await confirmDiscard(host, 'load'))) return false;
   try {
     const bytes = await host.readBinary(path);
     if (bytes.length === 0) {
@@ -193,7 +212,7 @@ export async function saveProjectFlow(host: PlatformHost): Promise<boolean> {
 }
 
 export async function openProjectFlow(host: PlatformHost): Promise<void> {
-  if (!(await confirmDiscard(host))) return;
+  if (!(await confirmDiscard(host, 'load'))) return;
   const projPath = await host.openFile('Open project', PROJECT_FILTERS);
   if (projPath === null) return;
   let text: string;

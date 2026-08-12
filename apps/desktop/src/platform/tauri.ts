@@ -1,6 +1,7 @@
 import { confirm as dialogConfirm, open, save } from '@tauri-apps/plugin-dialog';
 import { exists, readFile, readTextFile, writeFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import type { FileFilter, PlatformHost } from './host.js';
 
 /**
@@ -42,6 +43,19 @@ export const tauriHost: PlatformHost = {
   async onFileDrop(handler: (paths: string[]) => void): Promise<() => void> {
     return await getCurrentWebview().onDragDropEvent((event) => {
       if (event.payload.type === 'drop') handler(event.payload.paths);
+    });
+  },
+
+  /**
+   * Tauri's own onCloseRequested destroys the window when the handler does not
+   * call preventDefault (see @tauri-apps/api window.js), so this listener is
+   * what actually closes the app — hence `core:window:allow-destroy` in
+   * capabilities/default.json. Deny that permission and the app stops being
+   * closable at all.
+   */
+  async onCloseRequested(handler: () => Promise<boolean>): Promise<() => void> {
+    return await getCurrentWindow().onCloseRequested(async (event) => {
+      if (!(await handler())) event.preventDefault();
     });
   },
 };
