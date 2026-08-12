@@ -2,6 +2,7 @@ import { existsSync, mkdtempSync, readFileSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { PROTOCOL_VERSION } from '../src/link/envelope.js';
 import { linkFilePath, mintToken, removeHandshake, writeHandshake } from '../src/link/handshake.js';
 
 const norm = (p: string): string => p.replace(/\\/g, '/');
@@ -38,7 +39,7 @@ describe('writeHandshake / removeHandshake', () => {
     const at = join(mkdtempSync(join(tmpdir(), 'bslink-')), 'nested', 'copilot-link.json');
     writeHandshake(51733, 'f'.repeat(64), at);
     const rec = JSON.parse(readFileSync(at, 'utf8'));
-    expect(rec).toMatchObject({ v: 1, port: 51733, token: 'f'.repeat(64), pid: process.pid });
+    expect(rec).toMatchObject({ v: PROTOCOL_VERSION, port: 51733, token: 'f'.repeat(64), pid: process.pid });
     expect(typeof rec.startedAt).toBe('string');
     if (process.platform !== 'win32') expect(statSync(at).mode & 0o777).toBe(0o600);
     removeHandshake(at);

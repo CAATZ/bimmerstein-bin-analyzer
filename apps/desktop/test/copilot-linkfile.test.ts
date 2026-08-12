@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { PROTOCOL_VERSION } from '../src/copilot/protocol.js';
 import { linkFilePathFor, makeReadLink } from '../src/copilot/link-file.js';
 import type { PlatformHost } from '../src/platform/host.js';
 
@@ -25,7 +26,7 @@ describe('linkFilePathFor', () => {
 
 describe('makeReadLink', () => {
   it('parses a valid record', async () => {
-    const read = makeReadLink(host(JSON.stringify({ v: 1, port: 51733, token: 'f'.repeat(64) })), at);
+    const read = makeReadLink(host(JSON.stringify({ v: PROTOCOL_VERSION, port: 51733, token: 'f'.repeat(64) })), at);
     expect(await read()).toEqual({ port: 51733, token: 'f'.repeat(64) });
   });
 
@@ -33,8 +34,8 @@ describe('makeReadLink', () => {
     expect(await makeReadLink(host(null), at)()).toBeNull();
     expect(await makeReadLink(host('{'), at)()).toBeNull();
     expect(await makeReadLink(host(JSON.stringify({ v: 99, port: 1, token: 't' })), at)()).toBeNull();
-    expect(await makeReadLink(host(JSON.stringify({ v: 1, token: 't' })), at)()).toBeNull();
-    expect(await makeReadLink(host(JSON.stringify({ v: 1, port: 1 })), at)()).toBeNull();
+    expect(await makeReadLink(host(JSON.stringify({ v: PROTOCOL_VERSION, token: 't' })), at)()).toBeNull();
+    expect(await makeReadLink(host(JSON.stringify({ v: PROTOCOL_VERSION, port: 1 })), at)()).toBeNull();
   });
 
   it('never throws when the host itself fails', async () => {

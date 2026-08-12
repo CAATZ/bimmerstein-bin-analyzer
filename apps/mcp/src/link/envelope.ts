@@ -1,7 +1,22 @@
 import type { AxisLibEntry, MapDef, Result, ValueFormat } from '@binanalyzer/core';
 
-/** Bumped only on a breaking wire change; a mismatch is a hard error, never a degrade. */
-export const PROTOCOL_VERSION = 1;
+/**
+ * Bumped only on a breaking wire change; a mismatch is a hard error, never a
+ * degrade.
+ *
+ * 2 (Part C §3.3): `bin.working` was added. The bump is NOT bookkeeping for an
+ * additive field — the dangerous skew is a NEW server against an OLD app, which
+ * would see no `working`, conclude the session is clean, take the read-from-disk
+ * fast path and serve the file as opened to an agent told it was reading current
+ * bytes. Refusing to connect is the only safe answer.
+ */
+export const PROTOCOL_VERSION = 2;
+
+/** Fingerprint of the app's WORKING buffer; null while it is unedited. */
+export interface WireWorking {
+  sha256: string;
+  changedBytes: number;
+}
 
 export interface WireSelection {
   start: number;
@@ -33,7 +48,13 @@ export type WireScanStatus =
  * change and there is no diff protocol.
  */
 export interface SessionState {
-  bin: { sha256: string; name: string; size: number; path: string | null } | null;
+  bin: {
+    sha256: string;
+    name: string;
+    size: number;
+    path: string | null;
+    working: WireWorking | null;
+  } | null;
   maps: MapDef[];
   axisLibrary: AxisLibEntry[];
   addressFrame: 'none' | 'ms41full';

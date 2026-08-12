@@ -16,7 +16,7 @@ const VIEW = {
 
 function stateWith(path: string | null): SessionState {
   return {
-    bin: { sha256: SHA, name: 'live.bin', size: BYTES.length, path },
+    bin: { sha256: SHA, name: 'live.bin', size: BYTES.length, path, working: null },
     maps: [], axisLibrary: [], addressFrame: 'none', selection: null,
     viewParams: VIEW, scanStatus: { state: 'idle' },
   };

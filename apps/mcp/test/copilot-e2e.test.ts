@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import WebSocket from 'ws';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { PROTOCOL_VERSION } from '../src/link/envelope.js';
 
 const LAUNCHER = fileURLToPath(new URL('../bin/bimmerstein-mcp.mjs', import.meta.url));
 const FIXTURE = fileURLToPath(new URL('../../../fixtures/synthetic/synth-1.bin', import.meta.url));
@@ -78,16 +79,16 @@ beforeAll(async () => {
     if (m.type !== 'request') return;
     if (m.op === 'getBinBytes') {
       ws.send(JSON.stringify({
-        v: 1, type: 'response', id: m.id, ok: true, value: { base64: bytes.toString('base64') },
+        v: PROTOCOL_VERSION, type: 'response', id: m.id, ok: true, value: { base64: bytes.toString('base64') },
       }));
       return;
     }
-    ws.send(JSON.stringify({ v: 1, type: 'response', id: m.id, ok: true, value: { applied: { op: m.op } } }));
+    ws.send(JSON.stringify({ v: PROTOCOL_VERSION, type: 'response', id: m.id, ok: true, value: { applied: { op: m.op } } }));
   });
   await new Promise((r) => ws.once('open', r));
 
   ws.send(JSON.stringify({
-    v: 1, type: 'state', seq: 1,
+    v: PROTOCOL_VERSION, type: 'state', seq: 1,
     payload: {
       bin: { sha256: createHash('sha256').update(bytes).digest('hex'), name: 'synth-1.bin', size: bytes.length, path: null },
       maps: [], axisLibrary: [], addressFrame: 'none', selection: null,

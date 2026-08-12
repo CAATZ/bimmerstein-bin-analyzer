@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createBinImage } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
 import { BACKOFF_MS, CoPilotClient, type ClientDeps, type SocketLike } from '../src/copilot/client.js';
+import { PROTOCOL_VERSION } from '../src/copilot/protocol.js';
 import { coPilotStatus } from '../src/store/stores.js';
 
 class FakeSocket implements SocketLike {
@@ -87,7 +88,7 @@ describe('CoPilotClient', () => {
     await tick();
     const s = h.sockets[0]!;
     s.open();
-    s.deliver({ v: 1, type: 'request', id: 'q1', op: 'show', args: { viewMode: '2d' } });
+    s.deliver({ v: PROTOCOL_VERSION, type: 'request', id: 'q1', op: 'show', args: { viewMode: '2d' } });
     await tick();
     expect(s.frames().find((f) => f['type'] === 'response')).toMatchObject({ id: 'q1', ok: true });
   });
@@ -98,7 +99,7 @@ describe('CoPilotClient', () => {
     await tick();
     const s = h.sockets[0]!;
     s.open();
-    s.deliver({ v: 1, type: 'request', id: 'q2', op: 'nope', args: {} });
+    s.deliver({ v: PROTOCOL_VERSION, type: 'request', id: 'q2', op: 'nope', args: {} });
     await tick();
     expect(s.frames().find((f) => f['id'] === 'q2')).toMatchObject({ ok: false });
   });
@@ -137,7 +138,7 @@ describe('CoPilotClient', () => {
     await tick();
     const s = h.sockets[0]!;
     s.open();
-    s.deliver({ v: 1, type: 'request', id: 'q4', op: 'save_project', args: { requestId: 'r7' } });
+    s.deliver({ v: PROTOCOL_VERSION, type: 'request', id: 'q4', op: 'save_project', args: { requestId: 'r7' } });
     await tick();
     await tick();
     expect(h.saves).toHaveLength(1);
@@ -151,7 +152,7 @@ describe('CoPilotClient', () => {
     await tick();
     const s = h.sockets[0]!;
     s.open();
-    s.deliver({ v: 1, type: 'request', id: 'q5', op: 'save_project', args: { requestId: 'r8' } });
+    s.deliver({ v: PROTOCOL_VERSION, type: 'request', id: 'q5', op: 'save_project', args: { requestId: 'r8' } });
     await tick();
     await tick();
     expect(h.saves).toHaveLength(1);

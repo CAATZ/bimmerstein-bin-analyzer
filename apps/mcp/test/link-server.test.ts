@@ -9,7 +9,7 @@ import { PROTOCOL_VERSION, type SessionState } from '../src/link/envelope.js';
 const handshakeAt = (): string => join(mkdtempSync(join(tmpdir(), 'bslink-')), 'copilot-link.json');
 
 const STATE: SessionState = {
-  bin: { sha256: 'a'.repeat(64), name: 'x.bin', size: 256, path: 'C:/x.bin' },
+  bin: { sha256: 'a'.repeat(64), name: 'x.bin', size: 256, path: 'C:/x.bin', working: null },
   maps: [], axisLibrary: [], addressFrame: 'none', selection: null,
   viewParams: {
     format: { width: 1, signed: false, endianness: 'little' },
@@ -111,9 +111,9 @@ describe('WsCoPilotLink', () => {
   it('ignores a state whose seq did not advance', async () => {
     link = await WsCoPilotLink.listen({ handshakePath: handshakeAt() });
     const app = await attach(link);
-    app.send({ v: 1, type: 'state', seq: 5, payload: STATE });
+    app.send({ v: PROTOCOL_VERSION, type: 'state', seq: 5, payload: STATE });
     await vi.waitFor(() => expect(link!.state()).not.toBeNull());
-    app.send({ v: 1, type: 'state', seq: 4, payload: { ...STATE, bin: { ...STATE.bin!, name: 'stale.bin' } } });
+    app.send({ v: PROTOCOL_VERSION, type: 'state', seq: 4, payload: { ...STATE, bin: { ...STATE.bin!, name: 'stale.bin' } } });
     await new Promise((r) => setTimeout(r, 50));
     expect(link.state()?.bin?.name).toBe('x.bin');
   });
@@ -121,7 +121,7 @@ describe('WsCoPilotLink', () => {
   it('correlates a request with its response', async () => {
     link = await WsCoPilotLink.listen({ handshakePath: handshakeAt() });
     const app = await attach(link);
-    app.answer = (m) => ({ v: 1, type: 'response', id: m['id'], ok: true, value: { op: m['op'], args: m['args'] } });
+    app.answer = (m) => ({ v: PROTOCOL_VERSION, type: 'response', id: m['id'], ok: true, value: { op: m['op'], args: m['args'] } });
     const r = await link.request<{ op: string }>('select', { address: 16 });
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.value.op).toBe('select');
@@ -130,7 +130,7 @@ describe('WsCoPilotLink', () => {
   it('surfaces an app-side rejection as a Result error', async () => {
     link = await WsCoPilotLink.listen({ handshakePath: handshakeAt() });
     const app = await attach(link);
-    app.answer = (m) => ({ v: 1, type: 'response', id: m['id'], ok: false, error: 'no confirmed map with id z' });
+    app.answer = (m) => ({ v: PROTOCOL_VERSION, type: 'response', id: m['id'], ok: false, error: 'no confirmed map with id z' });
     const r = await link.request('change_map', { mapId: 'z' });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBe('no confirmed map with id z');
@@ -147,7 +147,7 @@ describe('WsCoPilotLink', () => {
     link = await WsCoPilotLink.listen({ handshakePath: handshakeAt() });
     const app = await attach(link);
     const big = { ...STATE, bin: { ...STATE.bin!, name: 'y'.repeat(200_000) } };
-    app.send({ v: 1, type: 'state', seq: 2, payload: big });
+    app.send({ v: PROTOCOL_VERSION, type: 'state', seq: 2, payload: big });
     await vi.waitFor(() => expect(link!.state()?.bin?.name.length).toBe(200_000), { timeout: 4000 });
   });
 
@@ -179,7 +179,7 @@ describe('WsCoPilotLink', () => {
     const seen: Array<[string, string[], string[]]> = [];
     link.onDecision((id, accepted, rejected) => seen.push([id, accepted, rejected]));
     const app = await attach(link);
-    app.send({ v: 1, type: 'decision', id: 'r1', accepted: ['c1'], rejected: ['c2'] });
+    app.send({ v: PROTOCOL_VERSION, type: 'decision', id: 'r1', accepted: ['c1'], rejected: ['c2'] });
     await vi.waitFor(() => expect(seen).toHaveLength(1));
     expect(seen[0]).toEqual(['r1', ['c1'], ['c2']]);
   });

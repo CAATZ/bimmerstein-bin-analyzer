@@ -40,7 +40,7 @@ export const liveBins = (): Record<string, Uint8Array> => ({ [LIVE_PATH]: LIVE_B
 
 export function liveState(over: Partial<SessionState> = {}): SessionState {
   return {
-    bin: { sha256: LIVE_SHA, name: 'live.bin', size: LIVE_BYTES.length, path: LIVE_PATH },
+    bin: { sha256: LIVE_SHA, name: 'live.bin', size: LIVE_BYTES.length, path: LIVE_PATH, working: null },
     maps: [], axisLibrary: [], addressFrame: 'none', selection: null,
     viewParams: VIEW, scanStatus: { state: 'idle' },
     ...over,

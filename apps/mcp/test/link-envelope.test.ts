@@ -20,15 +20,15 @@ describe('decodeEnvelope', () => {
   });
 
   it('accepts ok and error responses', () => {
-    const okR = decodeEnvelope(JSON.stringify({ v: 1, type: 'response', id: 'q1', ok: true, value: { applied: true } }));
+    const okR = decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'response', id: 'q1', ok: true, value: { applied: true } }));
     expect(okR.ok).toBe(true);
-    const errR = decodeEnvelope(JSON.stringify({ v: 1, type: 'response', id: 'q1', ok: false, error: 'no bin loaded' }));
+    const errR = decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'response', id: 'q1', ok: false, error: 'no bin loaded' }));
     expect(errR.ok).toBe(true);
     if (errR.ok && errR.value.type === 'response') expect(errR.value.ok).toBe(false);
   });
 
   it('accepts a decision message', () => {
-    const r = decodeEnvelope(JSON.stringify({ v: 1, type: 'decision', id: 'r1', accepted: ['c1'], rejected: ['c2'] }));
+    const r = decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'decision', id: 'r1', accepted: ['c1'], rejected: ['c2'] }));
     expect(r.ok).toBe(true);
   });
 
@@ -42,18 +42,30 @@ describe('decodeEnvelope', () => {
     expect(decodeEnvelope('not json').ok).toBe(false);
     expect(decodeEnvelope('[]').ok).toBe(false);
     expect(decodeEnvelope('null').ok).toBe(false);
-    expect(decodeEnvelope(JSON.stringify({ v: 1, type: 'nope' })).ok).toBe(false);
+    expect(decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'nope' })).ok).toBe(false);
   });
 
   it('rejects a state without a numeric seq or an object payload', () => {
-    expect(decodeEnvelope(JSON.stringify({ v: 1, type: 'state', payload: state })).ok).toBe(false);
-    expect(decodeEnvelope(JSON.stringify({ v: 1, type: 'state', seq: 'x', payload: state })).ok).toBe(false);
-    expect(decodeEnvelope(JSON.stringify({ v: 1, type: 'state', seq: 1, payload: 7 })).ok).toBe(false);
+    expect(decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'state', payload: state })).ok).toBe(false);
+    expect(decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'state', seq: 'x', payload: state })).ok).toBe(false);
+    expect(decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'state', seq: 1, payload: 7 })).ok).toBe(false);
   });
 
   it('rejects a response with no id, and a decision with non-string-array fields', () => {
-    expect(decodeEnvelope(JSON.stringify({ v: 1, type: 'response', ok: true })).ok).toBe(false);
-    expect(decodeEnvelope(JSON.stringify({ v: 1, type: 'decision', id: 'r1', accepted: 'c1', rejected: [] })).ok).toBe(false);
-    expect(decodeEnvelope(JSON.stringify({ v: 1, type: 'decision', id: 'r1', accepted: [1], rejected: [] })).ok).toBe(false);
+    expect(decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'response', ok: true })).ok).toBe(false);
+    expect(decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'decision', id: 'r1', accepted: 'c1', rejected: [] })).ok).toBe(false);
+    expect(decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'decision', id: 'r1', accepted: [1], rejected: [] })).ok).toBe(false);
+  });
+});
+
+describe('protocol version 2', () => {
+  it('is 2 and a version-1 state frame is a hard error', () => {
+    // Additive field, but the dangerous skew is a NEW server against an OLD
+    // app: it would see no `working`, assume clean, and serve the file as
+    // opened as if it were current. Refusing to connect is the safe answer.
+    expect(PROTOCOL_VERSION).toBe(2);
+    const decoded = decodeEnvelope(JSON.stringify({ v: 1, type: 'state', seq: 1, payload: {} }));
+    expect(decoded.ok).toBe(false);
+    if (!decoded.ok) expect(decoded.error).toContain('protocol version mismatch');
   });
 });

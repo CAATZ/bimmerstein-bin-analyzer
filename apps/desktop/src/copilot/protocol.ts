@@ -1,12 +1,28 @@
 import type { AxisLibEntry, MapDef, Result } from '@binanalyzer/core';
 import type { AddressFrame, ScanState, Selection, ViewParams } from '../store/stores.js';
 
-/** Must equal apps/mcp/src/link/envelope.ts PROTOCOL_VERSION. A mismatch is a hard error. */
-export const PROTOCOL_VERSION = 1;
+/**
+ * Must equal apps/mcp/src/link/envelope.ts PROTOCOL_VERSION. A mismatch is a
+ * hard error. 2 (Part C §3.3): `bin.working` added; see that file for why an
+ * additive field still forces a bump.
+ */
+export const PROTOCOL_VERSION = 2;
+
+/** Fingerprint of the WORKING buffer; null while it is unedited. */
+export interface WireWorking {
+  sha256: string;
+  changedBytes: number;
+}
 
 /** Authored state only — everything the co-pilot cannot re-derive. */
 export interface SessionState {
-  bin: { sha256: string; name: string; size: number; path: string | null } | null;
+  bin: {
+    sha256: string;
+    name: string;
+    size: number;
+    path: string | null;
+    working: WireWorking | null;
+  } | null;
   maps: MapDef[];
   axisLibrary: AxisLibEntry[];
   addressFrame: AddressFrame;
