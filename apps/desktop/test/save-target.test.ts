@@ -85,3 +85,21 @@ describe('projectSnapshot binds to the image as last saved', () => {
     expect(s.ok && s.value.bin).toEqual({ name: 'tuned.bin', sha256: 'deadbeef', size: 64 });
   });
 });
+
+describe('undo and the save target', () => {
+  it('undo does NOT rewind the save target — the file it names still exists', () => {
+    a.setBin(image());
+    a.editCell(byteMap, 0, 0, 9);
+    const t = { path: 'C:\\out\\t.bin', name: 't.bin', sha256: sha256Hex(get(workingBytes)!), size: 64 };
+    a.setSaveTarget(t);
+    expect(a.isDirty()).toBe(false);
+
+    a.editCell(byteMap, 0, 0, 11);
+    expect(a.isDirty()).toBe(true);
+    expect(a.undo()).toBe(true);
+
+    // The target survives the undo; what changed is whether the buffer matches it.
+    expect(get(saveTarget)).toEqual(t);
+    expect(a.isDirty()).toBe(false);
+  });
+});

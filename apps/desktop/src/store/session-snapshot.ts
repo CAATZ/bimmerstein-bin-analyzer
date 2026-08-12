@@ -26,6 +26,13 @@ import {
  * Excluded on purpose: toasts, modalOpen and scrollRequest are transient UI, not
  * session state; restoring them would resurrect dismissed toasts and re-fire a
  * scroll.
+ *
+ * Also excluded, and for a different reason: saveTarget and lastSave. Those are
+ * facts about the FILESYSTEM — "these bytes were written to this path and read
+ * back with this hash" — and undoing an edit does not unwrite a file. Rewinding
+ * them would make the app forget a file that still exists. Undo instead changes
+ * whether the buffer still MATCHES the target, which `isDirty` recomputes from
+ * the buffer's hash rather than from any stored flag.
  */
 export interface SessionSnapshot {
   bin: BinImage | null;
