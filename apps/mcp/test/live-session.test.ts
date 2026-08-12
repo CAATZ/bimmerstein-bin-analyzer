@@ -5,6 +5,12 @@ import { LiveSessionStore } from '../src/live-session.js';
 import type { CoPilotLink } from '../src/link/server.js';
 import type { SessionState } from '../src/link/envelope.js';
 import { FakeFileIo } from './helpers.js';
+// This file has its own local fakeLink (op-only callback); the shared one takes
+// (op, args), which dirtyLink needs. Aliased so both stay usable side by side.
+import {
+  EDITED_BYTES, EDITED_SHA, LIVE_BYTES, LIVE_SHA, dirtyLink,
+  fakeLink as sharedFakeLink, liveBins, liveState,
+} from './link-fakes.js';
 
 const BYTES = Uint8Array.from({ length: 256 }, (_, i) => (i * 7) & 0xff);
 const SHA = createHash('sha256').update(BYTES).digest('hex');
@@ -132,5 +138,37 @@ describe('LiveSessionStore', () => {
     await expect(
       s.open({ binId: SHA, sha256: SHA, name: 'x', path: 'x', size: 1, isFullRead: false, bytes: BYTES, originalBytes: BYTES, contentSha256: SHA, changedBytes: 0 })
     ).rejects.toThrow(/user opens bins/i);
+  });
+});
+
+describe('dirty sessions resolve the working buffer', () => {
+  it('takes the disk fast path only while clean', async () => {
+    const store = new LiveSessionStore(sharedFakeLink(liveState()), new FakeFileIo(liveBins()));
+    const entry = await store.get(LIVE_SHA);
+    expect(entry!.bytes).toBe(entry!.originalBytes);
+    expect(entry!.contentSha256).toBe(LIVE_SHA);
+    expect(entry!.changedBytes).toBe(0);
+  });
+
+  it('fetches working bytes over the link when the journal is non-empty', async () => {
+    const store = new LiveSessionStore(dirtyLink(), new FakeFileIo(liveBins()));
+    const entry = await store.get(LIVE_SHA);
+
+    expect(entry!.binId).toBe(LIVE_SHA);            // identity is stable
+    expect(entry!.contentSha256).toBe(EDITED_SHA);  // content is not
+    expect(entry!.changedBytes).toBe(1);
+    expect(entry!.bytes[0]).toBe(EDITED_BYTES[0]);
+    expect(entry!.originalBytes[0]).toBe(LIVE_BYTES[0]);
+  });
+
+  it('refuses working bytes whose hash is not the one the app declared', async () => {
+    const state = liveState();
+    state.bin!.working = { sha256: EDITED_SHA, changedBytes: 1 };
+    const liar = sharedFakeLink(state, () => ({
+      ok: true,
+      value: { base64: Buffer.from(LIVE_BYTES).toString('base64'), sha256: LIVE_SHA, which: 'working' },
+    }));
+    const store = new LiveSessionStore(liar, new FakeFileIo(liveBins()));
+    await expect(store.get(LIVE_SHA)).rejects.toThrow(/refusing to analyse/);
   });
 });

@@ -1,10 +1,11 @@
 import { get } from 'svelte/store';
 import type { AxisDef, MapDef, Scaling } from '@binanalyzer/core';
+import { sha256Hex } from '@binanalyzer/core';
 import * as actions from '../store/actions.js';
 import { pushToast } from '../store/actions.js';
 import { undoTransaction } from '../store/undo.js';
 import {
-  bin, maps, potentialMaps, proposals, selection, viewParams,
+  bin, maps, potentialMaps, proposals, selection, viewParams, workingBytes,
   type Proposal, type ViewMode,
 } from '../store/stores.js';
 
@@ -162,15 +163,21 @@ export async function dispatchOp(op: string, rawArgs: unknown): Promise<Dispatch
 
     case 'getBinBytes': {
       if (image === null) return fail(NO_BIN_OPEN);
+      // The sha256 argument is an IDENTITY check — "are you still holding the
+      // image I think you are" — and is deliberately not the content hash.
       const want = args['sha256'];
       if (typeof want === 'string' && want !== image.sha256) {
         return fail('the app has a different bin open now — call get_session again');
       }
+      const which = args['which'] === 'original' ? 'original' : 'working';
+      const working = get(workingBytes);
+      const source = which === 'original' ? image.bytes : (working ?? image.bytes);
       let binary = '';
-      // ORIGINAL bytes on purpose: the agent verifies sha256 against bin's
-      // identity, so edited bytes under the original's hash would fail that check.
-      for (const byte of image.bytes) binary += String.fromCharCode(byte);
-      return okv({ base64: btoa(binary), sha256: image.sha256 });
+      for (const byte of source) binary += String.fromCharCode(byte);
+      // The hash is OF WHAT WE SENT (Part C §3.4), so the co-pilot's check keeps
+      // its meaning: it still refuses bytes that are not what the app says it
+      // has, and still catches a payload truncated in transit.
+      return okv({ base64: btoa(binary), sha256: sha256Hex(source), which });
     }
 
     default:

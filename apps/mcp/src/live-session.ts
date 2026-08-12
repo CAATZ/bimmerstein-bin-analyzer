@@ -39,9 +39,29 @@ export class LiveSessionStore implements SessionStore {
     const bin = state?.bin;
     if (state === null || state === undefined || bin === null || bin === undefined) return undefined;
     if (bin.sha256 !== binId) return undefined;
-    this.forgetAllBut(bin.sha256);
 
-    const bytes = await this.resolveBytes(bin.sha256, bin.path);
+    const working = bin.working;
+    const contentSha = working === null ? bin.sha256 : working.sha256;
+    this.forgetAllBut(bin.sha256, contentSha);
+
+    const originalBytes = await this.resolveBytes({
+      contentSha: bin.sha256,
+      binSha: bin.sha256,
+      path: bin.path,
+      which: 'original',
+    });
+    const bytes =
+      working === null
+        ? originalBytes
+        : await this.resolveBytes({
+            // No file on disk holds edited bytes, so `path` is null here and
+            // the disk fast path is unreachable for a dirty session (§3.4).
+            contentSha: working.sha256,
+            binSha: bin.sha256,
+            path: null,
+            which: 'working',
+          });
+
     const entry: OpenBin = {
       binId: bin.sha256,
       sha256: bin.sha256,
@@ -50,9 +70,9 @@ export class LiveSessionStore implements SessionStore {
       size: bin.size,
       isFullRead: isMs41FullRead(bin.size),
       bytes,
-      originalBytes: bytes,
-      contentSha256: bin.sha256,
-      changedBytes: 0,
+      originalBytes,
+      contentSha256: contentSha,
+      changedBytes: working === null ? 0 : working.changedBytes,
       confirmed: state.maps,
     };
     const scan = this.scans.get(bin.sha256);
@@ -91,39 +111,60 @@ export class LiveSessionStore implements SessionStore {
   /**
    * Path first, verified by hash; the link second. Bytes whose sha256 does not
    * match what the app reported are NEVER used — a moved or replaced file would
-   * otherwise silently produce detections for the wrong bytes.
+   * otherwise silently produce detections for the wrong bytes, and a payload
+   * truncated in transit would parse as plausible garbage.
+   *
+   * Cached by CONTENT sha, not by binId, so the working buffer and the original
+   * coexist and neither can ever be served under the other's name.
    */
-  private async resolveBytes(sha: string, path: string | null): Promise<Uint8Array> {
-    const cached = this.bytesBySha.get(sha);
+  private async resolveBytes(args: {
+    contentSha: string;
+    binSha: string;
+    path: string | null;
+    which: 'original' | 'working';
+  }): Promise<Uint8Array> {
+    const { contentSha, binSha, path, which } = args;
+    const cached = this.bytesBySha.get(contentSha);
     if (cached !== undefined) return cached;
 
     if (path !== null) {
       const read = this.io.readBin(path);
-      if (read.ok && sha256Hex(read.value.bytes) === sha) {
-        this.bytesBySha.set(sha, read.value.bytes);
+      if (read.ok && sha256Hex(read.value.bytes) === contentSha) {
+        this.bytesBySha.set(contentSha, read.value.bytes);
         return read.value.bytes;
       }
     }
 
-    const answer = await this.link.request<{ base64: string }>('getBinBytes', { sha256: sha });
+    const answer = await this.link.request<{ base64: string }>('getBinBytes', {
+      sha256: binSha,
+      which,
+    });
     if (!answer.ok) throw new Error(`cannot obtain the bin bytes: ${answer.error}`);
     if (typeof answer.value?.base64 !== 'string') {
       throw new Error('the app answered getBinBytes without base64 bytes — refusing to analyse an empty payload');
     }
     const bytes = new Uint8Array(Buffer.from(answer.value.base64, 'base64'));
     const got = sha256Hex(bytes);
-    if (got !== sha) {
+    if (got !== contentSha) {
       throw new Error(
-        `the app sent bytes whose sha256 is ${got.slice(0, 12)}…, expected ${sha.slice(0, 12)}… — refusing to analyse them`
+        `the app sent ${which} bytes whose sha256 is ${got.slice(0, 12)}…, expected ${contentSha.slice(0, 12)}… — refusing to analyse them`
       );
     }
-    this.bytesBySha.set(sha, bytes);
+    this.bytesBySha.set(contentSha, bytes);
     return bytes;
   }
 
-  private forgetAllBut(sha: string): void {
-    for (const map of [this.bytesBySha, this.scans, this.axes, this.imports] as Array<Map<string, unknown>>) {
-      for (const key of [...map.keys()]) if (key !== sha) map.delete(key);
+  /**
+   * Keeps the original AND the current working buffer; everything else goes.
+   * Superseded working buffers are dropped here as editing proceeds, so the
+   * byte cache stays at two entries however long the session runs.
+   */
+  private forgetAllBut(binSha: string, contentSha: string): void {
+    for (const key of [...this.bytesBySha.keys()]) {
+      if (key !== binSha && key !== contentSha) this.bytesBySha.delete(key);
+    }
+    for (const map of [this.scans, this.axes, this.imports] as Array<Map<string, unknown>>) {
+      for (const key of [...map.keys()]) if (key !== binSha) map.delete(key);
     }
   }
 }

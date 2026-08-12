@@ -1,12 +1,12 @@
 import { get } from 'svelte/store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapDef } from '@binanalyzer/core';
-import { createBinImage } from '@binanalyzer/core';
+import { createBinImage, sha256Hex } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
 import {
   NO_BIN_OPEN, SINGLE_CHANGE_BURST, applyProposal, dispatchOp, resetBurstWindow,
 } from '../src/copilot/dispatch.js';
-import { axisLibrary, maps, potentialMaps, proposals, selection, toasts, viewParams } from '../src/store/stores.js';
+import { axisLibrary, bin, maps, potentialMaps, proposals, selection, toasts, viewParams, workingBytes } from '../src/store/stores.js';
 
 function testBin() {
   return createBinImage(Uint8Array.from({ length: 4096 }, (_, i) => i & 0xff), 'live.bin');
@@ -241,5 +241,42 @@ describe('guards', () => {
     const r = await dispatchOp('delete_everything', {});
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toContain('delete_everything');
+  });
+});
+
+describe('getBinBytes names the buffer it sent', () => {
+  const editMap = (): MapDef => ({
+    id: 'm1', name: 'M', address: 0x10, rows: 2, cols: 2,
+    format: { width: 1, signed: false, endianness: 'little' },
+    scaling: { factor: 0.1, offset: 0, units: '', digits: 1 },
+    orientation: 'row-major', provenance: 'manual',
+  });
+
+  beforeEach(() => {
+    a.resetStores();
+    a.setBin(testBin());
+    expect(a.editCell(editMap(), 0, 0, 20).ok).toBe(true);
+  });
+
+  it('defaults to working and hashes WHAT IT SENT', async () => {
+    const r = await dispatchOp('getBinBytes', {});
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value['which']).toBe('working');
+    expect(r.value['sha256']).toBe(sha256Hex(get(workingBytes)!));
+    expect(r.value['sha256']).not.toBe(get(bin)!.sha256);
+  });
+
+  it('serves the original on request, under the ORIGINAL hash', async () => {
+    const r = await dispatchOp('getBinBytes', { which: 'original' });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value['which']).toBe('original');
+    expect(r.value['sha256']).toBe(get(bin)!.sha256);
+  });
+
+  it('still refuses when the app holds a different bin', async () => {
+    const r = await dispatchOp('getBinBytes', { sha256: 'not-this-bin' });
+    expect(r.ok).toBe(false);
   });
 });

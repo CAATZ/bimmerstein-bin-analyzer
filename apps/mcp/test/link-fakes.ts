@@ -38,6 +38,30 @@ export const LIVE_SHA = createHash('sha256').update(LIVE_BYTES).digest('hex');
 export const LIVE_PATH = 'C:/live.bin';
 export const liveBins = (): Record<string, Uint8Array> => ({ [LIVE_PATH]: LIVE_BYTES });
 
+/** LIVE_BYTES with byte 0 flipped: a working buffer that differs from the file. */
+export const EDITED_BYTES = (() => {
+  const b = LIVE_BYTES.slice();
+  b[0] = b[0]! ^ 0xff;
+  return b;
+})();
+export const EDITED_SHA = createHash('sha256').update(EDITED_BYTES).digest('hex');
+
+/**
+ * A live state whose journal is non-empty, plus a link that serves BOTH
+ * buffers and hashes whichever it sent — the app's side of Part C §3.4.
+ */
+export function dirtyLink(changedBytes = 1): FakeLink {
+  const state = liveState();
+  state.bin!.working = { sha256: EDITED_SHA, changedBytes };
+  return fakeLink(state, (op, args) => {
+    if (op !== 'getBinBytes') return { ok: true, value: {} };
+    const which = (args as { which?: string }).which === 'original' ? 'original' : 'working';
+    const bytes = which === 'original' ? LIVE_BYTES : EDITED_BYTES;
+    const sha = which === 'original' ? LIVE_SHA : EDITED_SHA;
+    return { ok: true, value: { base64: Buffer.from(bytes).toString('base64'), sha256: sha, which } };
+  });
+}
+
 export function liveState(over: Partial<SessionState> = {}): SessionState {
   return {
     bin: { sha256: LIVE_SHA, name: 'live.bin', size: LIVE_BYTES.length, path: LIVE_PATH, working: null },

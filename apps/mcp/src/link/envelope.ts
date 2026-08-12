@@ -104,6 +104,14 @@ export function decodeEnvelope(text: string): Result<AppMessage> {
         return { ok: false, error: 'state frame needs a numeric seq' };
       }
       if (!isObject(raw['payload'])) return { ok: false, error: 'state frame needs an object payload' };
+      // `bin.working` is REQUIRED at protocol 2 (Part C §3.3). Defaulting a
+      // missing one to null would mean "assume clean" — precisely the
+      // stale-bytes hazard the version bump exists to prevent — so a frame
+      // without it is malformed and is dropped rather than interpreted.
+      const bin = (raw['payload'] as Record<string, unknown>)['bin'];
+      if (isObject(bin) && bin['working'] === undefined) {
+        return { ok: false, error: 'state frame bin is missing "working" (protocol 2 requires it, null when unedited)' };
+      }
       return { ok: true, value: raw as unknown as Extract<AppMessage, { type: 'state' }> };
     }
     case 'response': {

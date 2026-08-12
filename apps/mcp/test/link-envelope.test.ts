@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PROTOCOL_VERSION, decodeEnvelope } from '../src/link/envelope.js';
 
 const state = {
-  bin: { sha256: 'a'.repeat(64), name: 'x.bin', size: 256, path: 'C:/x.bin' },
+  bin: { sha256: 'a'.repeat(64), name: 'x.bin', size: 256, path: 'C:/x.bin', working: null },
   maps: [], axisLibrary: [], addressFrame: 'none',
   selection: null,
   viewParams: {
@@ -67,5 +67,20 @@ describe('protocol version 2', () => {
     const decoded = decodeEnvelope(JSON.stringify({ v: 1, type: 'state', seq: 1, payload: {} }));
     expect(decoded.ok).toBe(false);
     if (!decoded.ok) expect(decoded.error).toContain('protocol version mismatch');
+  });
+});
+
+describe('a state frame must declare its working buffer', () => {
+  it('drops a bin that omits "working" rather than assuming clean', () => {
+    // Assuming clean is the stale-bytes hazard the version bump prevents.
+    const payload = { ...state, bin: { sha256: 'a'.repeat(64), name: 'x.bin', size: 256, path: null } };
+    const r = decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'state', seq: 1, payload }));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain('working');
+  });
+
+  it('accepts bin:null, which has no buffer to describe', () => {
+    const payload = { ...state, bin: null };
+    expect(decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'state', seq: 1, payload })).ok).toBe(true);
   });
 });

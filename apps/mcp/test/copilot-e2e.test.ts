@@ -90,7 +90,7 @@ beforeAll(async () => {
   ws.send(JSON.stringify({
     v: PROTOCOL_VERSION, type: 'state', seq: 1,
     payload: {
-      bin: { sha256: createHash('sha256').update(bytes).digest('hex'), name: 'synth-1.bin', size: bytes.length, path: null },
+      bin: { sha256: createHash('sha256').update(bytes).digest('hex'), name: 'synth-1.bin', size: bytes.length, path: null, working: null },
       maps: [], axisLibrary: [], addressFrame: 'none', selection: null,
       viewParams: {
         format: { width: 1, signed: false, endianness: 'little' },
