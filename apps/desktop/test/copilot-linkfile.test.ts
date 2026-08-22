@@ -54,16 +54,16 @@ describe('linkFilePathFor on a REAL Windows base', () => {
     // exists() was false, readTextIfExists returned null, and the client never
     // dialled - the link silently never came up.
     const p = linkFilePathFor('windows', {
-      localAppData: 'C:\\Users\\crist\\AppData\\Local',
-      home: 'C:\\Users\\crist',
+      localAppData: 'C:\\U\\x\\AppData\\Local',
+      home: 'C:\\U\\x',
     });
-    expect(p).toBe('C:\\Users\\crist\\AppData\\Local\\BimmerStein Bin Analyzer\\copilot-link.json');
+    expect(p).toBe('C:\\U\\x\\AppData\\Local\\BimmerStein Bin Analyzer\\copilot-link.json');
     expect(p).not.toContain('/');
   });
 
   it('also normalises the home fallback', () => {
-    const p = linkFilePathFor('windows', { home: 'C:\\Users\\crist' });
-    expect(p).toBe('C:\\Users\\crist\\AppData\\Local\\BimmerStein Bin Analyzer\\copilot-link.json');
+    const p = linkFilePathFor('windows', { home: 'C:\\U\\x' });
+    expect(p).toBe('C:\\U\\x\\AppData\\Local\\BimmerStein Bin Analyzer\\copilot-link.json');
     expect(p).not.toContain('/');
   });
 });
