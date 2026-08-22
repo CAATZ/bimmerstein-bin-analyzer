@@ -75,6 +75,8 @@ export class CoPilotClient {
       id: requestId,
       accepted: outcome.accepted,
       rejected: outcome.rejected,
+      // Only when non-empty: a save_project decision has no rows at all.
+      ...(outcome.failed.length > 0 ? { failed: outcome.failed } : {}),
     });
     this.pushState(); // the batch changed authored state
   }

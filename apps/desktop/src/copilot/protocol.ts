@@ -45,7 +45,20 @@ export type ClientFrame =
   | { v: number; type: 'state'; seq: number; payload: SessionState }
   | { v: number; type: 'response'; id: string; ok: true; value?: unknown }
   | { v: number; type: 'response'; id: string; ok: false; error: string }
-  | { v: number; type: 'decision'; id: string; accepted: string[]; rejected: string[] };
+  | {
+      v: number;
+      type: 'decision';
+      id: string;
+      accepted: string[];
+      rejected: string[];
+      /**
+       * Rows the user ACCEPTED that then failed to apply — a stale
+       * expectedRaw, an unresolvable target. They are in neither accepted
+       * nor rejected, so without this the agent is told nothing about the
+       * one row it most needs to re-read. Absent means none.
+       */
+      failed?: Array<{ id: string; error: string }>;
+    };
 
 const isObject = (x: unknown): x is Record<string, unknown> =>
   typeof x === 'object' && x !== null && !Array.isArray(x);

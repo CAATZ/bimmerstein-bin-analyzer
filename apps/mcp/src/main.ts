@@ -29,11 +29,14 @@ if (parsed.value.copilot) {
   // A dropped link means nothing pending can ever be answered by the person
   // who was looking at that window.
   link.onDisconnect(() => table.cancelAll('the co-pilot link disconnected'));
-  link.onDecision((id, accepted, rejected) =>
+  link.onDecision((id, accepted, rejected, failed) =>
     table.settle(id, {
       status: accepted.length > 0 ? 'accepted' : 'rejected',
       acceptedIds: accepted,
       rejectedIds: rejected,
+      // A row the user accepted that then failed to apply is in NEITHER list;
+      // without this the agent cannot tell a stale row from a vanished one.
+      ...(failed.length > 0 ? { failed } : {}),
     })
   );
   store = new LiveSessionStore(link, io);

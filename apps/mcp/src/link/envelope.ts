@@ -67,7 +67,15 @@ export type AppMessage =
   | { v: number; type: 'state'; seq: number; payload: SessionState }
   | { v: number; type: 'response'; id: string; ok: true; value?: unknown }
   | { v: number; type: 'response'; id: string; ok: false; error: string }
-  | { v: number; type: 'decision'; id: string; accepted: string[]; rejected: string[] };
+  | {
+      v: number;
+      type: 'decision';
+      id: string;
+      accepted: string[];
+      rejected: string[];
+      /** Accepted-but-failed rows (stale expectedRaw, bad target). Absent means none. */
+      failed?: Array<{ id: string; error: string }>;
+    };
 
 export type ServerMessage =
   | { v: number; type: 'hello'; server: string; protocol: number }

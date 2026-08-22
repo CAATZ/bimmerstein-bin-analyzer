@@ -19,7 +19,9 @@ export interface CoPilotLink {
   /** Called whenever a connection is lost, so pending user decisions can be cancelled. */
   onDisconnect(fn: () => void): void;
   /** Called when the app reports a user's decision on a proposal. */
-  onDecision(fn: (id: string, accepted: string[], rejected: string[]) => void): void;
+  onDecision(
+    fn: (id: string, accepted: string[], rejected: string[], failed: Array<{ id: string; error: string }>) => void
+  ): void;
   close(): Promise<void>;
 }
 
@@ -41,7 +43,9 @@ export class WsCoPilotLink implements CoPilotLink {
   private lastSeq = -Infinity;
   private readonly pending = new Map<string, Pending>();
   private readonly disconnectHooks: Array<() => void> = [];
-  private readonly decisionHooks: Array<(id: string, accepted: string[], rejected: string[]) => void> = [];
+  private readonly decisionHooks: Array<
+    (id: string, accepted: string[], rejected: string[], failed: Array<{ id: string; error: string }>) => void
+  > = [];
   private reqSeq = 0;
 
   private constructor(
@@ -133,7 +137,8 @@ export class WsCoPilotLink implements CoPilotLink {
       p.resolve(msg.ok ? { ok: true, value: msg.value } : { ok: false, error: msg.error });
       return;
     }
-    for (const fn of this.decisionHooks) fn(msg.id, msg.accepted, msg.rejected);
+    // failed[] is optional on the wire; absent means no row failed to apply.
+    for (const fn of this.decisionHooks) fn(msg.id, msg.accepted, msg.rejected, msg.failed ?? []);
   }
 
   private failAllPending(error: string): void {
@@ -175,7 +180,9 @@ export class WsCoPilotLink implements CoPilotLink {
     this.disconnectHooks.push(fn);
   }
 
-  onDecision(fn: (id: string, accepted: string[], rejected: string[]) => void): void {
+  onDecision(
+    fn: (id: string, accepted: string[], rejected: string[], failed: Array<{ id: string; error: string }>) => void
+  ): void {
     this.decisionHooks.push(fn);
   }
 
