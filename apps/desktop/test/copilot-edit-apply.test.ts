@@ -204,6 +204,24 @@ describe('accepting a batch', () => {
     expect(rawAt(0x10)).toBe(101);   // the good row still landed
   });
 
+
+  it('reports a DECLINED stale row in rejected[], not silence', () => {
+    // GUI D3 surfaced this shape: a row the panel left unchecked BECAUSE it is
+    // stale, then Apply. The agent must learn the row did not land — appearing
+    // in neither acceptedIds nor rejectedIds tells it nothing.
+    const m = seed();
+    proposals.set([{
+      requestId: 'r1', title: 'one stale, one fresh',
+      changes: [
+        { id: 'stale', kind: 'cell', mapId: m.id, row: 0, col: 0, value: 20, raw: true, expectedRaw: 55 },
+        { id: 'fresh', kind: 'cell', mapId: m.id, row: 0, col: 1, value: 20, raw: true, expectedRaw: 100 },
+      ],
+    }]);
+    const outcome = applyProposal('r1', ['fresh']);
+    expect(outcome.accepted).toEqual(['fresh']);
+    expect(outcome.rejected).toEqual(['stale']);
+  });
+
   it('re-verifies checksums once the batch has landed', () => {
     // Needs an image the MS41 module actually recognises, so a report exists.
     a.resetStores();
