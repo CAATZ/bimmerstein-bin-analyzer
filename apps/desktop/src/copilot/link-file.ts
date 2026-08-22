@@ -15,8 +15,16 @@ export interface OsPaths {
  */
 export function linkFilePathFor(os: OsKind, paths: OsPaths): string {
   if (os === 'windows') {
-    const base = paths.localAppData ?? `${paths.home}/AppData/Local`;
-    return `${base}/BimmerStein Bin Analyzer/copilot-link.json`;
+    // localDataDir() returns BACKSLASHES here, so appending forward-slash
+    // segments yielded a MIXED path the fs plugin does not resolve: exists()
+    // was false, readTextIfExists returned null, and the client never dialled.
+    // The server computes this same location with node's path.join, which is
+    // all-backslash on win32 - the two ends must agree on the STRING, not just
+    // on which file it names.
+    const SEP = '\\';
+    const base = (paths.localAppData ?? `${paths.home}${SEP}AppData${SEP}Local`)
+      .split('/').join(SEP).replace(/[\\]+$/, '');
+    return `${base}${SEP}BimmerStein Bin Analyzer${SEP}copilot-link.json`;
   }
   if (os === 'macos') {
     return `${paths.home}/Library/Application Support/BimmerStein Bin Analyzer/copilot-link.json`;

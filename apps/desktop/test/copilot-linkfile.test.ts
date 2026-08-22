@@ -11,10 +11,13 @@ const at = (): string => '/link.json';
 
 describe('linkFilePathFor', () => {
   it("matches the server's per-OS resolution", () => {
+    // Windows resolves to a SINGLE separator style (see the dedicated block
+    // below): these previously asserted forward slashes, which localDataDir()
+    // never produces, so the real mixed-separator path went untested.
     expect(linkFilePathFor('windows', { localAppData: 'C:/U/x/AppData/Local', home: 'C:/U/x' }))
-      .toBe('C:/U/x/AppData/Local/BimmerStein Bin Analyzer/copilot-link.json');
+      .toBe('C:\\U\\x\\AppData\\Local\\BimmerStein Bin Analyzer\\copilot-link.json');
     expect(linkFilePathFor('windows', { home: 'C:/U/x' }))
-      .toBe('C:/U/x/AppData/Local/BimmerStein Bin Analyzer/copilot-link.json');
+      .toBe('C:\\U\\x\\AppData\\Local\\BimmerStein Bin Analyzer\\copilot-link.json');
     expect(linkFilePathFor('macos', { home: '/Users/x' }))
       .toBe('/Users/x/Library/Application Support/BimmerStein Bin Analyzer/copilot-link.json');
     expect(linkFilePathFor('linux', { home: '/home/x' }))
@@ -41,5 +44,26 @@ describe('makeReadLink', () => {
   it('never throws when the host itself fails', async () => {
     const angry = { async readTextIfExists() { throw new Error('denied'); } } as unknown as PlatformHost;
     expect(await makeReadLink(angry, at)()).toBeNull();
+  });
+});
+
+describe('linkFilePathFor on a REAL Windows base', () => {
+  it('emits a single separator style, matching the server path.join', () => {
+    // localDataDir() returns BACKSLASHES on Windows. Appending forward-slash
+    // segments produced a mixed path that the fs plugin does not resolve, so
+    // exists() was false, readTextIfExists returned null, and the client never
+    // dialled - the link silently never came up.
+    const p = linkFilePathFor('windows', {
+      localAppData: 'C:\\Users\\crist\\AppData\\Local',
+      home: 'C:\\Users\\crist',
+    });
+    expect(p).toBe('C:\\Users\\crist\\AppData\\Local\\BimmerStein Bin Analyzer\\copilot-link.json');
+    expect(p).not.toContain('/');
+  });
+
+  it('also normalises the home fallback', () => {
+    const p = linkFilePathFor('windows', { home: 'C:\\Users\\crist' });
+    expect(p).toBe('C:\\Users\\crist\\AppData\\Local\\BimmerStein Bin Analyzer\\copilot-link.json');
+    expect(p).not.toContain('/');
   });
 });
