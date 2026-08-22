@@ -93,7 +93,9 @@
     <div class="panel" role="dialog" aria-modal="true" aria-label={proposal.title}>
       <h2>{proposal.title}</h2>
       {#if proposal.reason}<p class="reason">{proposal.reason}</p>{/if}
-      <p class="count">{proposal.changes.length} proposed changes — {acceptedIds.length} selected</p>
+      <p class="count">
+        {proposal.changes.length} proposed change{proposal.changes.length === 1 ? '' : 's'} — {acceptedIds.length} selected
+      </p>
 
       <div class="actions-top">
         <button onclick={() => setAll(true)}>Select all</button>
