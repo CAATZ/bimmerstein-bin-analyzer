@@ -50,3 +50,21 @@ describe('RequestTable', () => {
     expect(t.get(first.requestId)).toBeUndefined();
   });
 });
+
+describe('a settled request surfaces rows that failed to apply', () => {
+  it('records failed[] so get_request can hand it back', () => {
+    // The agent needs the reason a row it proposed did not land. A row that
+    // is in neither acceptedIds nor rejectedIds tells it nothing.
+    const t = new RequestTable();
+    const r = t.create('map-edits', 2);
+    t.settle(r.requestId, {
+      status: 'accepted',
+      acceptedIds: ['fresh'],
+      rejectedIds: [],
+      failed: [{ id: 'stale', error: 'expected raw 8, found 50' }],
+    });
+    const row = t.get(r.requestId)!;
+    expect(row.acceptedIds).toEqual(['fresh']);
+    expect(row.failed).toEqual([{ id: 'stale', error: 'expected raw 8, found 50' }]);
+  });
+});

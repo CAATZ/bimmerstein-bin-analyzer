@@ -84,3 +84,25 @@ describe('a state frame must declare its working buffer', () => {
     expect(decodeEnvelope(JSON.stringify({ v: PROTOCOL_VERSION, type: 'state', seq: 1, payload })).ok).toBe(true);
   });
 });
+
+describe('a decision may carry rows that failed to apply', () => {
+  it('preserves failed[] through decode', () => {
+    const r = decodeEnvelope(JSON.stringify({
+      v: PROTOCOL_VERSION, type: 'decision', id: 'r1',
+      accepted: ['fresh'], rejected: [],
+      failed: [{ id: 'stale', error: 'the byte moved since this was proposed' }],
+    }));
+    expect(r.ok).toBe(true);
+    if (!r.ok || r.value.type !== 'decision') return;
+    expect(r.value.failed).toEqual([{ id: 'stale', error: 'the byte moved since this was proposed' }]);
+  });
+
+  it('still accepts a decision with no failed[] — save_project has no rows', () => {
+    const r = decodeEnvelope(JSON.stringify({
+      v: PROTOCOL_VERSION, type: 'decision', id: 'r2', accepted: ['r2'], rejected: [],
+    }));
+    expect(r.ok).toBe(true);
+    if (!r.ok || r.value.type !== 'decision') return;
+    expect(r.value.failed).toBeUndefined();
+  });
+});

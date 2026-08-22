@@ -4,7 +4,7 @@ import { createBinImage } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
 import { BACKOFF_MS, CoPilotClient, type ClientDeps, type SocketLike } from '../src/copilot/client.js';
 import { PROTOCOL_VERSION } from '../src/copilot/protocol.js';
-import { coPilotStatus } from '../src/store/stores.js';
+import { coPilotStatus, proposals } from '../src/store/stores.js';
 
 class FakeSocket implements SocketLike {
   sent: string[] = [];
@@ -188,5 +188,50 @@ describe('CoPilotClient', () => {
     c.stop();
     expect(h.sockets[0]!.closed).toBe(true);
     expect(get(coPilotStatus)).toBe('off');
+  });
+});
+
+describe('a decision reports rows that FAILED, not just rows the user declined', () => {
+  it('puts failed[] on the wire so the agent is not left in silence', async () => {
+    // GUI D3's root cause: a row the user ACCEPTED that then fails its
+    // expectedRaw check lands in neither acceptedIds (it did not apply) nor
+    // rejectedIds (the user did not decline it). applyProposal has always
+    // computed failed[]; the decision frame simply never carried it, so the
+    // agent could not tell a stale row from one that silently vanished.
+    a.resetStores();
+    a.setBin(createBinImage(new Uint8Array(64).fill(100), 'e.bin'));
+    const map = {
+      id: 'm1', name: 'M', address: 0x10, rows: 2, cols: 2,
+      format: { width: 1 as const, signed: false, endianness: 'little' as const },
+      scaling: { factor: 1, offset: 0, units: '', digits: 0 },
+      orientation: 'row-major' as const, provenance: 'manual' as const,
+    };
+    expect(a.addImportedMaps([map]).added).toBe(1);
+    proposals.set([{
+      requestId: 'r1', title: 'one stale, one fresh',
+      changes: [
+        { id: 'stale', kind: 'cell', mapId: 'm1', row: 0, col: 0, value: 20, raw: true, expectedRaw: 55 },
+        { id: 'fresh', kind: 'cell', mapId: 'm1', row: 0, col: 1, value: 20, raw: true, expectedRaw: 100 },
+      ],
+    }]);
+
+    const h = harness();
+    const c = new CoPilotClient(h.deps);
+    c.start();
+    await tick();
+    const s = h.sockets[0]!;
+    s.open();
+
+    // The user ticked BOTH rows — including the stale one — and applied.
+    c.decideProposal('r1', ['stale', 'fresh']);
+    await tick();
+
+    const decision = s.frames().find((f) => f['type'] === 'decision')!;
+    expect(decision['accepted']).toEqual(['fresh']);
+    expect(decision['rejected']).toEqual([]);
+    const failed = decision['failed'] as Array<{ id: string; error: string }>;
+    expect(failed).toHaveLength(1);
+    expect(failed[0]!.id).toBe('stale');
+    expect(failed[0]!.error).toContain('55');
   });
 });
