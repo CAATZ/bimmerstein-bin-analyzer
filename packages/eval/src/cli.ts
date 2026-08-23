@@ -327,8 +327,13 @@ interface Ms41ChecksumCase {
    * three-region walk or its eight-entry bank map against a known-good image —
    * a transcription regression there would otherwise be caught by nothing.
    * `match` is pinned rather than asserted: the e36m3 full read genuinely
-   * matches, and the s52 MS41.3 image genuinely does not (its program layout
-   * differs, which is exactly why the module refuses to write this checksum).
+   * matches, and the s52 MS41.3 image genuinely does not — because its stored
+   * value is STALE (it is patched, and its boot verification switch is off), NOT
+   * because its layout differs. MS41.3 is community firmware derived from
+   * official MS41.2 1406464, so its program layout IS MS41.2's; measured at
+   * 0.0-1.7 % byte divergence, against 46-91 % for a real factory variant. The
+   * module refuses to write this checksum because we have no MS41.1 image, not
+   * because of MS41.3. See docs/notes/ms41-program-checksum-variant-spike.md.
    */
   program?: { stored: number; computed: number; match: boolean };
 }
