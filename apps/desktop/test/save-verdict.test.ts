@@ -14,10 +14,16 @@ const report = (patch: Partial<ChecksumReport> = {}): ChecksumReport => ({
   ...patch,
 });
 
-const programSkipped = {
+/** A checksum we verify but never write, mismatched. */
+const programBlock = {
   id: 'program',
-  reason: 'not vouched for',
+  label: 'Program',
   covers: [{ start: 0x0000, end: 0x4000 }, { start: 0x20000, end: 0x40000 }],
+  storedAt: 0x6050,
+  stored: 1,
+  computed: 2,
+  ok: false,
+  correctable: false,
 };
 
 describe('saveVerdict', () => {
@@ -41,14 +47,8 @@ describe('saveVerdict', () => {
     expect(saveVerdict({ report: r, editedOffsets: [] })).toEqual({ kind: 'invalid-after-correction', mismatched: 1 });
   });
 
-  it('edits outside every skipped range ⇒ corrected', () => {
-    const r = report({ skipped: [programSkipped] });
-    // 0x14000 is the MS41 full-read cal window — deliberately outside all of them.
-    expect(saveVerdict({ report: r, editedOffsets: [0x14000, 0x14001] })).toEqual({ kind: 'corrected' });
-  });
-
-  it('an edit INSIDE a skipped range ⇒ covered-by-uncorrected, counting only the covered bytes', () => {
-    const r = report({ skipped: [programSkipped] });
+  it('an edit INSIDE a non-correctable block ⇒ covered-by-uncorrected, counting only the covered bytes', () => {
+    const r = report({ valid: false, blocks: [...report().blocks, programBlock] });
     expect(saveVerdict({ report: r, editedOffsets: [0x14000, 0x0002, 0x21000] })).toEqual({
       kind: 'covered-by-uncorrected',
       checksumId: 'program',
@@ -57,12 +57,15 @@ describe('saveVerdict', () => {
   });
 
   it('range ends are EXCLUSIVE — the byte at `end` is not covered', () => {
-    const r = report({ skipped: [{ id: 'x', reason: 'r', covers: [{ start: 0x10, end: 0x20 }] }] });
+    const block = { ...programBlock, id: 'x', covers: [{ start: 0x10, end: 0x20 }] };
+    const r = report({ valid: false, blocks: [...report().blocks, block] });
+    // 0x20 is outside, so nothing of the user's is covered. Task 4 turns this
+    // into `uncorrectable-mismatch`; today it still falls through to corrected.
     expect(saveVerdict({ report: r, editedOffsets: [0x20] })).toEqual({ kind: 'corrected' });
     expect(saveVerdict({ report: r, editedOffsets: [0x1f] })).toMatchObject({ kind: 'covered-by-uncorrected' });
   });
 
-  it('a skipped checksum with NO ranges can never be touched', () => {
+  it('a skipped checksum is absent, so it can never be touched', () => {
     const r = report({ skipped: [{ id: 'boot', reason: 'lives outside a 24 KB partial' }] });
     expect(saveVerdict({ report: r, editedOffsets: [0, 1, 2, 3] })).toEqual({ kind: 'corrected' });
   });

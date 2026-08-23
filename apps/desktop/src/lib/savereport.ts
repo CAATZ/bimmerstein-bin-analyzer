@@ -62,14 +62,18 @@ export function saveVerdict(args: {
   const { report, editedOffsets } = args;
   if (report === undefined) return { kind: 'unrecognised' };
   if (!report.applies) return { kind: 'structure-changed' };
-  if (!report.valid) {
-    return { kind: 'invalid-after-correction', mismatched: report.blocks.filter((b) => !b.ok).length };
+  // Deliberately NOT keyed on `report.valid`. `valid` spans blocks we never
+  // write, so a stale one would otherwise be reported as OUR correction having
+  // failed — three different situations that need three different answers.
+  const bad = report.blocks.filter((b) => !b.ok);
+  const badCorrectable = bad.filter((b) => b.correctable);
+  if (badCorrectable.length > 0) {
+    return { kind: 'invalid-after-correction', mismatched: badCorrectable.length };
   }
-  for (const s of report.skipped) {
-    const ranges = s.covers;
-    if (ranges === undefined || ranges.length === 0) continue;
-    const bytes = editedOffsets.filter((o) => covered(o, ranges)).length;
-    if (bytes > 0) return { kind: 'covered-by-uncorrected', checksumId: s.id, coveredBytes: bytes };
+  // A checksum we never write, whose region the user's edits landed in.
+  for (const b of bad.filter((x) => !x.correctable)) {
+    const bytes = editedOffsets.filter((o) => covered(o, b.covers)).length;
+    if (bytes > 0) return { kind: 'covered-by-uncorrected', checksumId: b.id, coveredBytes: bytes };
   }
   return { kind: 'corrected' };
 }

@@ -27,6 +27,7 @@
             {#each b.covers as c}<span>{hex(c.start, 5)}–{hex(c.end, 5)}</span>{/each}
             <span>stored {hex(b.stored)} / computed {hex(b.computed)}</span>
             <span class="verdict">{b.ok ? 'OK' : 'MISMATCH'}</span>
+            {#if !b.correctable}<span class="flag">not corrected by this tool</span>{/if}
           </div>
         {/each}
         {#each $checksumReport.skipped as s (s.id)}
@@ -53,6 +54,7 @@
          padding: .25rem 0; font-family: monospace; font-size: .85rem; }
   .row.bad .verdict { color: #f66; font-weight: bold; }
   .row.ok .verdict { color: #6c6; }
+  .flag { color: var(--fg-dim); font-size: 0.85em; }
   .row.skipped { grid-template-columns: 10rem 1fr; opacity: .7; }
   .note { font-size: .85rem; opacity: .85; }
   .actions { flex: 0 0 auto; display: flex; justify-content: flex-end; padding-top: .5rem; }

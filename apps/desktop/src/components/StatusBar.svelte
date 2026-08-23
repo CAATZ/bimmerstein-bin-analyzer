@@ -43,8 +43,9 @@
       class="chip chip-{$checksumReport.valid ? 'connected' : 'disconnected'}"
       onclick={onShowChecksums}
     >
-      <!-- `valid` covers only the checksums the family module stands behind —
-           on MS41 the program checksum is always skipped. A bare "OK" would
+      <!-- `valid` covers every block the family module evaluated, including the
+           ones it never writes — on MS41 the program checksum is reported but
+           never corrected, and it counts toward `valid` like any other block. A bare "OK" would
            read as "everything checked out", so the count of not-checked blocks
            rides along; the dialog names them and says why.
            `applies === false` (I4): an edit broke the family's structural
