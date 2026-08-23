@@ -25,6 +25,14 @@ export interface PlatformHost {
   exists(path: string): Promise<boolean>;
   /** Read a text file, or null when it is absent/unreadable. Never throws. */
   readTextIfExists(path: string): Promise<string | null>;
+  /**
+   * Absolute paths of the files directly inside `path` — NOT recursive, and an
+   * absent directory is an empty list, not an error. Used only to find drop-in
+   * family modules (2026-08-23-drop-in-family-modules-design.md §3).
+   */
+  readDir(path: string): Promise<string[]>;
+  /** Create `path` and any missing parents. A directory that already exists is not an error. */
+  mkdirp(path: string): Promise<void>;
   /** Modal yes/no; the spec §3 sha-mismatch gate. */
   confirm(message: string, title: string): Promise<boolean>;
   /** OS file drops onto the window; resolves to an unsubscribe fn. */
