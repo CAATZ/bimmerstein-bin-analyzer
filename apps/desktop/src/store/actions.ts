@@ -16,6 +16,7 @@ import {
   type CellRange, type SaveTarget, type Selection, type Toast, type ViewMode,
 } from './stores.js';
 import type { SaveOutcome } from '../lib/savereport.js';
+import type { PackRow } from '../lib/packapply.js';
 import { detachedAxis, libraryAxis, stampAxis } from '../lib/axislib.js';
 import { axisEditability, isMonotonic } from '../lib/axisedit.js';
 import { clearUndo, pushUndo, redo as redoInternal, undo as undoInternal, undoTransaction } from './undo.js';
@@ -515,6 +516,65 @@ export function applyProposedEdit(
   workingBytes.set(working);
   editJournal.set(journal);
   return { ok: true, value: { offset, stored: q.stored, clamped: q.clamped } };
+}
+
+/**
+ * Write the given pack rows into the working buffer.
+ *
+ * Rows are pre-classified (lib/packapply.ts); an `incompatible` one is never
+ * written. The whole batch is ONE undoTransaction and ONE checksum re-verify,
+ * so applying a pack is a single undo step and the checksum chip is never stale
+ * mid-batch (map-packs spec §4.4). Values are RAW — the pack's scaling is for
+ * display only and is deliberately not used here.
+ *
+ * The transaction is opened only once there is something to write, so a batch
+ * with nothing applicable leaves no phantom undo step behind.
+ */
+export function applyPackRows(rows: readonly PackRow[]): { tables: number; bytes: number } {
+  const image = get(bin);
+  const working = get(workingBytes);
+  if (image === null || working === null) return { tables: 0, bytes: 0 };
+
+  interface Write {
+    offset: number;
+    format: ValueFormat;
+    raw: number;
+  }
+  const plan: Write[] = [];
+  let tables = 0;
+  for (const row of rows) {
+    if (row.klass === 'incompatible') continue;
+    const t = row.table;
+    const before = plan.length;
+    for (const cell of row.cells) {
+      if (cell.before === cell.after) continue;
+      const i =
+        t.orientation === 'row-major' ? cell.row * t.cols + cell.col : cell.col * t.rows + cell.row;
+      const offset = row.address + i * t.format.width;
+      if (offset < 0 || offset + t.format.width > working.length) continue;
+      plan.push({ offset, format: t.format, raw: cell.after });
+    }
+    if (plan.length > before) tables++;
+  }
+  if (plan.length === 0) return { tables: 0, bytes: 0 };
+
+  undoTransaction('apply map pack', () => {
+    const journal = get(editJournal);
+    for (const w of plan) {
+      applyEdit({
+        working,
+        original: image.bytes,
+        journal,
+        offset: w.offset,
+        format: w.format,
+        raw: w.raw,
+      });
+    }
+    workingBytes.set(working);
+    editJournal.set(journal);
+  });
+  reverifyChecksums();
+  return { tables, bytes: plan.length };
 }
 
 /** Plain click (1×1) or drag-select; `MapView` also passes the same anchor for shift-click extension. */
