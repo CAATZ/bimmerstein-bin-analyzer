@@ -11,9 +11,11 @@
 export { crc16 } from './crc16.js';
 export { CAL_MAGIC } from './ms41/cal.js';
 export type { ChecksumBlock, ChecksumReport, FamilyChecksums, FamilyIdentity } from './types.js';
+export { clearExternalFamilies, externalFamilies, registerExternalFamily } from './external.js';
 
 import type { FamilyChecksums, FamilyIdentity } from './types.js';
 import { ms41Checksums } from './ms41/checksums.js';
+import { externalFamilies } from './external.js';
 
 /**
  * Registry of family checksum modules, mirroring the engine's
@@ -24,9 +26,17 @@ import { ms41Checksums } from './ms41/checksums.js';
  */
 export const FAMILY_CHECKSUMS: readonly FamilyChecksums[] = [ms41Checksums];
 
-/** The first module that recognises `bytes`, or undefined. */
+/**
+ * The first module that recognises `bytes`, or undefined.
+ *
+ * BUILT-INS FIRST, then drop-in modules. A drop-in declaring `ms41` therefore
+ * never shadows the shipped one — it is simply never reached, which fails
+ * visibly (the Families dialog lists both) rather than silently.
+ */
 export function checksumsFor(bytes: Uint8Array): FamilyChecksums | undefined {
-  return FAMILY_CHECKSUMS.find((c) => c.applies(bytes));
+  return (
+    FAMILY_CHECKSUMS.find((c) => c.applies(bytes)) ?? externalFamilies().find((c) => c.applies(bytes))
+  );
 }
 
 /**
