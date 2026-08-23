@@ -1,5 +1,5 @@
 import { confirm as dialogConfirm, open, save } from '@tauri-apps/plugin-dialog';
-import { exists, readFile, readTextFile, writeFile, writeTextFile } from '@tauri-apps/plugin-fs';
+import { exists, mkdir, readDir, readFile, readTextFile, writeFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import type { FileFilter, PlatformHost } from './host.js';
@@ -30,6 +30,23 @@ export const tauriHost: PlatformHost = {
    * `fs:allow-read-text-file`) — no new Tauri capability. Absent, unreadable
    * and malformed all collapse to null so the co-pilot dial just retries.
    */
+  async readDir(path: string): Promise<string[]> {
+    try {
+      const entries = await readDir(path);
+      return entries.filter((e) => e.isFile).map((e) => `${path}/${e.name}`);
+    } catch {
+      // Absent directory, or a platform that refuses to list it: an empty list
+      // is the honest answer and keeps startup non-fatal.
+      return [];
+    }
+  },
+  async mkdirp(path: string): Promise<void> {
+    try {
+      await mkdir(path, { recursive: true });
+    } catch {
+      /* Already there, or not creatable — the caller's readDir will report []. */
+    }
+  },
   readTextIfExists: async (path: string): Promise<string | null> => {
     try {
       return (await exists(path)) ? await readTextFile(path) : null;

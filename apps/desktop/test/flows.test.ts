@@ -49,6 +49,15 @@ export class FakeHost implements PlatformHost {
     if (this.existsError) throw this.existsError;
     return this.files.has(path);
   }
+  async readDir(path: string): Promise<string[]> {
+    const prefix = path.endsWith('/') ? path : `${path}/`;
+    return [...this.files.keys()].filter(
+      (k) => k.startsWith(prefix) && !k.slice(prefix.length).includes('/')
+    );
+  }
+  async mkdirp(): Promise<void> {
+    /* The fake filesystem is a flat map; directories are implied by keys. */
+  }
   async readTextIfExists(path: string): Promise<string | null> {
     const f = this.files.get(path);
     return typeof f === 'string' ? f : null;
@@ -561,5 +570,20 @@ describe('binPath provenance (2026-08-01 co-pilot spec §5.2)', () => {
     const host = new FakeHost();
     expect(await loadBinFromPath(host, 'C:\\missing.bin')).toBe(false);
     expect(get(binPath)).toBeNull();
+  });
+});
+
+describe('FakeHost directory support', () => {
+  it('lists only the files directly inside a directory', async () => {
+    const h = new FakeHost();
+    h.files.set('/fam/a.js', 'return {}');
+    h.files.set('/fam/b.js', 'return {}');
+    h.files.set('/fam/sub/c.js', 'return {}');
+    h.files.set('/other/d.js', 'return {}');
+    expect((await h.readDir('/fam')).sort()).toEqual(['/fam/a.js', '/fam/b.js']);
+  });
+
+  it('returns an empty list for a directory that does not exist', async () => {
+    expect(await new FakeHost().readDir('/nope')).toEqual([]);
   });
 });
