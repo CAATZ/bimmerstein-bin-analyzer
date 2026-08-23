@@ -4,7 +4,8 @@
   import * as actions from '../store/actions.js';
   import { tauriHost } from '../platform/tauri.js';
   import {
-    exportFlow, importDef, openBinFlow, openProjectFlow, pickDefFlow, saveProjectFlow, type ExportKind,
+    exportFlow, exportPackFlow, importDef, openBinFlow, openPackFlow, openProjectFlow, pickDefFlow,
+    saveProjectFlow, type ExportKind,
   } from '../platform/flows.js';
   import { cancelScan, runScan } from '../worker/controller.js';
   import RomPickerDialog from './RomPickerDialog.svelte';
@@ -36,6 +37,8 @@
   <button onclick={() => void saveProjectFlow(tauriHost)} disabled={$bin === null}>Save Project</button>
   <button onclick={() => onSaveBin(false)} disabled={$bin === null}>Save Bin</button>
   <button onclick={() => onSaveBin(true)} disabled={$bin === null}>Save Bin As…</button>
+  <button onclick={() => void exportPackFlow(tauriHost)} disabled={$bin === null}>Export Pack</button>
+  <button onclick={() => void openPackFlow(tauriHost)} disabled={$bin === null}>Apply Pack</button>
   <button onclick={() => (axisLibOpen = true)} disabled={$bin === null}>Axes</button>
   <label class="copilot-toggle" title="Let a connected agent see this session, point at things, and propose changes. Off by default.">
     <input type="checkbox" bind:checked={$coPilotEnabled} />

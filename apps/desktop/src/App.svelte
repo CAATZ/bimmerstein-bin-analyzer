@@ -25,6 +25,7 @@
   import { confirmCloseFlow, loadBinFromPath, saveBinFlow, saveProjectFlow } from './platform/flows.js';
   import { isModalOutcome } from './lib/savereport.js';
   import { runScan } from './worker/controller.js';
+  import PackPanel from './components/PackPanel.svelte';
   import ProposalPanel from './components/ProposalPanel.svelte';
   import { CoPilotClient, type SocketLike } from './copilot/client.js';
   import { detectOsKind, linkFilePathFor, makeReadLink, type OsPaths } from './copilot/link-file.js';
@@ -172,6 +173,7 @@
 <svelte:window onkeydown={onKeydown} />
 
 <ProposalPanel onDecide={(id, ids) => coPilot?.current()?.decideProposal(id, ids)} />
+<PackPanel />
 
 <div class="app">
   <Toolbar onSaveBin={(prompt: boolean) => void onSaveBin(prompt)} />

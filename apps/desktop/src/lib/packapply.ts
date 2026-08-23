@@ -140,3 +140,16 @@ export function classifyPack(args: { pack: MapPack; bytes: Uint8Array; binIsFull
     return { ...base, address, klass, changedCells: changed, cells, divergedCells: diverged };
   });
 }
+
+/**
+ * Everything checked except `incompatible`, which can never be applied.
+ *
+ * `modified` rows ARE checked: unlike Part C's stale cell rows, a modified
+ * table is the normal case when someone applies a second pack, so it is
+ * flagged loudly rather than silently opted out.
+ */
+export function initialPackChecked(rows: readonly PackRow[]): Record<number, boolean> {
+  const out: Record<number, boolean> = {};
+  for (const r of rows) out[r.index] = r.klass !== 'incompatible';
+  return out;
+}
