@@ -82,3 +82,15 @@ describe('the co-pilot cannot reach the save path', () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe('a map pack is not reachable from the co-pilot', () => {
+  it('no pack symbol appears anywhere under src/copilot/', () => {
+    // Part C froze the dispatcher's op set; a pack must not become an
+    // agent-reachable write path (map-packs spec §5).
+    const offenders = sources()
+      .filter((f) => f.path.includes('/src/copilot/'))
+      .filter((f) => /\b(applyPackRows|openPackFlow|exportPackFlow|pendingPack|classifyPack)\b/.test(f.text))
+      .map((f) => f.path.slice(f.path.indexOf('src/')));
+    expect(offenders).toEqual([]);
+  });
+});
