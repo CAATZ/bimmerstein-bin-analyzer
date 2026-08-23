@@ -26,12 +26,14 @@
   import { isModalOutcome } from './lib/savereport.js';
   import { runScan } from './worker/controller.js';
   import PackPanel from './components/PackPanel.svelte';
+  import { persistFamilyPaths } from './store/families.js';
+  import { reloadFamilies } from './platform/familyflows.js';
   import ProposalPanel from './components/ProposalPanel.svelte';
   import { CoPilotClient, type SocketLike } from './copilot/client.js';
   import { detectOsKind, linkFilePathFor, makeReadLink, type OsPaths } from './copilot/link-file.js';
   import { mountCoPilot, type CoPilotMount } from './copilot/mount.js';
   import { persistCoPilotConsent } from './store/consent.js';
-  import { homeDir, localDataDir } from '@tauri-apps/api/path';
+  import { appLocalDataDir, homeDir, localDataDir } from '@tauri-apps/api/path';
 
   let showChecksums = $state(false);
   let showSaveReport = $state(false);
@@ -138,6 +140,8 @@
   });
   let coPilot: CoPilotMount | null = null;
   let stopConsentPersistence: (() => void) | null = null;
+  let stopFamilyPaths: (() => void) | null = null;
+  let appLocalData = $state('');
 
   onMount(() => {
     // Resolve the OS paths ONCE; the handshake location never moves at runtime.
@@ -151,6 +155,16 @@
     // the current value, so a user who left the toggle on last session gets
     // their link back without re-ticking it (spec §4.5).
     stopConsentPersistence = persistCoPilotConsent(localStorage);
+
+    // Drop-in family modules, before any bin can be opened: a bin opened while
+    // they were still loading would resolve no family
+    // (2026-08-23-drop-in-family-modules-design.md §10). Hydrate the configured
+    // list FIRST so a path remembered last session is loaded on this one.
+    stopFamilyPaths = persistFamilyPaths(localStorage);
+    void (async () => {
+      appLocalData = await appLocalDataDir();
+      await reloadFamilies(tauriHost, appLocalData);
+    })();
 
     coPilot = mountCoPilot(
       () =>
@@ -167,6 +181,7 @@
   onDestroy(() => {
     coPilot?.stop();
     stopConsentPersistence?.();
+    stopFamilyPaths?.();
   });
 </script>
 
@@ -176,7 +191,7 @@
 <PackPanel />
 
 <div class="app">
-  <Toolbar onSaveBin={(prompt: boolean) => void onSaveBin(prompt)} />
+  <Toolbar onSaveBin={(prompt: boolean) => void onSaveBin(prompt)} {appLocalData} />
   <div class="body">
     <Sidebar />
     <main class="view">
