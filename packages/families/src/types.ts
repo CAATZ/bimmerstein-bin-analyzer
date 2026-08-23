@@ -46,25 +46,15 @@ export interface ChecksumReport {
    */
   valid: boolean;
   /**
-   * Checksums deliberately NOT evaluated, each with a reason — and, when the
-   * checksum EXISTS in this image but is not vouched for, the FILE ranges it
-   * covers plus the values it was measured at. A checksum that is simply ABSENT
-   * (boot, in a 24 KB partial) carries none of the three, because there is
-   * nothing to cover and nothing to measure.
+   * Checksums this image does not contain, each with a reason — boot in a 24 KB
+   * partial, for instance.
    *
-   * `covers` answers "do my edits touch it?". `stored`/`computed` exist because
-   * an un-vouched-for checksum is still COMPUTED, and a computation nothing can
-   * read as data is a computation nothing can regression-test — the MS41
-   * program CRC has no other real-firmware coverage. The reason string renders
-   * from these same values, so prose and fields cannot drift.
+   * ABSENT, not merely unwritten: a checksum we compute but never write is a
+   * BLOCK with `correctable: false`, because it has real ranges and real
+   * stored/computed values. An absent one has nothing to cover and nothing to
+   * measure, which is why this entry carries neither.
    */
-  skipped: {
-    id: string;
-    reason: string;
-    covers?: { start: number; end: number }[];
-    stored?: number;
-    computed?: number;
-  }[];
+  skipped: { id: string; reason: string }[];
   /** Advisory facts that change what a result MEANS, not whether it passes. */
   notes: string[];
 }
