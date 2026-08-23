@@ -4,6 +4,15 @@ import { be16, u16le } from '../bytes.js';
 /** Marker that locates the calibration checksum table. */
 export const CAL_MAGIC = new Uint8Array([0x4e, 0x00, 0xff, 0xff]);
 
+/**
+ * The two image sizes this family recognises: a 256 KB full ROM read and a
+ * 24 KB calibration partial. They live here, with the layout, so that both the
+ * checksum walk and the identity reader can use them without importing each
+ * other.
+ */
+export const FULL_ROM_SIZE = 256 * 1024;
+export const TUNE_SIZE = 24 * 1024;
+
 /** Max entries walked — a bound carried over from the reference. */
 const MAX_ENTRIES = 20;
 

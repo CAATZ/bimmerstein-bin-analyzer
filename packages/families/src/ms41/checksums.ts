@@ -1,7 +1,8 @@
 import type { FamilyChecksums, ChecksumBlock, ChecksumReport } from '../types.js';
 import { crc16 } from '../crc16.js';
 import { trimEnd, u16le } from '../bytes.js';
-import { calEntries, calWalk, findCalTable, isCoherentCalTable, isCoherentWalk, type CalEntry } from './cal.js';
+import { calEntries, calWalk, findCalTable, isCoherentCalTable, isCoherentWalk, FULL_ROM_SIZE, TUNE_SIZE, type CalEntry } from './cal.js';
+import { ms41Identify } from './identity.js';
 
 /**
  * MS41 checksum semantics, transcribed from the patch tooling's reference
@@ -19,9 +20,6 @@ import { calEntries, calWalk, findCalTable, isCoherentCalTable, isCoherentWalk, 
  * discriminator and confirmation of the MS41.3 layout — deliberately out of
  * scope here.
  */
-export const FULL_ROM_SIZE = 256 * 1024;
-export const TUNE_SIZE = 24 * 1024;
-
 const BOOT_REGION = { start: 0x4000, end: 0x5c14 } as const;
 const BOOT_INIT = 0x4711;
 const BOOT_STORE = 0x5c80;
@@ -209,6 +207,7 @@ function correctImage(bytes: Uint8Array): {
 export const ms41Checksums: FamilyChecksums = {
   familyId: 'ms41',
   applies: appliesTo,
+  identify: ms41Identify,
   verify: verifyImage,
   correct: correctImage,
 };
