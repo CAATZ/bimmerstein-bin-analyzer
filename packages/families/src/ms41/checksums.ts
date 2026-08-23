@@ -12,13 +12,28 @@ import { ms41Identify } from './identity.js';
  * Confidence is NOT uniform across the three checksums:
  *   - calibration table : verified for MS41.0/.1/.2 AND MS41.3
  *   - boot sector       : verified across variants
- *   - program           : verified for MS41.0/.1/.2 ONLY; the MS41.3 layout is
- *                         unconfirmed, and the reference tooling always leaves
- *                         it untouched.
+ *   - program           : computed here but NEVER written. Verified against real
+ *                         MS41.0 and MS41.2 firmware (both match); MS41.1 is the
+ *                         one factory program we have no image of.
+ *
+ * An earlier version of this comment said the MS41.3 layout was unconfirmed and
+ * treated that as the blocker. That was wrong, and the correction matters
+ * because it changes what "unverified" means here: **MS41.3 is not a factory
+ * program.** It is community firmware derived from official MS41.2 1406464 (BMW
+ * ships no MS41.3 program), so its layout IS MS41.2's — measured, at 0.0 % /
+ * 0.1 % / 1.7 % byte divergence from an MS41.2 stock image across the three
+ * regions programComputed walks, against 45.7 % / 88.6 % / 91.0 % for a genuinely
+ * different factory variant. Our one MS41.3 fixture mismatches because its stored
+ * value is STALE (it is patched, a cal block is stale too, and its boot
+ * verification switch is off), not because the layout differs.
+ *
  * So boot and cal are authoritative blocks; program is always reported via
- * `skipped`, carrying its numbers in the reason. Promoting it needs a variant
- * discriminator and confirmation of the MS41.3 layout — deliberately out of
- * scope here.
+ * `skipped`, carrying its numbers in the reason. Promoting it is blocked by
+ * something else: `ChecksumReport.valid` is "every block ok" and the desktop's
+ * save verdict turns `!valid` into `invalid-after-correction`, so promoting a
+ * checksum we deliberately never correct would condemn every save on an image
+ * carrying a stale one. `valid` has to separate VERIFIED from CORRECTABLE first.
+ * See docs/notes/ms41-program-checksum-variant-spike.md.
  */
 const BOOT_REGION = { start: 0x4000, end: 0x5c14 } as const;
 const BOOT_INIT = 0x4711;
@@ -43,7 +58,7 @@ const SWITCH_ENABLED = 0x30;
 const SWITCH_DISABLED = 0xff;
 
 const PROGRAM_SKIP_REASON =
-  'program-checksum layout is confirmed only for MS41.0/.1/.2; not vouched for here';
+  'program checksum is computed but never written — verified against real MS41.0 and MS41.2 firmware, MS41.1 unmeasured';
 
 const hex = (v: number, w = 4): string => `0x${v.toString(16).toUpperCase().padStart(w, '0')}`;
 

@@ -32,6 +32,27 @@ fixtures/
 - Synthetic fixtures are regenerated ONLY via `pnpm eval gen-synthetic`
   (seeded, deterministic); never hand-edit them.
 
+## What the MS41 real-bin fixtures actually are
+
+Their filenames are not reliable descriptions — read this before drawing any
+conclusion from which fixture a result came from.
+
+| file | what it really is |
+|---|---|
+| `E36 M3 Stock Full Read.bin` | genuinely stock **MS41.2**, romid CAL-ID `12`. Every checksum verifies. |
+| `MS41.3 S52 Stock Full Read.bin` | **MS41.3, but NOT stock** — SS1v2-patched, with its checksums left stale and the ECU's boot-verification switch turned OFF (`0x605C = 0xFF`). Its romid still reads CAL-ID `12`. |
+
+Both are S52-engine bins; the distinguishing axis is firmware, not car.
+
+**MS41.3 is not a fourth factory variant.** It is community firmware derived from
+official MS41.2 `1406464` — BMW ships no MS41.3 program — so its program layout
+IS MS41.2's. Measured: 0.0 % / 0.1 % / 1.7 % byte divergence from the MS41.2
+image across the three program-checksum regions, against 45.7 % / 88.6 % / 91.0 %
+between two genuinely different factory variants (MS41.2 vs MS41.0). So the S52
+fixture's program-checksum mismatch is a **stale stored value**, and this fixture
+must not be cited as evidence about a distinct factory layout.
+See `docs/notes/ms41-program-checksum-variant-spike.md`.
+
 ## Adding a real-bin fixture locally
 
 1. Drop `yourbin.bin` into `fixtures/<family>/`.
