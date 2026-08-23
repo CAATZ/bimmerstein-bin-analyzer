@@ -22,7 +22,14 @@ export type SaveVerdict =
   /** A module was active at load but no longer recognises the edited image — an edit hit structural bytes. */
   | { kind: 'structure-changed' }
   /** Correction ran and the result still does not verify. An internal inconsistency, not a user error. */
-  | { kind: 'invalid-after-correction'; mismatched: number };
+  | { kind: 'invalid-after-correction'; mismatched: number }
+  /**
+   * A checksum this tool never writes is mismatched, and the user's edits did
+   * NOT touch it — the image arrived that way. Distinct from
+   * `covered-by-uncorrected` (you caused it) and from
+   * `invalid-after-correction` (we did): three situations, three responses.
+   */
+  | { kind: 'uncorrectable-mismatch'; checksumId: string };
 
 export interface SaveSuccess {
   ok: true;
@@ -75,6 +82,9 @@ export function saveVerdict(args: {
     const bytes = editedOffsets.filter((o) => covered(o, b.covers)).length;
     if (bytes > 0) return { kind: 'covered-by-uncorrected', checksumId: b.id, coveredBytes: bytes };
   }
+  // Stale, ours to report but not to fix, and not the user's doing.
+  const stale = bad.find((b) => !b.correctable);
+  if (stale !== undefined) return { kind: 'uncorrectable-mismatch', checksumId: stale.id };
   return { kind: 'corrected' };
 }
 
@@ -90,6 +100,8 @@ export function verdictHeadline(v: SaveVerdict): string {
       return 'NOT checksum-corrected — the family module no longer recognises this image, so an edit reached bytes its structure depends on.';
     case 'invalid-after-correction':
       return `Correction ran and ${v.mismatched} checksum(s) still do not match. Do not flash this file.`;
+    case 'uncorrectable-mismatch':
+      return `Saved. The "${v.checksumId}" checksum was already mismatched in this image, and this tool does not write it.`;
   }
 }
 

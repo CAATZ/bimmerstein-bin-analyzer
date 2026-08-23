@@ -185,7 +185,9 @@ describe('real-bin checksum acceptance', () => {
     const byKey = Object.fromEntries(MS41_CHECKSUM_CASES.map((c) => [c.key, c.staleIds]));
     expect(byKey['e36m3-full']).toEqual([]);
     expect(byKey['e36m3-partial']).toEqual([]);
-    expect(byKey['s52-full']).toEqual(['cal-0']);
+    // program joined the stale list when the checksum became a BLOCK we verify
+    // but never write; positional in report order, so it precedes cal-0.
+    expect(byKey['s52-full']).toEqual(['program', 'cal-0']);
     expect(byKey['s52-partial']).toEqual(['cal-4', 'cal-6', 'cal-14']);
   });
 });

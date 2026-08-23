@@ -320,7 +320,8 @@ interface Ms41ChecksumCase {
   staleIds: readonly string[];
   /**
    * The program checksum, pinned as stored-vs-computed. Absent for a 24 KB
-   * partial, which carries no program checksum at all.
+   * partial, which carries no program checksum at all. Read from the BLOCK it
+   * now is — it was in `skipped` until the verified/correctable split.
    *
    * This is the ONLY real-firmware coverage the program CRC has. It is never
    * corrected and it is not vouched for, so nothing else exercises its chained
@@ -355,9 +356,11 @@ interface Ms41ChecksumCase {
  * re-measured and re-pinned deliberately, not silently absorbed.
  */
 export const MS41_CHECKSUM_CASES: readonly Ms41ChecksumCase[] = [
-  { key: 'e36m3-full', bin: 'E36 M3 Stock Full Read.bin', bootOk: true, okBlocks: 17, totalBlocks: 17, staleIds: [],
+  { key: 'e36m3-full', bin: 'E36 M3 Stock Full Read.bin', bootOk: true, okBlocks: 18, totalBlocks: 18, staleIds: [],
     program: { stored: 0x990f, computed: 0x990f, match: true } },
-  { key: 's52-full', bin: 'MS41.3 S52 Stock Full Read.bin', bootOk: true, okBlocks: 16, totalBlocks: 17, staleIds: ['cal-0'],
+  // staleIds is positional in REPORT order, and the program block is pushed
+  // directly after boot — hence program before cal-0, not the other way round.
+  { key: 's52-full', bin: 'MS41.3 S52 Stock Full Read.bin', bootOk: true, okBlocks: 16, totalBlocks: 18, staleIds: ['program', 'cal-0'],
     program: { stored: 0x27ed, computed: 0x214b, match: false } },
   { key: 'e36m3-partial', bin: 'partial/E36 M3 Stock partial.bin', bootOk: null, okBlocks: 16, totalBlocks: 16, staleIds: [] },
   { key: 's52-partial', bin: 'partial/MS41.3 S52 Stock partial.bin', bootOk: null, okBlocks: 13, totalBlocks: 16, staleIds: ['cal-4', 'cal-6', 'cal-14'] },
@@ -799,13 +802,11 @@ export function runAcceptance(repoRoot: string): number {
     // Report order, so the comparison is positional and the message reads like
     // the dialog: a permutation that keeps the COUNT identical still drifts.
     const staleIds = r.blocks.filter((b) => !b.ok).map((b) => b.id);
-    // The program checksum is REPORTED, never corrected, so it never appears in
-    // `blocks` — pin it from `skipped` or it stays untested against real firmware.
-    const prog = r.skipped.find((s) => s.id === 'program');
+    // The program checksum is a BLOCK now — verified, never corrected. Pinning
+    // it is still the only real-firmware coverage that computation has.
+    const prog = r.blocks.find((b) => b.id === 'program');
     const progSeen =
-      prog?.stored === undefined || prog.computed === undefined
-        ? undefined
-        : { stored: prog.stored, computed: prog.computed, match: prog.stored === prog.computed };
+      prog === undefined ? undefined : { stored: prog.stored, computed: prog.computed, match: prog.ok };
     const progDrift =
       (progSeen === undefined) !== (c.program === undefined) ||
       (progSeen !== undefined &&
