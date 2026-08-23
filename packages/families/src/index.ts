@@ -10,9 +10,9 @@
  */
 export { crc16 } from './crc16.js';
 export { CAL_MAGIC } from './ms41/cal.js';
-export type { ChecksumBlock, ChecksumReport, FamilyChecksums } from './types.js';
+export type { ChecksumBlock, ChecksumReport, FamilyChecksums, FamilyIdentity } from './types.js';
 
-import type { FamilyChecksums } from './types.js';
+import type { FamilyChecksums, FamilyIdentity } from './types.js';
 import { ms41Checksums } from './ms41/checksums.js';
 
 /**
@@ -27,4 +27,16 @@ export const FAMILY_CHECKSUMS: readonly FamilyChecksums[] = [ms41Checksums];
 /** The first module that recognises `bytes`, or undefined. */
 export function checksumsFor(bytes: Uint8Array): FamilyChecksums | undefined {
   return FAMILY_CHECKSUMS.find((c) => c.applies(bytes));
+}
+
+/**
+ * The image's family + calibration id, or undefined when none can be read.
+ *
+ * Deliberately routed through `checksumsFor`, so an id is only ever read out of
+ * an image a family structurally CLAIMS. Reading the id bytes alone would
+ * happily identify any buffer that happens to carry digits at the right offset,
+ * and the CAL-ID gate would then be resting on a coincidence.
+ */
+export function identifyBin(bytes: Uint8Array): FamilyIdentity | undefined {
+  return checksumsFor(bytes)?.identify(bytes);
 }

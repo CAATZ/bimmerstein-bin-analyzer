@@ -46,6 +46,13 @@ export interface ChecksumReport {
   notes: string[];
 }
 
+/** Which family a buffer belongs to, and which calibration within it. */
+export interface FamilyIdentity {
+  familyId: FamilyId;
+  /** The ECU's own calibration id, read from the image — never user-entered. */
+  calId: string;
+}
+
 /**
  * A family's byte semantics. Registered at compile time; shaped as a future
  * public contract so runtime loading is a later, separate step.
@@ -54,6 +61,12 @@ export interface FamilyChecksums {
   familyId: FamilyId;
   /** Cheap structural gate — mirrors the analyzers' off-family rule. */
   applies(bytes: Uint8Array): boolean;
+  /**
+   * The image's calibration id, or undefined when it cannot be read.
+   * Undefined means "I do not know" — never a guess: a map pack applied on an
+   * unverified id is exactly what the CAL-ID gate exists to prevent.
+   */
+  identify(bytes: Uint8Array): FamilyIdentity | undefined;
   verify(bytes: Uint8Array): ChecksumReport;
   /** Pure: returns a NEW buffer, never mutates the input. */
   correct(bytes: Uint8Array): {
