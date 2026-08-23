@@ -612,6 +612,17 @@ export function applyPackRows(rows: readonly PackRow[]): { tables: number; chang
   }
   if (plan.length === 0) return { tables: 0, changedBytes: 0 };
 
+  // Snapshot every byte the plan can touch, so the count we report is BYTES
+  // that actually moved — not cells. A 16-bit cell spans two bytes and may move
+  // only one of them, and the app reports byte counts everywhere else.
+  const before = new Map<number, number>();
+  for (const w of plan) {
+    for (let i = 0; i < w.format.width; i++) {
+      const o = w.offset + i;
+      if (!before.has(o)) before.set(o, working[o]!);
+    }
+  }
+
   undoTransaction('apply map pack', () => {
     const journal = get(editJournal);
     for (const w of plan) {
@@ -628,7 +639,10 @@ export function applyPackRows(rows: readonly PackRow[]): { tables: number; chang
     editJournal.set(journal);
   });
   reverifyChecksums();
-  return { tables, changedBytes: plan.length };
+
+  let changedBytes = 0;
+  for (const [o, v] of before) if (working[o] !== v) changedBytes++;
+  return { tables, changedBytes };
 }
 
 /** Plain click (1×1) or drag-select; `MapView` also passes the same anchor for shift-click extension. */

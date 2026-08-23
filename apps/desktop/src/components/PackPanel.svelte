@@ -73,8 +73,9 @@
 
       {#if modifiedCount > 0}
         <p class="warn">
-          {modifiedCount} table{modifiedCount === 1 ? '' : 's'} in this bin already differ from what the
-          pack's author started from. Expand a row to see which cells.
+          {modifiedCount} table{modifiedCount === 1 ? '' : 's'} in this bin already {modifiedCount === 1
+            ? 'differs'
+            : 'differ'} from what the pack's author started from. Expand a row to see which cells.
         </p>
       {/if}
 

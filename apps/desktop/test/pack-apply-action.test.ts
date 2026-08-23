@@ -122,6 +122,53 @@ describe('applyPackRows', () => {
     expect(a.applyPackRows(rows)).toEqual({ tables: 1, changedBytes: 2 });
   });
 
+  it('counts BYTES, not cells — a 16-bit cell moves two of them', () => {
+    // Measured on real firmware during GUI acceptance: one 16-bit cell plus one
+    // 8-bit cell reported "2 bytes changed" while the file diff showed 3.
+    const p: MapPack = {
+      schemaVersion: 1,
+      source: { familyId: 'ms41', calId: '12', binSha256: 'a'.repeat(64) },
+      title: 'T',
+      tables: [
+        {
+          name: 'wide',
+          address: 0x10,
+          rows: 1,
+          cols: 1,
+          orientation: 'row-major',
+          format: { width: 2, signed: false, endianness: 'little' },
+          scaling: { factor: 1, offset: 0, units: '', digits: 0 },
+          values: [[0x1234]],
+          baseline: [[0x0909]],
+        },
+      ],
+    };
+    expect(a.applyPackRows(rowsFor(p))).toEqual({ tables: 1, changedBytes: 2 });
+  });
+
+  it('does not count a byte inside a wide cell that did not move', () => {
+    // 0x0909 -> 0x0934: the high byte is unchanged, so only ONE byte moved.
+    const p: MapPack = {
+      schemaVersion: 1,
+      source: { familyId: 'ms41', calId: '12', binSha256: 'a'.repeat(64) },
+      title: 'T',
+      tables: [
+        {
+          name: 'wide',
+          address: 0x10,
+          rows: 1,
+          cols: 1,
+          orientation: 'row-major',
+          format: { width: 2, signed: false, endianness: 'little' },
+          scaling: { factor: 1, offset: 0, units: '', digits: 0 },
+          values: [[0x0934]],
+          baseline: [[0x0909]],
+        },
+      ],
+    };
+    expect(a.applyPackRows(rowsFor(p))).toEqual({ tables: 1, changedBytes: 1 });
+  });
+
   it('pushes NO undo entry when the caller passes nothing applicable', () => {
     const rows = rowsFor(
       pack(
