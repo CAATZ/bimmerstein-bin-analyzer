@@ -24,10 +24,14 @@
         {#each $checksumReport.blocks as b (b.id)}
           <div class="row {b.ok ? 'ok' : 'bad'}">
             <span class="name">{b.label}</span>
-            {#each b.covers as c}<span>{hex(c.start, 5)}–{hex(c.end, 5)}</span>{/each}
+            <!-- ONE cell, however many ranges: the grid has a fixed column count,
+                 and a block with three covers (the MS41 program checksum) would
+                 otherwise spill its verdict into the next row. -->
+            <span class="covers">{b.covers.map((c) => `${hex(c.start, 5)}–${hex(c.end, 5)}`).join(', ')}</span>
             <span>stored {hex(b.stored)} / computed {hex(b.computed)}</span>
+            <!-- Always emitted, empty when correctable, so the columns stay aligned. -->
+            <span class="flag">{b.correctable ? '' : 'not corrected by this tool'}</span>
             <span class="verdict">{b.ok ? 'OK' : 'MISMATCH'}</span>
-            {#if !b.correctable}<span class="flag">not corrected by this tool</span>{/if}
           </div>
         {/each}
         {#each $checksumReport.skipped as s (s.id)}
@@ -50,11 +54,12 @@
   .dialog { display: flex; flex-direction: column; max-height: 80vh; min-width: 34rem;
             padding: 1rem; background: var(--bg, #1e1e1e); border-radius: 6px; }
   .rows { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
-  .row { display: grid; grid-template-columns: 10rem 12rem 1fr auto; gap: .5rem;
+  .row { display: grid; grid-template-columns: 10rem 14rem 1fr auto auto; gap: .5rem;
          padding: .25rem 0; font-family: monospace; font-size: .85rem; }
   .row.bad .verdict { color: #f66; font-weight: bold; }
   .row.ok .verdict { color: #6c6; }
-  .flag { color: var(--fg-dim); font-size: 0.85em; }
+  .flag { color: var(--fg-dim); font-size: 0.85em; white-space: nowrap; }
+  .covers { white-space: normal; }
   .row.skipped { grid-template-columns: 10rem 1fr; opacity: .7; }
   .note { font-size: .85rem; opacity: .85; }
   .actions { flex: 0 0 auto; display: flex; justify-content: flex-end; padding-top: .5rem; }
