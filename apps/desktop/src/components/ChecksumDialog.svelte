@@ -24,7 +24,7 @@
         {#each $checksumReport.blocks as b (b.id)}
           <div class="row {b.ok ? 'ok' : 'bad'}">
             <span class="name">{b.label}</span>
-            <span>{hex(b.covers.start, 5)}–{hex(b.covers.end, 5)}</span>
+            {#each b.covers as c}<span>{hex(c.start, 5)}–{hex(c.end, 5)}</span>{/each}
             <span>stored {hex(b.stored)} / computed {hex(b.computed)}</span>
             <span class="verdict">{b.ok ? 'OK' : 'MISMATCH'}</span>
           </div>

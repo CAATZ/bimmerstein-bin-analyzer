@@ -139,7 +139,7 @@ describe.skipIf(!existsSync(E36))('map packs on real firmware', () => {
 
     load();
     const covering = (): { id: string; ok: boolean } | undefined =>
-      get(checksumReport)?.blocks.find((b) => b.covers.start <= CAL && CAL < b.covers.end);
+      get(checksumReport)?.blocks.find((b) => b.covers.some((c) => c.start <= CAL && CAL < c.end));
     // Stock firmware: the block covering our cell verifies before we touch it.
     expect(covering()?.ok).toBe(true);
 

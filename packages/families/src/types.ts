@@ -6,13 +6,28 @@ export interface ChecksumBlock {
   id: string;
   /** Human label for the UI. */
   label: string;
-  /** FILE offsets covered by this checksum (end exclusive). */
-  covers: { start: number; end: number };
+  /**
+   * FILE offsets covered by this checksum (end exclusive).
+   *
+   * An ARRAY because a checksum may cover DISJOINT regions — the MS41 program
+   * checksum covers three. A single range was never the general shape, and
+   * `skipped` already used a list for the same data.
+   */
+  covers: { start: number; end: number }[];
   /** FILE offset where the stored value lives. */
   storedAt: number;
   stored: number;
   computed: number;
   ok: boolean;
+  /**
+   * Will `correct()` write this block's stored value?
+   *
+   * A block we verify but never write is still a block — it just is not ours to
+   * fix. This is the difference between "your image is wrong" and "we broke
+   * it", and the save verdict depends on telling those apart: a mismatch we
+   * cannot fix must never be reported as our correction having failed.
+   */
+  correctable: boolean;
 }
 
 export interface ChecksumReport {
@@ -20,7 +35,15 @@ export interface ChecksumReport {
   /** false ⇒ this module does not recognise the image; `blocks` is empty. */
   applies: boolean;
   blocks: ChecksumBlock[];
-  /** true when every block is ok AND at least one block was evaluated. */
+  /**
+   * true when every block is ok AND at least one block was evaluated.
+   *
+   * Ranges over NON-CORRECTABLE blocks too, deliberately: an image carrying a
+   * stale checksum we never write is not a valid image, and saying otherwise
+   * would hide a real defect behind a green chip. The save verdict does NOT key
+   * on this — see lib/savereport.ts, which distinguishes "we broke it" from
+   * "it came that way".
+   */
   valid: boolean;
   /**
    * Checksums deliberately NOT evaluated, each with a reason — and, when the

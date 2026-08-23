@@ -68,11 +68,12 @@ function bootBlock(d: Uint8Array): ChecksumBlock {
   return {
     id: 'boot',
     label: 'Boot sector',
-    covers: { ...BOOT_REGION },
+    covers: [{ ...BOOT_REGION }],
     storedAt: BOOT_STORE,
     stored,
     computed,
     ok: stored === computed,
+    correctable: true,
   };
 }
 
@@ -109,11 +110,12 @@ function calBlocks(d: Uint8Array, entries: readonly CalEntry[]): ChecksumBlock[]
     return {
       id: `cal-${i}`,
       label: `Calibration ${i}`,
-      covers: { start: e.from, end: e.store },
+      covers: [{ start: e.from, end: e.store }],
       storedAt: e.store,
       stored,
       computed: e.calc,
       ok: stored === e.calc,
+      correctable: true,
     };
   });
 }
