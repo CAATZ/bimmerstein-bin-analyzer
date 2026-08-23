@@ -477,7 +477,12 @@ export async function exportPackFlow(host: PlatformHost): Promise<boolean> {
       familyId: identity.familyId,
       calId: identity.calId,
       binSha256: image.sha256,
-      ...(get(addressFrame) === 'ms41full' ? { addressFrame: 'ms41full' as const } : {}),
+      // The frame is decided by THIS IMAGE's size, not by the def-import
+      // store: a map's address is a file offset in the loaded bin, so a full
+      // read's offsets are ms41full whether or not a definition was ever
+      // imported. Keying on the store labelled such a pack frameless, and it
+      // then failed to classify against its own image.
+      ...(isMs41FullRead(image.size) ? { addressFrame: 'ms41full' as const } : {}),
     },
     title: `${stemOf(image.name)} pack`,
     tables,
