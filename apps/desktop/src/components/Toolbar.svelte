@@ -10,13 +10,18 @@
   import { cancelScan, runScan } from '../worker/controller.js';
   import RomPickerDialog from './RomPickerDialog.svelte';
   import AxisLibraryDialog from './AxisLibraryDialog.svelte';
+  import FamiliesDialog from './FamiliesDialog.svelte';
 
-  let { onSaveBin }: { onSaveBin: (promptAlways: boolean) => void } = $props();
+  let {
+    onSaveBin,
+    appLocalData,
+  }: { onSaveBin: (promptAlways: boolean) => void; appLocalData: string } = $props();
 
   const VIEW_MODES: ViewMode[] = ['hex', '2d', '3d', 'map'];
   let exportKind: ExportKind = $state('csv');
   let pendingDef: { xml: string; romIds: string[] } | null = $state(null);
   let axisLibOpen = $state(false);
+  let familiesOpen = $state(false);
 
   async function onOpenBin(): Promise<void> {
     if (await openBinFlow(tauriHost)) runScan(); // locked decision 5: auto-scan on open
@@ -39,6 +44,7 @@
   <button onclick={() => onSaveBin(true)} disabled={$bin === null}>Save Bin As…</button>
   <button onclick={() => void exportPackFlow(tauriHost)} disabled={$bin === null}>Export Pack</button>
   <button onclick={() => void openPackFlow(tauriHost)} disabled={$bin === null}>Apply Pack</button>
+  <button onclick={() => (familiesOpen = true)}>Families…</button>
   <button onclick={() => (axisLibOpen = true)} disabled={$bin === null}>Axes</button>
   <label class="copilot-toggle" title="Let a connected agent see this session, point at things, and propose changes. Off by default.">
     <input type="checkbox" bind:checked={$coPilotEnabled} />
@@ -108,6 +114,9 @@
 
 {#if axisLibOpen}
   <AxisLibraryDialog onclose={() => (axisLibOpen = false)} />
+{/if}
+{#if familiesOpen}
+  <FamiliesDialog {appLocalData} onclose={() => (familiesOpen = false)} />
 {/if}
 
 <style>
