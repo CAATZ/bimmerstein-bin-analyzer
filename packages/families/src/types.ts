@@ -1,5 +1,3 @@
-import type { FamilyId } from '@binanalyzer/core';
-
 /** One checksum the family module stands behind. */
 export interface ChecksumBlock {
   /** Stable id, e.g. 'boot', 'cal-0'. */
@@ -31,7 +29,15 @@ export interface ChecksumBlock {
 }
 
 export interface ChecksumReport {
-  familyId: FamilyId;
+  /**
+   * Which family this is. A plain string, not core's `FamilyId` union: a
+   * DROP-IN module declares an id this build never heard of, and `FAMILY_IDS`
+   * lists what SHIPS, not what may exist. The union still drives the drift
+   * check for the BUILT-IN registry — see index.ts and registry.test.ts.
+   *
+   * Mirrors `MapPack.source.familyId`, a string for the same reason.
+   */
+  familyId: string;
   /** false ⇒ this module does not recognise the image; `blocks` is empty. */
   applies: boolean;
   blocks: ChecksumBlock[];
@@ -61,7 +67,15 @@ export interface ChecksumReport {
 
 /** Which family a buffer belongs to, and which calibration within it. */
 export interface FamilyIdentity {
-  familyId: FamilyId;
+  /**
+   * Which family this is. A plain string, not core's `FamilyId` union: a
+   * DROP-IN module declares an id this build never heard of, and `FAMILY_IDS`
+   * lists what SHIPS, not what may exist. The union still drives the drift
+   * check for the BUILT-IN registry — see index.ts and registry.test.ts.
+   *
+   * Mirrors `MapPack.source.familyId`, a string for the same reason.
+   */
+  familyId: string;
   /** The ECU's own calibration id, read from the image — never user-entered. */
   calId: string;
 }
@@ -71,7 +85,15 @@ export interface FamilyIdentity {
  * public contract so runtime loading is a later, separate step.
  */
 export interface FamilyChecksums {
-  familyId: FamilyId;
+  /**
+   * Which family this is. A plain string, not core's `FamilyId` union: a
+   * DROP-IN module declares an id this build never heard of, and `FAMILY_IDS`
+   * lists what SHIPS, not what may exist. The union still drives the drift
+   * check for the BUILT-IN registry — see index.ts and registry.test.ts.
+   *
+   * Mirrors `MapPack.source.familyId`, a string for the same reason.
+   */
+  familyId: string;
   /** Cheap structural gate — mirrors the analyzers' off-family rule. */
   applies(bytes: Uint8Array): boolean;
   /**
