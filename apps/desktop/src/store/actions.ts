@@ -523,18 +523,6 @@ export function applyProposedEdit(
 }
 
 /**
- * Write the given pack rows into the working buffer.
- *
- * Rows are pre-classified (lib/packapply.ts); an `incompatible` one is never
- * written. The whole batch is ONE undoTransaction and ONE checksum re-verify,
- * so applying a pack is a single undo step and the checksum chip is never stale
- * mid-batch (map-packs spec §4.4). Values are RAW — the pack's scaling is for
- * display only and is deliberately not used here.
- *
- * The transaction is opened only once there is something to write, so a batch
- * with nothing applicable leaves no phantom undo step behind.
- */
-/**
  * The confirmed maps whose bytes this session edited, as pack tables.
  *
  * `values` come from the working buffer and `baseline` from the image as
@@ -584,6 +572,18 @@ export function editedPackTables(): PackTable[] {
   return out;
 }
 
+/**
+ * Write the given pack rows into the working buffer.
+ *
+ * Rows are pre-classified (lib/packapply.ts); an `incompatible` one is never
+ * written. The whole batch is ONE undoTransaction and ONE checksum re-verify,
+ * so applying a pack is a single undo step and the checksum chip is never stale
+ * mid-batch (map-packs spec §4.4). Values are RAW — the pack's scaling is for
+ * display only and is deliberately not used here.
+ *
+ * The transaction is opened only once there is something to write, so a batch
+ * with nothing applicable leaves no phantom undo step behind.
+ */
 export function applyPackRows(rows: readonly PackRow[]): { tables: number; changedBytes: number } {
   const image = get(bin);
   const working = get(workingBytes);
