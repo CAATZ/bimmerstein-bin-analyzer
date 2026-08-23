@@ -7,7 +7,7 @@ const report = (patch: Partial<ChecksumReport> = {}): ChecksumReport => ({
   applies: true,
   valid: true,
   blocks: [
-    { id: 'cal-0', label: 'Calibration 0', covers: { start: 0, end: 0x10 }, storedAt: 0x10, stored: 1, computed: 1, ok: true },
+    { id: 'cal-0', label: 'Calibration 0', covers: [{ start: 0, end: 0x10 }], storedAt: 0x10, stored: 1, computed: 1, ok: true, correctable: true },
   ],
   skipped: [],
   notes: [],
@@ -34,8 +34,8 @@ describe('saveVerdict', () => {
     const r = report({
       valid: false,
       blocks: [
-        { id: 'cal-0', label: 'c0', covers: { start: 0, end: 4 }, storedAt: 4, stored: 1, computed: 2, ok: false },
-        { id: 'cal-1', label: 'c1', covers: { start: 6, end: 8 }, storedAt: 8, stored: 3, computed: 3, ok: true },
+        { id: 'cal-0', label: 'c0', covers: [{ start: 0, end: 4 }], storedAt: 4, stored: 1, computed: 2, ok: false, correctable: true },
+        { id: 'cal-1', label: 'c1', covers: [{ start: 6, end: 8 }], storedAt: 8, stored: 3, computed: 3, ok: true, correctable: true },
       ],
     });
     expect(saveVerdict({ report: r, editedOffsets: [] })).toEqual({ kind: 'invalid-after-correction', mismatched: 1 });

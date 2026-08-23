@@ -138,3 +138,20 @@ describe('a skipped checksum reports its numbers as DATA, not only as prose', ()
     }
   });
 });
+
+describe('a block reports its coverage as a list', () => {
+  it('marks every checksum it will write as correctable', () => {
+    const r = ms41Checksums.verify(ms41Image(FULL));
+    expect(r.blocks.every((b) => b.correctable)).toBe(true);
+  });
+
+  it('every block reports its coverage as a list of ranges', () => {
+    const r = ms41Checksums.verify(ms41Image(FULL));
+    expect(r.blocks.length).toBeGreaterThan(0);
+    for (const b of r.blocks) {
+      expect(Array.isArray(b.covers)).toBe(true);
+      expect(b.covers.length).toBeGreaterThanOrEqual(1);
+      for (const c of b.covers) expect(c.end).toBeGreaterThan(c.start);
+    }
+  });
+});
