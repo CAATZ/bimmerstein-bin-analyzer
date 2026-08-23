@@ -58,7 +58,7 @@ describe('applyPackRows', () => {
         ]
       )
     );
-    expect(a.applyPackRows(rows)).toEqual({ tables: 1, bytes: 4 });
+    expect(a.applyPackRows(rows)).toEqual({ tables: 1, changedBytes: 4 });
     expect([rawAt(0x10), rawAt(0x11), rawAt(0x12), rawAt(0x13)]).toEqual([1, 2, 3, 4]);
   });
 
@@ -100,7 +100,7 @@ describe('applyPackRows', () => {
       )
     );
     expect(rows[0]!.klass).toBe('incompatible');
-    expect(a.applyPackRows(rows)).toEqual({ tables: 0, bytes: 0 });
+    expect(a.applyPackRows(rows)).toEqual({ tables: 0, changedBytes: 0 });
     expect(get(editJournal).size).toBe(0);
   });
 
@@ -119,7 +119,7 @@ describe('applyPackRows', () => {
         ]
       )
     );
-    expect(a.applyPackRows(rows)).toEqual({ tables: 1, bytes: 2 });
+    expect(a.applyPackRows(rows)).toEqual({ tables: 1, changedBytes: 2 });
   });
 
   it('pushes NO undo entry when the caller passes nothing applicable', () => {

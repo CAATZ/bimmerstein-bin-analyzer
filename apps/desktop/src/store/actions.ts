@@ -584,10 +584,10 @@ export function editedPackTables(): PackTable[] {
   return out;
 }
 
-export function applyPackRows(rows: readonly PackRow[]): { tables: number; bytes: number } {
+export function applyPackRows(rows: readonly PackRow[]): { tables: number; changedBytes: number } {
   const image = get(bin);
   const working = get(workingBytes);
-  if (image === null || working === null) return { tables: 0, bytes: 0 };
+  if (image === null || working === null) return { tables: 0, changedBytes: 0 };
 
   interface Write {
     offset: number;
@@ -610,7 +610,7 @@ export function applyPackRows(rows: readonly PackRow[]): { tables: number; bytes
     }
     if (plan.length > before) tables++;
   }
-  if (plan.length === 0) return { tables: 0, bytes: 0 };
+  if (plan.length === 0) return { tables: 0, changedBytes: 0 };
 
   undoTransaction('apply map pack', () => {
     const journal = get(editJournal);
@@ -628,7 +628,7 @@ export function applyPackRows(rows: readonly PackRow[]): { tables: number; bytes
     editJournal.set(journal);
   });
   reverifyChecksums();
-  return { tables, bytes: plan.length };
+  return { tables, changedBytes: plan.length };
 }
 
 /** Plain click (1×1) or drag-select; `MapView` also passes the same anchor for shift-click extension. */
