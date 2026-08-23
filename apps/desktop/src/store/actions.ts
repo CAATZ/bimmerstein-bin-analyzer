@@ -9,6 +9,7 @@ import {
   lastSave,
   maps,
   modalOpen,
+  pendingPack,
   potentialMaps,
   proposals, regions,
   saveTarget,
@@ -16,6 +17,7 @@ import {
   type CellRange, type SaveTarget, type Selection, type Toast, type ViewMode,
 } from './stores.js';
 import type { SaveOutcome } from '../lib/savereport.js';
+import type { PackTable } from '@binanalyzer/formats';
 import type { PackRow } from '../lib/packapply.js';
 import { detachedAxis, libraryAxis, stampAxis } from '../lib/axislib.js';
 import { axisEditability, isMonotonic } from '../lib/axisedit.js';
@@ -91,6 +93,7 @@ export function resetStores(): void {
   addressFrame.set('none');
   framePromptAnswered.set(false);
   proposals.set([]);
+  pendingPack.set(null);
   checksumReport.set(undefined);
   activeChecksums = undefined;
   workingBytes.set(null);
@@ -116,6 +119,7 @@ export function setBin(image: BinImage): void {
   addressFrame.set('none'); // a new bin is a new frame decision
   framePromptAnswered.set(false);
   proposals.set([]); // a proposal is about maps in the bin that just went away
+  pendingPack.set(null); // ditto: a pack was classified against the image that just went away
   checksumReport.set(undefined); // a new bin is a new checksum verdict — the old one would be fabricated data
   activeChecksums = undefined; // a new bin means a new (or no) family module — never carry the old one over
   workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
@@ -530,6 +534,56 @@ export function applyProposedEdit(
  * The transaction is opened only once there is something to write, so a batch
  * with nothing applicable leaves no phantom undo step behind.
  */
+/**
+ * The confirmed maps whose bytes this session edited, as pack tables.
+ *
+ * `values` come from the working buffer and `baseline` from the image as
+ * opened, so a pack always records what the author started from (spec §2).
+ * Only journal-touched maps qualify: exporting every confirmed map would ship
+ * a stranger's whole calibration under the name of a tune.
+ */
+export function editedPackTables(): PackTable[] {
+  const image = get(bin);
+  const working = get(workingBytes);
+  if (image === null || working === null) return [];
+  const touched = new Set(get(editJournal).keys());
+  if (touched.size === 0) return [];
+
+  const out: PackTable[] = [];
+  for (const m of get(maps)) {
+    const { start, end } = byteSpanOf(m);
+    let hit = false;
+    for (let o = start; o < end; o++) {
+      if (touched.has(o)) {
+        hit = true;
+        break;
+      }
+    }
+    if (!hit) continue;
+    const grid = (src: Uint8Array): number[][] => {
+      const g: number[][] = [];
+      for (let r = 0; r < m.rows; r++) {
+        const row: number[] = [];
+        for (let c = 0; c < m.cols; c++) row.push(readValue(src, cellOffset(m, r, c), m.format));
+        g.push(row);
+      }
+      return g;
+    };
+    out.push({
+      name: m.name,
+      address: m.address,
+      rows: m.rows,
+      cols: m.cols,
+      orientation: m.orientation,
+      format: m.format,
+      scaling: m.scaling,
+      values: grid(working),
+      baseline: grid(image.bytes),
+    });
+  }
+  return out;
+}
+
 export function applyPackRows(rows: readonly PackRow[]): { tables: number; bytes: number } {
   const image = get(bin);
   const working = get(workingBytes);
@@ -1014,6 +1068,7 @@ export function applyProject(image: BinImage, project: Project): ApplyProjectRep
   activeChecksums = undefined; // a new bin means a new (or no) family module — never carry the old one over
   workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
   editJournal.set(new Map());
+  pendingPack.set(null); // a pack was classified against the image this one replaces
   saveTarget.set(null); // a new bin has never been saved — carrying a target over would overwrite another image's file
   lastSave.set(null);
   cellRange.set(null); // a new bin is a new address space — a stale range's mapId would be meaningless

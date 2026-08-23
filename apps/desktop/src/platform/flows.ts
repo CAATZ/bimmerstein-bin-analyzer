@@ -2,11 +2,14 @@ import { get } from 'svelte/store';
 import { createBinImage, sha256Hex } from '@binanalyzer/core';
 import type { BinImage } from '@binanalyzer/core';
 import {
-  exportMapListCsv, exportMapListJson, exportRomRaiderXml, exportXdf, importRomRaiderXml, parseProject, serializeProject,
+  exportMapListCsv, exportMapListJson, exportRomRaiderXml, exportXdf, importRomRaiderXml, parsePack, parseProject,
+  serializePack, serializeProject, type MapPack,
 } from '@binanalyzer/formats';
+import { identifyBin } from '@binanalyzer/families';
 import * as actions from '../store/actions.js';
 import { listRomIds } from '../lib/romlist.js';
-import { addressFrame, bin, binPath, editJournal, framePromptAnswered, maps, potentialMaps, saveTarget } from '../store/stores.js';
+import { addressFrame, bin, binPath, editJournal, framePromptAnswered, maps, pendingPack, potentialMaps, saveTarget, workingBytes } from '../store/stores.js';
+import { classifyPack, packGateError } from '../lib/packapply.js';
 import { frameDefMaps, isMs41FullRead, unframeDefMaps } from '@binanalyzer/appkit';
 import { saveVerdict, verdictHeadline } from '../lib/savereport.js';
 import { basename, dirname, joinPath, samePath, stemOf, type FileFilter, type PlatformHost } from './host.js';
@@ -22,6 +25,7 @@ const BIN_FILTERS: FileFilter[] = [
   { name: 'All files', extensions: ['*'] },
 ];
 const PROJECT_FILTERS: FileFilter[] = [{ name: 'BimmerStein Bin Analyzer project', extensions: ['binproj.json', 'json'] }];
+const PACK_FILTERS: FileFilter[] = [{ name: 'Map pack', extensions: ['binpack.json', 'json'] }];
 
 function errText(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
@@ -441,4 +445,90 @@ export async function importDef(host: PlatformHost, xml: string, romId: string |
         `${frame === 'ms41full' ? ' — addresses mapped via the MS41 full-read frame' : ''}`
     );
   }
+}
+
+/**
+ * Export the tables this session edited (spec §6). The default selection is
+ * COMPUTED — every confirmed map whose byte span the journal touched — so the
+ * common case needs no typing.
+ */
+export async function exportPackFlow(host: PlatformHost): Promise<boolean> {
+  const image = get(bin);
+  if (image === null) {
+    actions.pushToast('error', 'Open a bin first.');
+    return false;
+  }
+  const identity = identifyBin(image.bytes);
+  if (identity === undefined) {
+    actions.pushToast(
+      'error',
+      "This bin's calibration id could not be read, so a pack could not be labelled for it."
+    );
+    return false;
+  }
+  const tables = actions.editedPackTables();
+  if (tables.length === 0) {
+    actions.pushToast('info', 'No edited tables to export — change some values first.');
+    return false;
+  }
+  const pack: MapPack = {
+    schemaVersion: 1,
+    source: {
+      familyId: identity.familyId,
+      calId: identity.calId,
+      binSha256: image.sha256,
+      ...(get(addressFrame) === 'ms41full' ? { addressFrame: 'ms41full' as const } : {}),
+    },
+    title: `${stemOf(image.name)} pack`,
+    tables,
+  };
+  const path = await host.saveFile('Export map pack', `${stemOf(image.name)}.binpack.json`, PACK_FILTERS);
+  if (path === null) return false;
+  try {
+    await host.writeText(path, serializePack(pack));
+    actions.pushToast('info', `Exported ${tables.length} table(s) to ${basename(path)}`);
+    return true;
+  } catch (e) {
+    actions.pushToast('error', `Export failed: ${errText(e)}`);
+    return false;
+  }
+}
+
+/**
+ * Open a pack and queue it for review. The CAL-ID gate (spec §4.1) runs BEFORE
+ * anything is queued: a mismatch is refused whole, with both ids named.
+ */
+export async function openPackFlow(host: PlatformHost): Promise<void> {
+  const image = get(bin);
+  const working = get(workingBytes);
+  if (image === null || working === null) {
+    actions.pushToast('error', 'Open a bin first.');
+    return;
+  }
+  const path = await host.openFile('Open map pack', PACK_FILTERS);
+  if (path === null) return;
+
+  let text: string;
+  try {
+    text = await host.readText(path);
+  } catch (e) {
+    actions.pushToast('error', `Could not read the pack: ${errText(e)}`);
+    return;
+  }
+  const parsed = parsePack(text);
+  if (!parsed.ok) {
+    actions.pushToast('error', `That is not a valid map pack: ${parsed.error}`);
+    return;
+  }
+  const gate = packGateError(parsed.value, identifyBin(image.bytes));
+  if (gate !== undefined) {
+    actions.pushToast('error', gate);
+    return;
+  }
+  const rows = classifyPack({
+    pack: parsed.value,
+    bytes: working,
+    binIsFullRead: isMs41FullRead(image.size),
+  });
+  pendingPack.set({ pack: parsed.value, rows, fileName: basename(path) });
 }

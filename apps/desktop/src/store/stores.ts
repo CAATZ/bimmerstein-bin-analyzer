@@ -2,7 +2,9 @@ import { writable, type Writable } from 'svelte/store';
 import type { AxisLibEntry, BinImage, EditJournal, MapDef, ValueFormat } from '@binanalyzer/core';
 import type { Region, ScanProgress } from '@binanalyzer/engine';
 import type { ChecksumReport } from '@binanalyzer/families';
+import type { MapPack } from '@binanalyzer/formats';
 import type { SaveOutcome } from '../lib/savereport.js';
+import type { PackRow } from '../lib/packapply.js';
 
 /**
  * Single source of truth (spec §7). Views subscribe;
@@ -126,6 +128,20 @@ export interface Proposal {
 
 /** Queued co-pilot proposals; the panel renders the head of this list. */
 export const proposals: Writable<Proposal[]> = writable([]);
+
+/** A pack awaiting the user's table-by-table decision; null when none is open. */
+export interface PendingPack {
+  pack: MapPack;
+  rows: PackRow[];
+  fileName: string;
+}
+
+/**
+ * Cleared on every bin swap: the rows were classified against ONE image, and a
+ * pack reviewed against a different one would show addresses and before-values
+ * that are no longer true.
+ */
+export const pendingPack: Writable<PendingPack | null> = writable(null);
 
 /**
  * The user's consent to share the session. OFF by default — this toggle IS the
