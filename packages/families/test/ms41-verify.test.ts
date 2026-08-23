@@ -116,9 +116,13 @@ describe('a non-correctable block carries the ranges it covers', () => {
     }
   });
 
-  it('a 24 KB partial skips boot and program with NO ranges — they are absent, not unvouched', () => {
+  it('a skipped entry carries nothing but an id and a reason', () => {
+    // Absent, not merely unwritten: there is nothing to cover and nothing to
+    // measure. Pinned as a SHAPE so a future module cannot quietly reintroduce
+    // the optional fields that used to smuggle the program checksum through.
     const r = ms41Checksums.verify(ms41Image(TUNE));
-    for (const s of r.skipped) expect(s.covers).toBeUndefined();
+    expect(r.skipped.length).toBeGreaterThan(0);
+    for (const s of r.skipped) expect(Object.keys(s).sort()).toEqual(['id', 'reason']);
   });
 });
 
@@ -134,13 +138,6 @@ describe('a non-correctable block reports its numbers as DATA', () => {
     expect(program.storedAt).toBe(0x6050);
     expect(typeof program.computed).toBe('number');
     expect(program.ok).toBe(program.stored === program.computed);
-  });
-
-  it('an ABSENT checksum reports no numbers — a 24 KB partial has nothing to report', () => {
-    for (const s of ms41Checksums.verify(ms41Image(TUNE)).skipped) {
-      expect(s.stored).toBeUndefined();
-      expect(s.computed).toBeUndefined();
-    }
   });
 });
 
