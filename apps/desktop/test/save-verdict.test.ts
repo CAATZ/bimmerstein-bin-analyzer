@@ -59,10 +59,36 @@ describe('saveVerdict', () => {
   it('range ends are EXCLUSIVE — the byte at `end` is not covered', () => {
     const block = { ...programBlock, id: 'x', covers: [{ start: 0x10, end: 0x20 }] };
     const r = report({ valid: false, blocks: [...report().blocks, block] });
-    // 0x20 is outside, so nothing of the user's is covered. Task 4 turns this
-    // into `uncorrectable-mismatch`; today it still falls through to corrected.
-    expect(saveVerdict({ report: r, editedOffsets: [0x20] })).toEqual({ kind: 'corrected' });
+    // 0x20 is outside, so nothing of the user's is covered — but the block is
+    // still stale, which is the OTHER verdict, not `corrected`.
+    expect(saveVerdict({ report: r, editedOffsets: [0x20] })).toEqual({
+      kind: 'uncorrectable-mismatch',
+      checksumId: 'x',
+    });
     expect(saveVerdict({ report: r, editedOffsets: [0x1f] })).toMatchObject({ kind: 'covered-by-uncorrected' });
+  });
+
+  it('a stale checksum we never write, untouched by the edits ⇒ uncorrectable-mismatch', () => {
+    const r = report({ valid: false, blocks: [...report().blocks, programBlock] });
+    // 0x14000 is the MS41 cal window — outside every program region.
+    expect(saveVerdict({ report: r, editedOffsets: [0x14000] })).toEqual({
+      kind: 'uncorrectable-mismatch',
+      checksumId: 'program',
+    });
+  });
+
+  it('a CORRECTABLE block still bad outranks it — that is our correction failing', () => {
+    const bad = { ...report().blocks[0]!, ok: false };
+    const r = report({ valid: false, blocks: [bad, programBlock] });
+    expect(saveVerdict({ report: r, editedOffsets: [0x100] })).toEqual({
+      kind: 'invalid-after-correction',
+      mismatched: 1,
+    });
+  });
+
+  it('a non-correctable block that is OK changes nothing', () => {
+    const r = report({ blocks: [...report().blocks, { ...programBlock, ok: true, computed: 1 }] });
+    expect(saveVerdict({ report: r, editedOffsets: [0x100] })).toEqual({ kind: 'corrected' });
   });
 
   it('a skipped checksum is absent, so it can never be touched', () => {
