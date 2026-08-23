@@ -24,15 +24,22 @@ describe('ms41Checksums.correct', () => {
     ['24 KB partial (cal region)', TUNE, 0x1010, 0x104e],
   ] as const) {
     it(`round-trips a corrupted ${name}: verify fails → correct → verify passes AND only the victim and its checksum store differ`, () => {
+      // `valid` spans NON-CORRECTABLE blocks too, and the synthetic fixture
+      // carries an arbitrary program checksum — so on a full ROM `valid` is
+      // false before and after, by design. What correct() actually promises is
+      // that every checksum IT WRITES comes out ok.
+      const correctableOk = (d: Uint8Array): boolean =>
+        ms41Checksums.verify(d).blocks.filter((b) => b.correctable).every((b) => b.ok);
+
       const original = ms41Image(size);
-      expect(ms41Checksums.verify(original).valid).toBe(true);
+      expect(correctableOk(original)).toBe(true);
 
       const damaged = Uint8Array.from(original);
       damaged[victim] = damaged[victim]! ^ 0xff;
-      expect(ms41Checksums.verify(damaged).valid).toBe(false);
+      expect(correctableOk(damaged)).toBe(false);
 
       const fixed = ms41Checksums.correct(damaged);
-      expect(fixed.report.valid).toBe(true);
+      expect(fixed.report.blocks.filter((b) => b.correctable).every((b) => b.ok)).toBe(true);
 
       // Corrupting a byte INSIDE a covered region necessarily changes that
       // checksum, so correct() must rewrite its two stored bytes. The strong
@@ -71,5 +78,24 @@ describe('ms41Checksums.correct', () => {
     const r = ms41Checksums.correct(d);
     expect([r.bytes[0x6050], r.bytes[0x6051]]).toEqual(originalProg);
     expect(r.changed.some((c) => c.offset === 0x6050 || c.offset === 0x6051)).toBe(false);
+  });
+});
+
+describe('correct() and non-correctable blocks', () => {
+  it('NEVER writes a byte inside a non-correctable block', () => {
+    const image = ms41Image(FULL);
+    // Corrupt the program checksum's STORED value (PROG_STORE = 0x6050) so a
+    // careless implementation would be tempted to "fix" it. 0x6050 sits outside
+    // every block's coverage — boot is [0x4000,0x5C14), the program regions
+    // start at 0x6100 — so this changes `stored` and nothing else.
+    image[0x6050] = image[0x6050]! ^ 0xff;
+    const { report, changed } = ms41Checksums.correct(image);
+    const forbidden = report.blocks.filter((b) => !b.correctable).flatMap((b) => b.covers);
+    expect(forbidden.length).toBeGreaterThan(0);
+    for (const w of changed) {
+      for (const c of forbidden) {
+        expect(w.offset >= c.start && w.offset < c.end).toBe(false);
+      }
+    }
   });
 });

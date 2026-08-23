@@ -44,18 +44,24 @@ describe('ms41Checksums.verify — full ROM', () => {
   it('reports boot + cal as valid on a well-formed image', () => {
     const r = ms41Checksums.verify(ms41Image(FULL));
     expect(r.applies).toBe(true);
-    expect(r.valid).toBe(true);
-    expect(r.blocks.map((b) => b.id)).toEqual(['boot', 'cal-0', 'cal-1', 'cal-2', 'cal-3']);
-    expect(r.blocks.every((b) => b.ok)).toBe(true);
+    expect(r.blocks.map((b) => b.id)).toEqual(['boot', 'program', 'cal-0', 'cal-1', 'cal-2', 'cal-3']);
+    // Every checksum THIS TOOL WRITES is ok. `valid` is deliberately NOT
+    // asserted: the synthetic fixture carries an arbitrary program checksum,
+    // and a stale checksum we never write makes an image invalid by design.
+    expect(r.blocks.filter((b) => b.correctable).every((b) => b.ok)).toBe(true);
   });
 
-  it('never treats the PROGRAM checksum as authoritative', () => {
-    // The reference verifies program only for MS41.0/.1/.2 and its own tooling
-    // always passes correct_program=False. It is reported, never gating.
+  it('reports the PROGRAM checksum but marks it as one we never write', () => {
+    // This test's premise was deliberately reversed: the program checksum USED
+    // to be hidden in `skipped` so it could not gate anything. It is now a
+    // block, so a stale one does make an image invalid — what it must never do
+    // is get written. `correctable: false` is that promise, and
+    // ms41-correct.test.ts pins it.
     const r = ms41Checksums.verify(ms41Image(FULL));
-    expect(r.blocks.some((b) => b.id === 'program')).toBe(false);
-    expect(r.skipped.map((s) => s.id)).toContain('program');
-    expect(r.skipped.find((s) => s.id === 'program')!.reason).toMatch(/MS41\.0/);
+    const program = r.blocks.find((b) => b.id === 'program');
+    expect(program).toBeDefined();
+    expect(program!.correctable).toBe(false);
+    expect(r.skipped.some((s) => s.id === 'program')).toBe(false);
   });
 
   it('notes the boot-verification switch state', () => {
@@ -89,10 +95,10 @@ describe('ms41Checksums.verify — inapplicable', () => {
   });
 });
 
-describe('skipped checksums carry the ranges they cover', () => {
-  it('the program entry names its three regions on a full ROM', () => {
+describe('a non-correctable block carries the ranges it covers', () => {
+  it('the program block names its three regions on a full ROM', () => {
     const r = ms41Checksums.verify(ms41Image(FULL));
-    const program = r.skipped.find((s) => s.id === 'program')!;
+    const program = r.blocks.find((b) => b.id === 'program')!;
     expect(program.covers).toEqual([
       { start: 0x0000, end: 0x4000 },
       { start: 0x6100, end: 0x8000 },
@@ -104,8 +110,8 @@ describe('skipped checksums carry the ranges they cover', () => {
     // fo(SA) = (0x10000 + SA) ^ 0x4000 lands cal in [0x10000, 0x18000), which is
     // disjoint from all three program regions. This is what lets a save tell a
     // tuner their calibration edit did not disturb the checksum it will not fix.
-    const program = ms41Checksums.verify(ms41Image(FULL)).skipped.find((s) => s.id === 'program')!;
-    for (const c of program.covers!) {
+    const program = ms41Checksums.verify(ms41Image(FULL)).blocks.find((b) => b.id === 'program')!;
+    for (const c of program.covers) {
       expect(c.start >= 0x18000 || c.end <= 0x10000).toBe(true);
     }
   });
@@ -116,19 +122,18 @@ describe('skipped checksums carry the ranges they cover', () => {
   });
 });
 
-describe('a skipped checksum reports its numbers as DATA, not only as prose', () => {
-  it('the program entry carries stored + computed alongside the reason', () => {
-    // The reason string has always embedded these, but only a regex could reach
-    // them. The acceptance harness pins the program CRC against real firmware,
-    // so it needs them structured — and the program path is the one checksum
-    // computation with no other real-bin coverage.
+describe('a non-correctable block reports its numbers as DATA', () => {
+  it('the program block carries stored + computed like any other block', () => {
+    // The acceptance harness pins the program CRC against real firmware, so it
+    // needs these structured — and the program path is the one checksum
+    // computation with no other real-bin coverage. It used to reach them through
+    // a reason string; as a block it simply has the fields.
     const d = ms41Image(FULL);
-    const program = ms41Checksums.verify(d).skipped.find((s) => s.id === 'program')!;
+    const program = ms41Checksums.verify(d).blocks.find((b) => b.id === 'program')!;
     expect(program.stored).toBe(d[0x6050]! | (d[0x6051]! << 8));
+    expect(program.storedAt).toBe(0x6050);
     expect(typeof program.computed).toBe('number');
-    // The prose and the fields cannot drift: both are rendered from the same values.
-    expect(program.reason).toContain(program.stored!.toString(16).toUpperCase().padStart(4, '0'));
-    expect(program.reason).toContain(program.computed!.toString(16).toUpperCase().padStart(4, '0'));
+    expect(program.ok).toBe(program.stored === program.computed);
   });
 
   it('an ABSENT checksum reports no numbers — a 24 KB partial has nothing to report', () => {
@@ -140,9 +145,11 @@ describe('a skipped checksum reports its numbers as DATA, not only as prose', ()
 });
 
 describe('a block reports its coverage as a list', () => {
-  it('marks every checksum it will write as correctable', () => {
+  it('marks boot and cal — the checksums it writes — as correctable', () => {
     const r = ms41Checksums.verify(ms41Image(FULL));
-    expect(r.blocks.every((b) => b.correctable)).toBe(true);
+    const written = r.blocks.filter((b) => b.id !== 'program');
+    expect(written.length).toBeGreaterThan(0);
+    expect(written.every((b) => b.correctable)).toBe(true);
   });
 
   it('every block reports its coverage as a list of ranges', () => {
@@ -153,5 +160,31 @@ describe('a block reports its coverage as a list', () => {
       expect(b.covers.length).toBeGreaterThanOrEqual(1);
       for (const c of b.covers) expect(c.end).toBeGreaterThan(c.start);
     }
+  });
+});
+
+describe('the program checksum is a block we never write', () => {
+  it('reports the program checksum as a block that is NOT correctable', () => {
+    const r = ms41Checksums.verify(ms41Image(FULL));
+    const program = r.blocks.find((b) => b.id === 'program');
+    expect(program).toBeDefined();
+    expect(program!.correctable).toBe(false);
+    expect(program!.covers).toEqual([
+      { start: 0x0000, end: 0x4000 },
+      { start: 0x6100, end: 0x8000 },
+      { start: 0x20000, end: 0x40000 },
+    ]);
+    expect(r.skipped.some((s) => s.id === 'program')).toBe(false);
+  });
+
+  it('says in a note that the program checksum is never written', () => {
+    const r = ms41Checksums.verify(ms41Image(FULL));
+    expect(r.notes.join(' ')).toMatch(/never written/i);
+  });
+
+  it('keeps the program checksum SKIPPED on a 24 KB partial, where it is absent', () => {
+    const r = ms41Checksums.verify(ms41Image(TUNE));
+    expect(r.blocks.some((b) => b.id === 'program')).toBe(false);
+    expect(r.skipped.map((s) => s.id)).toContain('program');
   });
 });

@@ -57,9 +57,6 @@ const SWITCH_ADDR = 0x605c;
 const SWITCH_ENABLED = 0x30;
 const SWITCH_DISABLED = 0xff;
 
-const PROGRAM_SKIP_REASON =
-  'program checksum is computed but never written — verified against real MS41.0 and MS41.2 firmware, MS41.1 unmeasured';
-
 const hex = (v: number, w = 4): string => `0x${v.toString(16).toUpperCase().padStart(w, '0')}`;
 
 function bootBlock(d: Uint8Array): ChecksumBlock {
@@ -151,18 +148,24 @@ function verifyImage(bytes: Uint8Array): ChecksumReport {
     blocks.push(bootBlock(bytes));
     const pc = programComputed(bytes);
     const ps = u16le(bytes, PROG_STORE);
-    skipped.push({
+    blocks.push({
       id: 'program',
-      reason: `${PROGRAM_SKIP_REASON} — stored ${hex(ps)}, computed ${hex(pc)}`,
+      label: 'Program',
       // Copied, never handed out by reference: verify() must not expose module
       // state a caller could mutate.
       covers: PROGRAM_COVERS.map((c) => ({ ...c })),
-      // The same `ps`/`pc` the reason renders, as data. Not vouched for, but
-      // MEASURED — and the acceptance harness pins them against real firmware,
-      // which is the only regression coverage this computation has.
+      storedAt: PROG_STORE,
       stored: ps,
       computed: pc,
+      ok: ps === pc,
+      // Reported, never written — see the file header. `correct()` writes boot
+      // and cal only, and ms41-correct.test.ts pins that this block's ranges
+      // are never touched.
+      correctable: false,
     });
+    notes.push(
+      'The program checksum is reported but never written by this tool. It is verified against real MS41.0 and MS41.2 firmware; MS41.1 is unmeasured directly.'
+    );
     notes.push(switchNote(bytes));
   } else {
     skipped.push({ id: 'boot', reason: 'lives outside a 24 KB partial' });
