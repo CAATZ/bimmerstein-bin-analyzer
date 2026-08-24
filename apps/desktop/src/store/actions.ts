@@ -7,6 +7,7 @@ import { checksumsFor } from '@binanalyzer/families';
 import {
   DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, cellRange, checksumReport, editJournal, framePromptAnswered,
   lastSave,
+  loadedLineage,
   maps,
   modalOpen,
   pendingPack,
@@ -94,6 +95,7 @@ export function resetStores(): void {
   framePromptAnswered.set(false);
   proposals.set([]);
   pendingPack.set(null);
+  loadedLineage.set(null);
   checksumReport.set(undefined);
   activeChecksums = undefined;
   workingBytes.set(null);
@@ -120,6 +122,7 @@ export function setBin(image: BinImage): void {
   framePromptAnswered.set(false);
   proposals.set([]); // a proposal is about maps in the bin that just went away
   pendingPack.set(null); // ditto: a pack was classified against the image that just went away
+  loadedLineage.set(null); // lineage describes an image; a new image has none until a project says so
   checksumReport.set(undefined); // a new bin is a new checksum verdict — the old one would be fabricated data
   activeChecksums = undefined; // a new bin means a new (or no) family module — never carry the old one over
   workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
@@ -1011,6 +1014,17 @@ export function stepPotential(delta: 1 | -1): void {
   selectMap(pots[index]!);
 }
 
+/** §4: measure when this session produced a new image, carry otherwise. */
+function lineageFor(
+  image: BinImage,
+  target: SaveTarget | null
+): { name: string; sha256: string } | undefined {
+  if (target !== null && target.sha256 !== image.sha256) {
+    return { name: image.name, sha256: image.sha256 };
+  }
+  return get(loadedLineage) ?? undefined;
+}
+
 export function projectSnapshot(): Result<Project> {
   const image = get(bin);
   if (!image) return { ok: false, error: 'no bin loaded — nothing to save' };
@@ -1018,15 +1032,22 @@ export function projectSnapshot(): Result<Project> {
   const frame = get(addressFrame);
   const lib = get(axisLibrary);
   const t = get(saveTarget);
+  const lineage = lineageFor(image, t);
   return {
     ok: true,
     value: {
-      schemaVersion: 2,
+      schemaVersion: 3,
       // Spec §7: a project binds to the image as LAST SAVED, so reopening it
       // finds the tune it describes rather than the pristine file it came from.
       bin: t === null
         ? { name: image.name, sha256: image.sha256, size: image.size }
         : { name: t.name, sha256: t.sha256, size: t.size },
+      // Lineage describes the IMAGE, not the session
+      // (2026-08-24-project-lineage-design.md §4). A new image this session =>
+      // MEASURE where it came from. No new image => carry what the loaded
+      // project said, because the image's ancestry has not changed just
+      // because its definitions did.
+      ...(lineage !== undefined ? { derivedFrom: lineage } : {}),
       valueDefaults: { ...vp.format },
       ...(frame === 'ms41full' ? { addressFrame: 'ms41full' as const } : {}),
       ...(lib.length > 0 ? { axisLibrary: lib } : {}),
@@ -1083,6 +1104,7 @@ export function applyProject(image: BinImage, project: Project): ApplyProjectRep
   workingBytes.set(Uint8Array.from(image.bytes)); // a new bin is a new working buffer
   editJournal.set(new Map());
   pendingPack.set(null); // a pack was classified against the image this one replaces
+  loadedLineage.set(project.derivedFrom ?? null); // AFTER the clears above, or this is undone
   saveTarget.set(null); // a new bin has never been saved — carrying a target over would overwrite another image's file
   lastSave.set(null);
   cellRange.set(null); // a new bin is a new address space — a stale range's mapId would be meaningless

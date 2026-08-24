@@ -94,6 +94,15 @@ export interface SaveTarget {
   size: number;
 }
 export const saveTarget: Writable<SaveTarget | null> = writable(null);
+/**
+ * The `derivedFrom` of the project currently open, or null.
+ *
+ * PER-BIN state: cleared in setBin and resetStores alongside the rest. Lineage
+ * describes an IMAGE, so carrying it across a bin swap would let a new image
+ * inherit an ancestry it never had
+ * (2026-08-24-project-lineage-design.md §4, §9).
+ */
+export const loadedLineage: Writable<{ name: string; sha256: string } | null> = writable(null);
 /** The most recent save attempt — success or failure. Drives the report dialog and the status chip. */
 export const lastSave: Writable<SaveOutcome | null> = writable(null);
 /** User-confirmed maps (sorted by address). */
