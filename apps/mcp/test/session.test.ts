@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MemorySessionStore, bufferFor, type OpenBin } from '../src/session.js';
+import { MemorySessionStore, bufferFor, diffPair, type OpenBin } from '../src/session.js';
 
 function entry(id: string, size = 16): OpenBin {
   const buf = new Uint8Array(size);
@@ -122,5 +122,18 @@ describe('OpenBin buffers', () => {
     const e = twoBuffer();
     expect(bufferFor(e, 'working')).toBe(e.bytes);
     expect(bufferFor(e, 'original')).toBe(e.originalBytes);
+  });
+});
+
+describe('diffPair', () => {
+  it('hands back the working and original buffers as distinct references', () => {
+    const original = Uint8Array.from([1, 2, 3, 4]);
+    const working = Uint8Array.from([1, 9, 3, 4]);
+    const e: OpenBin = { ...entry('a', 4), bytes: working, originalBytes: original, changedBytes: 1 };
+
+    const pair = diffPair(e);
+
+    expect(pair.working).toBe(working);
+    expect(pair.original).toBe(original);
   });
 });

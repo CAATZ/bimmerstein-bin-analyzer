@@ -73,6 +73,25 @@ export function bufferFor(entry: OpenBin, which: 'working' | 'original'): Uint8A
 }
 
 /**
+ * Both buffers at once, for a consumer that DIFFS them rather than reading a
+ * value out of one.
+ *
+ * This exists so the literal-'original' form of `bufferFor` can keep meaning
+ * "detection, and nothing else" — spelled out rather than written as a call,
+ * because the guard below scans raw text and a comment would trip it.
+ * `list_edits` is not detection — it never scans and never
+ * produces a MapDef — but it does need the pre-edit bytes to say what a value
+ * WAS. Giving that access its own name, in the one module that already holds
+ * `originalBytes`, keeps the literal-'original' guard precise instead of
+ * widening it until it stops asserting anything.
+ *
+ * Call sites are pinned by test/buffer-guards.test.ts.
+ */
+export function diffPair(entry: OpenBin): { working: Uint8Array; original: Uint8Array } {
+  return { working: entry.bytes, original: entry.originalBytes };
+}
+
+/**
  * The Phase-2 seam. Phase 1 owns bins in memory; the co-pilot implementation
  * (spec 2026-08-01-mcp-copilot-design.md) proxies to the live desktop store
  * over a loopback link, so every method is a round trip and the interface is
