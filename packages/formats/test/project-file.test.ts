@@ -38,7 +38,7 @@ function switchMap(): MapDef {
 
 function sampleProject(): Project {
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     bin: { name: 'test.bin', sha256: SHA, size: 0x1000 },
     valueDefaults: { width: 2, signed: false, endianness: 'big' },
     maps: [confirmedMap()],
@@ -69,9 +69,9 @@ describe('serializeProject / parseProject', () => {
   });
 
   it('rejects newer schema versions with an actionable message', () => {
-    const r = parseProject(serializeProject(sampleProject()).replace('"schemaVersion": 2', '"schemaVersion": 3'));
+    const r = parseProject(serializeProject(sampleProject()).replace('"schemaVersion": 3', '"schemaVersion": 4'));
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error).toContain('schemaVersion 3');
+    if (!r.ok) expect(r.error).toContain('schemaVersion 4');
   });
 
   it('rejects invalid JSON, non-objects, bad bin identity and bad valueDefaults', () => {
@@ -247,7 +247,7 @@ function libraryProject(): Project {
     },
   };
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     bin: { name: 'test.bin', sha256: SHA, size: 0x1000 },
     valueDefaults: { width: 2, signed: false, endianness: 'big' },
     axisLibrary: [
@@ -266,7 +266,7 @@ function libraryProject(): Project {
 describe('axis library (schemaVersion 2)', () => {
   it('round-trips a non-empty axis library and libId-stamped map axes deep-equal', () => {
     const json = serializeProject(libraryProject());
-    expect(json).toContain('"schemaVersion": 2');
+    expect(json).toContain('"schemaVersion": 3');
     expect(json).toContain('"axisLibrary"');
     const r = parseProject(json);
     expect(r.ok).toBe(true);
@@ -280,12 +280,12 @@ describe('axis library (schemaVersion 2)', () => {
     expect(r.ok && r.value.axisLibrary === undefined).toBe(true);
   });
 
-  it('accepts a v1 document and normalizes it to schemaVersion 2', () => {
-    const v1 = serializeProject(sampleProject()).replace('"schemaVersion": 2', '"schemaVersion": 1');
+  it('accepts a v1 document and normalizes it to the current schemaVersion', () => {
+    const v1 = serializeProject(sampleProject()).replace('"schemaVersion": 3', '"schemaVersion": 1');
     const r = parseProject(v1);
     expect(r.ok).toBe(true);
     if (r.ok) {
-      expect(r.value.schemaVersion).toBe(2);
+      expect(r.value.schemaVersion).toBe(3);
       expect(r.value.axisLibrary).toBeUndefined();
     }
   });
@@ -343,5 +343,59 @@ describe('axis library (schemaVersion 2)', () => {
     const r = parseProject(serializeProject(dangling));
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.value.maps[0]!.xAxis!.libId).toBe('lib-rpm');
+  });
+});
+
+describe('project lineage (schemaVersion 3)', () => {
+  const OTHER = '1'.repeat(64);
+
+  it('round-trips derivedFrom', () => {
+    const p: Project = { ...sampleProject(), derivedFrom: { name: 'stock.bin', sha256: OTHER } };
+    const r = parseProject(serializeProject(p));
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value.derivedFrom).toEqual({ name: 'stock.bin', sha256: OTHER });
+  });
+
+  it('omits derivedFrom entirely when absent', () => {
+    expect(serializeProject(sampleProject())).not.toContain('derivedFrom');
+  });
+
+  it('writes schemaVersion 3', () => {
+    expect(serializeProject(sampleProject())).toContain('"schemaVersion": 3');
+  });
+
+  it('is byte-stable with lineage — serializing a parsed project reproduces the text', () => {
+    const once = serializeProject({ ...sampleProject(), derivedFrom: { name: 'stock.bin', sha256: OTHER } });
+    const r = parseProject(once);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(serializeProject(r.value)).toBe(once);
+  });
+
+  it('accepts a v2 document, normalizing to 3 with no lineage', () => {
+    const v2 = serializeProject(sampleProject()).replace('"schemaVersion": 3', '"schemaVersion": 2');
+    const r = parseProject(v2);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value.schemaVersion).toBe(3);
+      expect(r.value.derivedFrom).toBeUndefined();
+    }
+  });
+
+  it('rejects a bad derivedFrom sha rather than carrying a lie', () => {
+    const bad = serializeProject({
+      ...sampleProject(),
+      derivedFrom: { name: 'stock.bin', sha256: OTHER },
+    }).replace(OTHER, 'nope');
+    const r = parseProject(bad);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain('derivedFrom');
+  });
+
+  it('rejects a derivedFrom with no name', () => {
+    const doc = JSON.parse(serializeProject(sampleProject())) as Record<string, unknown>;
+    doc['derivedFrom'] = { sha256: OTHER };
+    const r = parseProject(JSON.stringify(doc));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain('derivedFrom');
   });
 });

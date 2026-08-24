@@ -15,8 +15,11 @@ import { validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
  */
 export function serializeProject(project: Project): string {
   const canonical: Project = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     bin: { name: project.bin.name, sha256: project.bin.sha256, size: project.bin.size },
+    ...(project.derivedFrom !== undefined
+      ? { derivedFrom: { name: project.derivedFrom.name, sha256: project.derivedFrom.sha256 } }
+      : {}),
     valueDefaults: project.valueDefaults,
     ...(project.addressFrame !== undefined ? { addressFrame: project.addressFrame } : {}),
     ...(project.axisLibrary !== undefined && project.axisLibrary.length > 0 ? { axisLibrary: project.axisLibrary } : {}),
@@ -155,8 +158,11 @@ export function parseProject(json: string): Result<Project> {
   }
   if (typeof doc !== 'object' || doc === null) return { ok: false, error: 'project must be a JSON object' };
   const p = doc as Partial<Project> & { schemaVersion?: unknown };
-  if (p.schemaVersion !== 1 && p.schemaVersion !== 2) {
-    return { ok: false, error: `unsupported schemaVersion ${JSON.stringify(p.schemaVersion)} — this build supports schemaVersion 1 and 2` };
+  if (p.schemaVersion !== 1 && p.schemaVersion !== 2 && p.schemaVersion !== 3) {
+    return {
+      ok: false,
+      error: `unsupported schemaVersion ${JSON.stringify(p.schemaVersion)} — this build supports schemaVersion 1, 2 and 3`,
+    };
   }
   if (typeof p.bin !== 'object' || p.bin === null) return { ok: false, error: 'bin must be an object' };
   const bin = p.bin;
@@ -165,6 +171,21 @@ export function parseProject(json: string): Result<Project> {
   }
   if (typeof bin.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(bin.sha256)) {
     return { ok: false, error: 'bin.sha256 must be 64 lowercase hex chars' };
+  }
+  const lineage = (p as { derivedFrom?: unknown }).derivedFrom;
+  let derivedFrom: { name: string; sha256: string } | undefined;
+  if (lineage !== undefined) {
+    if (typeof lineage !== 'object' || lineage === null || Array.isArray(lineage)) {
+      return { ok: false, error: 'derivedFrom must be an object when present' };
+    }
+    const l = lineage as { name?: unknown; sha256?: unknown };
+    if (typeof l.name !== 'string' || l.name === '') {
+      return { ok: false, error: 'derivedFrom.name must be a non-empty string' };
+    }
+    if (typeof l.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(l.sha256)) {
+      return { ok: false, error: 'derivedFrom.sha256 must be 64 lowercase hex chars' };
+    }
+    derivedFrom = { name: l.name, sha256: l.sha256 };
   }
   if (!isValueFormat(p.valueDefaults)) return { ok: false, error: 'valueDefaults must be a valid ValueFormat' };
   const frame = (p as { addressFrame?: unknown }).addressFrame;
@@ -208,8 +229,9 @@ export function parseProject(json: string): Result<Project> {
   return {
     ok: true,
     value: {
-      schemaVersion: 2,
+      schemaVersion: 3,
       bin: { name: bin.name, sha256: bin.sha256, size: bin.size },
+      ...(derivedFrom !== undefined ? { derivedFrom } : {}),
       valueDefaults: p.valueDefaults,
       ...(frame === 'ms41full' ? { addressFrame: 'ms41full' as const } : {}),
       ...(axisLibrary !== undefined && axisLibrary.length > 0 ? { axisLibrary } : {}),
