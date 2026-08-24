@@ -1,4 +1,4 @@
-import { readValue, toPhysical, type MapDef, type Scaling, type ValueFormat } from '@binanalyzer/core';
+import { readValue, toPhysical, type AxisDef, type MapDef, type Scaling, type ValueFormat } from '@binanalyzer/core';
 import type { MapSource, SourcedMap } from './maps.js';
 
 /** A decoded value: raw always; `value` only when a scaling makes it meaningful. */
@@ -127,6 +127,44 @@ export function attributeEdits(input: AttributionInput): AttributionResult {
         });
         bump(m, 'cells', w);
       }
+    }
+  }
+
+  // --- axes, after every cell has had its chance to claim -------------------
+  // Key by the bytes an axis actually occupies: two maps stamped from the same
+  // library entry share an address, and that is ONE edit, not two.
+  const axisGroups = new Map<string, { axis: AxisDef; owners: SourcedMap[] }>();
+  for (const m of ordered) {
+    for (const a of [m.map.xAxis, m.map.yAxis]) {
+      if (a === undefined || a.kind !== 'referenced') continue;
+      if (a.address === undefined || a.format === undefined) continue;
+      const key = `${a.address}:${a.format.width}:${a.count}`;
+      const g = axisGroups.get(key);
+      if (g === undefined) axisGroups.set(key, { axis: a, owners: [m] });
+      else if (!g.owners.some((o) => o.map.id === m.map.id)) g.owners.push(m);
+    }
+  }
+
+  for (const { axis, owners } of axisGroups.values()) {
+    const format = axis.format!;
+    const scaling = axis.scaling ?? { factor: 1, offset: 0, units: '', digits: 0 };
+    const w = format.width;
+    const mapIds = owners.map((o) => o.map.id).sort();
+    // Lowest map id carries the summary charge; charging every owner would
+    // double-count the bytes and break the additive invariant.
+    const charge = owners.find((o) => o.map.id === mapIds[0]!)!;
+    for (let i = 0; i < axis.count; i++) {
+      const off = axis.address! + i * w;
+      if (off < 0 || off + w > working.length) continue;
+      if (!claimable(off, w)) continue;
+      claim(off, w);
+      rows.push({
+        kind: 'axis', offset: off, axisAddress: axis.address!, index: i, mapIds,
+        ...(axis.libId === undefined ? {} : { libId: axis.libId }),
+        original: decode(original, off, format, scaling),
+        current: decode(working, off, format, scaling),
+      });
+      bump(charge, 'axisEntries', w);
     }
   }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { MapDef } from '@binanalyzer/core';
+import type { AxisDef, MapDef } from '@binanalyzer/core';
 import { attributeEdits, changedOffsets } from '../src/edits.js';
 import type { SourcedMap } from '../src/maps.js';
 
@@ -102,5 +102,70 @@ describe('cell attribution', () => {
     const out = attributeEdits({ working, original, maps: [sourced(gridMap())], checksums: [] });
 
     expect(out.rows.map((r) => r.offset)).toEqual([0x10, 0x13]);
+  });
+});
+
+const axis = (over: Partial<AxisDef> = {}): AxisDef => ({
+  kind: 'referenced',
+  address: 0x40,
+  count: 4,
+  format: { width: 1, signed: false, endianness: 'big' },
+  scaling: { factor: 1, offset: 0, units: '', digits: 0 },
+  ...over,
+});
+
+describe('axis attribution', () => {
+  it('reports an axis entry as an axis row, not a cell row', () => {
+    // axis at 0x40, u8, index 2 -> offset 0x42. Map data is at 0x10, untouched.
+    const { working, original } = buffers(0x60, { 0x42: [30, 44] });
+    const map = gridMap({ xAxis: axis() });
+
+    const out = attributeEdits({ working, original, maps: [sourced(map)], checksums: [] });
+
+    expect(out.rows).toEqual([
+      {
+        kind: 'axis', offset: 0x42, axisAddress: 0x40, index: 2, mapIds: ['m1'],
+        original: { raw: 30, value: 30 }, current: { raw: 44, value: 44 },
+      },
+    ]);
+    expect(out.summary.maps[0]).toMatchObject({ cells: 0, axisEntries: 1, bytes: 1 });
+  });
+
+  it('reports a SHARED axis once, naming every map that references it', () => {
+    const { working, original } = buffers(0x60, { 0x42: [30, 44] });
+    const shared = axis({ libId: 'lib-rpm' });
+    const m1 = sourced(gridMap({ id: 'm1', xAxis: shared }));
+    const m2 = sourced(gridMap({ id: 'm2', address: 0x20, xAxis: shared }));
+
+    const out = attributeEdits({ working, original, maps: [m2, m1], checksums: [] });
+
+    expect(out.rows).toHaveLength(1);
+    expect(out.rows[0]).toMatchObject({ kind: 'axis', mapIds: ['m1', 'm2'], libId: 'lib-rpm' });
+    // Charged to the lowest map id only, so bytes are not double-counted.
+    const charged = out.summary.maps.filter((m) => m.axisEntries > 0);
+    expect(charged).toHaveLength(1);
+    expect(charged[0]!.mapId).toBe('m1');
+  });
+
+  it('ignores literal and index axes, which have no bytes in the bin', () => {
+    const { working, original } = buffers(0x60, { 0x42: [30, 44] });
+    const map = gridMap({
+      xAxis: { kind: 'literal', count: 2, values: [1, 2] },
+      yAxis: { kind: 'index', count: 2 },
+    });
+
+    const out = attributeEdits({ working, original, maps: [sourced(map)], checksums: [] });
+
+    expect(out.rows.filter((r) => r.kind === 'axis')).toEqual([]);
+  });
+
+  it('claims a CELL before an axis when a map overlaps its own axis', () => {
+    // Pathological but legal: axis address inside the data span.
+    const { working, original } = buffers(0x60, { 0x11: [1, 2] });
+    const map = gridMap({ xAxis: axis({ address: 0x10 }) });
+
+    const out = attributeEdits({ working, original, maps: [sourced(map)], checksums: [] });
+
+    expect(out.rows[0]!.kind).toBe('cell');
   });
 });
