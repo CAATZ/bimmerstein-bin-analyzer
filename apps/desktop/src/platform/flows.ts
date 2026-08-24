@@ -270,16 +270,19 @@ export async function openProjectFlow(host: PlatformHost): Promise<void> {
   }
   const { droppedMaps, droppedPotentials, droppedAxisEntries, clearedStamps } = actions.applyProject(image, project);
   actions.runChecksumVerify(); // applyProject cleared the old verdict — recompute for this bin
+  // Provenance is read at exactly the moment it is being asked for
+  // (2026-08-24-project-lineage-design.md §5).
+  const from = project.derivedFrom === undefined ? '' : ` · derived from ${project.derivedFrom.name}`;
   const dropped = droppedMaps.length + droppedPotentials.length;
   if (dropped > 0) {
     actions.pushToast(
       'error',
-      `Project loaded, but ${dropped} map(s) were out of range for ${image.name} and dropped (sha mismatch?). First: ${(droppedMaps[0] ?? droppedPotentials[0]) ?? ''}`
+      `Project loaded, but ${dropped} map(s) were out of range for ${image.name} and dropped (sha mismatch?). First: ${(droppedMaps[0] ?? droppedPotentials[0]) ?? ''}${from}`
     );
   } else {
     actions.pushToast(
       'info',
-      `Project loaded: ${project.maps.length} maps, ${project.potentialMaps.length} potential — rescan to restore region dimming`
+      `Project loaded: ${project.maps.length} maps, ${project.potentialMaps.length} potential — rescan to restore region dimming${from}`
     );
   }
   if (droppedAxisEntries.length > 0) {

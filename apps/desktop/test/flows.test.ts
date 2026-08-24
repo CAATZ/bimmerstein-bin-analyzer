@@ -1,8 +1,8 @@
 import { get } from 'svelte/store';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createBinImage } from '@binanalyzer/core';
-import type { MapDef } from '@binanalyzer/core';
-import { importRomRaiderXml } from '@binanalyzer/formats';
+import type { MapDef, Project } from '@binanalyzer/core';
+import { importRomRaiderXml, serializeProject } from '@binanalyzer/formats';
 import { ms41TuneImage } from './ms41-image.js';
 import * as a from '../src/store/actions.js';
 import { addressFrame, bin, binPath, checksumReport, maps, potentialMaps, toasts } from '../src/store/stores.js';
@@ -585,5 +585,26 @@ describe('FakeHost directory support', () => {
 
   it('returns an empty list for a directory that does not exist', async () => {
     expect(await new FakeHost().readDir('/nope')).toEqual([]);
+  });
+});
+
+describe('open project reports lineage', () => {
+  it('names the image a tune was derived from', async () => {
+    const h = new FakeHost();
+    const image = createBinImage(BYTES, 'stage2.bin');
+    const project: Project = {
+      schemaVersion: 3,
+      bin: { name: 'stage2.bin', sha256: image.sha256, size: image.size },
+      derivedFrom: { name: 'stock.bin', sha256: 'd'.repeat(64) },
+      valueDefaults: { width: 1, signed: false, endianness: 'little' },
+      maps: [],
+      potentialMaps: [],
+    };
+    h.openAnswers = ['/p/stage2.binproj.json'];
+    h.files.set('/p/stage2.binproj.json', serializeProject(project));
+    h.files.set('/p/stage2.bin', BYTES);
+
+    await openProjectFlow(h);
+    expect(get(toasts).map((t) => t.text).join(' ')).toContain('stock.bin');
   });
 });
