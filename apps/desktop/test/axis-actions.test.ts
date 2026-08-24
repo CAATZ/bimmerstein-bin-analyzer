@@ -126,11 +126,11 @@ describe('library lifecycle clears', () => {
 });
 
 describe('project lifecycle', () => {
-  it('snapshot carries the library at schemaVersion 2 and omits it when empty', () => {
+  it('snapshot carries the library at the current schemaVersion and omits it when empty', () => {
     const snapEmpty = a.projectSnapshot();
     expect(snapEmpty.ok).toBe(true);
     if (snapEmpty.ok) {
-      expect(snapEmpty.value.schemaVersion).toBe(2);
+      expect(snapEmpty.value.schemaVersion).toBe(3);
       expect(snapEmpty.value.axisLibrary).toBeUndefined();
     }
     expect(a.addAxisLibEntry('RPM', rpmAxis).ok).toBe(true);
