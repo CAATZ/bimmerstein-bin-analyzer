@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AxisDef, MapDef } from '@binanalyzer/core';
-import { attributeEdits, changedOffsets } from '../src/edits.js';
+import { attributeEdits, changedOffsets, type ChecksumPair } from '../src/edits.js';
 import type { SourcedMap } from '../src/maps.js';
 
 const gridMap = (over: Partial<MapDef> = {}): MapDef => ({
@@ -167,5 +167,74 @@ describe('axis attribution', () => {
     const out = attributeEdits({ working, original, maps: [sourced(map)], checksums: [] });
 
     expect(out.rows[0]!.kind).toBe('cell');
+  });
+});
+
+describe('checksum and raw attribution', () => {
+  const pair = (over: Partial<ChecksumPair> = {}): ChecksumPair => ({
+    id: 'cal-0', storedAt: 0x50, originalStored: 0x1111, currentStored: 0x2222,
+    correctable: true, ...over,
+  });
+
+  it('claims the changed run starting at storedAt when the stored value moved', () => {
+    const { working, original } = buffers(0x60, { 0x50: [0x11, 0x22], 0x51: [0x11, 0x22] });
+
+    const out = attributeEdits({ working, original, maps: [], checksums: [pair()] });
+
+    expect(out.rows).toEqual([
+      {
+        kind: 'checksum', offset: 0x50, checksumId: 'cal-0', storedAt: 0x50,
+        byteLength: 2, correctable: true, original: 0x1111, current: 0x2222,
+      },
+    ]);
+    expect(out.summary.checksums).toEqual([{ checksumId: 'cal-0', bytes: 2 }]);
+    expect(out.summary.rawBytes).toBe(0);
+  });
+
+  it('claims NOTHING for a block whose stored value is unchanged', () => {
+    const { working, original } = buffers(0x60, { 0x50: [0x11, 0x22] });
+
+    const out = attributeEdits({
+      working, original, maps: [],
+      checksums: [pair({ originalStored: 0x1111, currentStored: 0x1111 })],
+    });
+
+    expect(out.rows).toEqual([{ kind: 'raw', offset: 0x50, original: 0x11, current: 0x22 }]);
+  });
+
+  it('ranks a confirmed map ABOVE a checksum field, and a checksum ABOVE a potential map', () => {
+    const { working, original } = buffers(0x60, { 0x10: [1, 2], 0x50: [0x11, 0x22] });
+    const confirmed = sourced(gridMap({ id: 'c1' }), 'confirmed');
+    const potential = sourced(gridMap({ id: 'p1', address: 0x50 }), 'potential');
+
+    const out = attributeEdits({ working, original, maps: [confirmed, potential], checksums: [pair()] });
+
+    expect(out.rows.find((r) => r.offset === 0x10)).toMatchObject({ kind: 'cell', mapId: 'c1' });
+    expect(out.rows.find((r) => r.offset === 0x50)).toMatchObject({ kind: 'checksum' });
+  });
+
+  it('emits one raw row per changed byte that nothing owns', () => {
+    const { working, original } = buffers(0x60, { 0x02: [1, 2], 0x03: [3, 4] });
+
+    const out = attributeEdits({ working, original, maps: [], checksums: [] });
+
+    expect(out.rows).toEqual([
+      { kind: 'raw', offset: 0x02, original: 1, current: 2 },
+      { kind: 'raw', offset: 0x03, original: 3, current: 4 },
+    ]);
+    expect(out.summary.rawBytes).toBe(2);
+  });
+
+  it('keeps the byte counts additive: map + checksum + raw === changedBytes', () => {
+    const { working, original } = buffers(0x60, {
+      0x10: [1, 2], 0x42: [3, 4], 0x50: [0x11, 0x22], 0x51: [0x11, 0x22], 0x02: [9, 8],
+    });
+    const map = sourced(gridMap({ xAxis: axis() }));
+
+    const out = attributeEdits({ working, original, maps: [map], checksums: [pair()] });
+
+    const mapBytes = out.summary.maps.reduce((n, m) => n + m.bytes, 0);
+    const sumBytes = out.summary.checksums.reduce((n, c) => n + c.bytes, 0);
+    expect(mapBytes + sumBytes + out.summary.rawBytes).toBe(out.changedBytes);
   });
 });

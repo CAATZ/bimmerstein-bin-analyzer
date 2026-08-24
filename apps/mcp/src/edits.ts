@@ -110,68 +110,106 @@ export function attributeEdits(input: AttributionInput): AttributionResult {
     perMap.set(m.map.id, cur);
   };
 
-  for (const m of ordered) {
-    const { map } = m;
-    const w = map.format.width;
-    for (let r = 0; r < map.rows; r++) {
-      for (let c = 0; c < map.cols; c++) {
-        const off = cellOffset(map, r, c);
+  // --- axes, after every cell of the same phase has had its chance ---------
+  // Key by the bytes an axis actually occupies: two maps stamped from the same
+  // library entry share an address, and that is ONE edit, not two.
+  const runAxes = (subset: SourcedMap[]): void => {
+    const axisGroups = new Map<string, { axis: AxisDef; owners: SourcedMap[] }>();
+    for (const m of subset) {
+      for (const a of [m.map.xAxis, m.map.yAxis]) {
+        if (a === undefined || a.kind !== 'referenced') continue;
+        if (a.address === undefined || a.format === undefined) continue;
+        const key = `${a.address}:${a.format.width}:${a.count}`;
+        const g = axisGroups.get(key);
+        if (g === undefined) axisGroups.set(key, { axis: a, owners: [m] });
+        else if (!g.owners.some((o) => o.map.id === m.map.id)) g.owners.push(m);
+      }
+    }
+
+    for (const { axis, owners } of axisGroups.values()) {
+      const format = axis.format!;
+      const scaling = axis.scaling ?? { factor: 1, offset: 0, units: '', digits: 0 };
+      const w = format.width;
+      const mapIds = owners.map((o) => o.map.id).sort();
+      // Lowest map id carries the summary charge; charging every owner would
+      // double-count the bytes and break the additive invariant.
+      const charge = owners.find((o) => o.map.id === mapIds[0]!)!;
+      for (let i = 0; i < axis.count; i++) {
+        const off = axis.address! + i * w;
         if (off < 0 || off + w > working.length) continue;
         if (!claimable(off, w)) continue;
         claim(off, w);
         rows.push({
-          kind: 'cell', offset: off, mapId: map.id, mapName: map.name, source: m.source,
-          row: r, col: c,
-          original: decode(original, off, map.format, map.scaling),
-          current: decode(working, off, map.format, map.scaling),
+          kind: 'axis', offset: off, axisAddress: axis.address!, index: i, mapIds,
+          ...(axis.libId === undefined ? {} : { libId: axis.libId }),
+          original: decode(original, off, format, scaling),
+          current: decode(working, off, format, scaling),
         });
-        bump(m, 'cells', w);
+        bump(charge, 'axisEntries', w);
       }
     }
+  };
+
+  const runMaps = (subset: SourcedMap[]): void => {
+    for (const m of subset) {
+      const { map } = m;
+      const w = map.format.width;
+      for (let r = 0; r < map.rows; r++) {
+        for (let c = 0; c < map.cols; c++) {
+          const off = cellOffset(map, r, c);
+          if (off < 0 || off + w > working.length) continue;
+          if (!claimable(off, w)) continue;
+          claim(off, w);
+          rows.push({
+            kind: 'cell', offset: off, mapId: map.id, mapName: map.name, source: m.source,
+            row: r, col: c,
+            original: decode(original, off, map.format, map.scaling),
+            current: decode(working, off, map.format, map.scaling),
+          });
+          bump(m, 'cells', w);
+        }
+      }
+    }
+    runAxes(subset);
+  };
+
+  // Checksum fields rank below the maps a user authored or imported, and above
+  // the potential pool — a checksum field falling inside one of thousands of
+  // candidates is a detection artifact, not a finding.
+  runMaps(ordered.filter((m) => m.source !== 'potential'));
+
+  const checksumBytes: Array<{ checksumId: string; bytes: number }> = [];
+  for (const cs of input.checksums) {
+    if (cs.originalStored === cs.currentStored) continue;
+    // ChecksumBlock carries no width, so the field is the changed run that
+    // begins exactly at storedAt. Cells and axes claimed first, so a real edit
+    // adjacent to a checksum can never be swallowed by this.
+    let len = 0;
+    while (changed.has(cs.storedAt + len) && !claimed.has(cs.storedAt + len)) len++;
+    if (len === 0) continue;
+    claim(cs.storedAt, len);
+    rows.push({
+      kind: 'checksum', offset: cs.storedAt, checksumId: cs.id, storedAt: cs.storedAt,
+      byteLength: len, correctable: cs.correctable,
+      original: cs.originalStored, current: cs.currentStored,
+    });
+    checksumBytes.push({ checksumId: cs.id, bytes: len });
   }
 
-  // --- axes, after every cell has had its chance to claim -------------------
-  // Key by the bytes an axis actually occupies: two maps stamped from the same
-  // library entry share an address, and that is ONE edit, not two.
-  const axisGroups = new Map<string, { axis: AxisDef; owners: SourcedMap[] }>();
-  for (const m of ordered) {
-    for (const a of [m.map.xAxis, m.map.yAxis]) {
-      if (a === undefined || a.kind !== 'referenced') continue;
-      if (a.address === undefined || a.format === undefined) continue;
-      const key = `${a.address}:${a.format.width}:${a.count}`;
-      const g = axisGroups.get(key);
-      if (g === undefined) axisGroups.set(key, { axis: a, owners: [m] });
-      else if (!g.owners.some((o) => o.map.id === m.map.id)) g.owners.push(m);
-    }
-  }
+  runMaps(ordered.filter((m) => m.source === 'potential'));
 
-  for (const { axis, owners } of axisGroups.values()) {
-    const format = axis.format!;
-    const scaling = axis.scaling ?? { factor: 1, offset: 0, units: '', digits: 0 };
-    const w = format.width;
-    const mapIds = owners.map((o) => o.map.id).sort();
-    // Lowest map id carries the summary charge; charging every owner would
-    // double-count the bytes and break the additive invariant.
-    const charge = owners.find((o) => o.map.id === mapIds[0]!)!;
-    for (let i = 0; i < axis.count; i++) {
-      const off = axis.address! + i * w;
-      if (off < 0 || off + w > working.length) continue;
-      if (!claimable(off, w)) continue;
-      claim(off, w);
-      rows.push({
-        kind: 'axis', offset: off, axisAddress: axis.address!, index: i, mapIds,
-        ...(axis.libId === undefined ? {} : { libId: axis.libId }),
-        original: decode(original, off, format, scaling),
-        current: decode(working, off, format, scaling),
-      });
-      bump(charge, 'axisEntries', w);
-    }
+  // --- whatever nothing owns ------------------------------------------------
+  let rawBytes = 0;
+  for (const off of [...changed].sort((a, b) => a - b)) {
+    if (claimed.has(off)) continue;
+    rows.push({ kind: 'raw', offset: off, original: original[off]!, current: working[off]! });
+    rawBytes++;
   }
 
   rows.sort((a, b) => a.offset - b.offset);
   return {
     rows,
-    summary: { maps: [...perMap.values()], checksums: [], rawBytes: 0 },
+    summary: { maps: [...perMap.values()], checksums: checksumBytes, rawBytes },
     changedBytes: changed.size,
   };
 }
