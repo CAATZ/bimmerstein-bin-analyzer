@@ -45,4 +45,12 @@ describe('the original buffer is reachable only where it should be', () => {
       'src/tools/scan-bin.ts',
     ]);
   });
+
+  it('diffPair is called only by the edit-diff tool', () => {
+    // list_edits legitimately needs BOTH buffers, and is not detection. Giving
+    // it a named accessor instead of widening the literal-'original' allowlist
+    // is what keeps that guard meaning "detection only" - so this pins the new
+    // door as tightly as the old one.
+    expect(hits(/diffPair\(\s*\w+\s*\)/)).toEqual(['src/tools/list-edits.ts']);
+  });
 });

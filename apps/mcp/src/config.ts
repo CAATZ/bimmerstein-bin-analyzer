@@ -17,6 +17,8 @@ export const MCP_CONFIG = {
   listMapsMaxLimit: 200,
   listAxesDefaultLimit: 100,
   listAxesMaxLimit: 500,
+  listEditsDefaultLimit: 100,
+  listEditsMaxLimit: 500,
   /** A 64x64 grid. Real MS41 tables never exceed 20 columns. */
   readMapMaxCells: 4096,
   readBytesDefaultLength: 256,
