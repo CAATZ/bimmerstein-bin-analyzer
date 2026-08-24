@@ -3,7 +3,7 @@ import { clearExternalFamilies, registerExternalFamily, FAMILY_CHECKSUMS } from 
 import * as actions from '../store/actions.js';
 import { configuredFamilyPaths, loadedFamilies, type LoadedFamily } from '../store/families.js';
 import { guarded, loadFamilyModule } from '../lib/familyloader.js';
-import { basename, type FileFilter, type PlatformHost } from './host.js';
+import { basename, joinPath, type FileFilter, type PlatformHost } from './host.js';
 
 /**
  * Drop-in family modules (2026-08-23-drop-in-family-modules-design.md).
@@ -13,8 +13,13 @@ import { basename, type FileFilter, type PlatformHost } from './host.js';
  */
 const MODULE_FILTERS: FileFilter[] = [{ name: 'Family module', extensions: ['js'] }];
 
-/** Where a dropped-in module goes. Under the app's own data dir, which `fs:default` already grants. */
-export const familiesFolder = (appLocalData: string): string => `${appLocalData}/families`;
+/**
+ * Where a dropped-in module goes. Under the app's own data dir, which
+ * `fs:default` already grants. Joined with the platform's OWN separator: this
+ * string is displayed to the user as the folder to drop files into, and a
+ * mixed-separator path reads like a bug.
+ */
+export const familiesFolder = (appLocalData: string): string => joinPath(appLocalData, 'families');
 
 async function loadOne(host: PlatformHost, path: string, out: LoadedFamily[]): Promise<void> {
   let src: string;
