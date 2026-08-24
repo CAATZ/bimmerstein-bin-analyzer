@@ -115,3 +115,16 @@ describe('addFamilyModule / removeFamilyModule', () => {
     expect(get(loadedFamilies)).toEqual([]);
   });
 });
+
+describe('familiesFolder', () => {
+  it('uses the separator the parent path already uses', () => {
+    // The string is shown to the user as "drop files here"; a Windows path
+    // with a stray forward slash in it reads like a bug.
+    //
+    // Deliberately NOT under a home directory: the pre-push scrub greps for
+    // personal absolute paths, and a synthetic one that trips it trains the
+    // reader to ignore a check that has caught real leaks twice.
+    expect(familiesFolder('D:\\apps\\binalyzer')).toBe('D:\\apps\\binalyzer\\families');
+    expect(familiesFolder('/opt/binalyzer')).toBe('/opt/binalyzer/families');
+  });
+});

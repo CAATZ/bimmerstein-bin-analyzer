@@ -2,7 +2,7 @@ import { confirm as dialogConfirm, open, save } from '@tauri-apps/plugin-dialog'
 import { exists, mkdir, readDir, readFile, readTextFile, writeFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import type { FileFilter, PlatformHost } from './host.js';
+import { joinPath, type FileFilter, type PlatformHost } from './host.js';
 
 /**
  * Real PlatformHost on Tauri 2 (plugin APIs verified against the v2 docs +
@@ -33,7 +33,7 @@ export const tauriHost: PlatformHost = {
   async readDir(path: string): Promise<string[]> {
     try {
       const entries = await readDir(path);
-      return entries.filter((e) => e.isFile).map((e) => `${path}/${e.name}`);
+      return entries.filter((e) => e.isFile).map((e) => joinPath(path, e.name));
     } catch {
       // Absent directory, or a platform that refuses to list it: an empty list
       // is the honest answer and keeps startup non-fatal.
