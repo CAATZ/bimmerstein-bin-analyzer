@@ -137,12 +137,21 @@ export interface BinImage {
 
 export interface Project {
   /**
-   * 2 since the Axis Library (2026-07-29 spec): writers emit 2 unconditionally;
-   * parseProject accepts 1 AND 2 and normalizes v1 → v2 on load.
+   * 3 since project lineage (2026-08-24): writers emit 3 unconditionally;
+   * parseProject accepts 1, 2 AND 3, normalizing older versions on load.
    */
-  schemaVersion: 1 | 2;
+  schemaVersion: 1 | 2 | 3;
   /** Bin referenced by identity, never embedded. */
   bin: { name: string; sha256: string; size: number };
+  /**
+   * The image that was OPEN when this project was saved, when that differs
+   * from `bin` — the base a tune was built on.
+   *
+   * Name AND sha: the name is what makes this readable a year later, the sha is
+   * what makes it checkable if the file is still around. Absent when `bin` IS
+   * the image as opened, because `derivedFrom === bin` is noise, not provenance.
+   */
+  derivedFrom?: { name: string; sha256: string };
   /** View defaults (e.g. MS41: width 2, big-endian). */
   valueDefaults: ValueFormat;
   /**
