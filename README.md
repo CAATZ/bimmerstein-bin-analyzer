@@ -4,9 +4,13 @@
 
 An open-source desktop app for **ECU bin file tuning-table analysis**: load a raw ECU firmware dump, view it as hexdump / 2D / 3D, automatically detect tuning tables ("maps") and their axes, refine them manually, and export RomRaider XML / TunerPro XDF / CSV / JSON definitions.
 
-**Status: v0.1.1 — preview, under active development.** v1 is analysis-only
-(read-only): it never modifies bin bytes. Editing and checksum tooling come
-later.
+**Status: v0.1.1 — preview, under active development.**
+
+The **downloadable v0.1.1 release is analysis-only**: it reads a bin and never
+modifies its bytes. Value editing, checksum verification and correction, map
+packs, and drop-in family modules are **built and tested on `main` but not yet
+released** — to use them today, build from source with the steps below. A later
+release will include them.
 
 Currently targets Windows. macOS/Linux builds are untested (Tauri supports
 them, but nothing here has been verified on those platforms yet).
@@ -49,12 +53,13 @@ Tauri 2 desktop shell, all logic in TypeScript (pnpm monorepo):
 | `packages/core` | Types, value codecs, scaling, project model. Depends on nothing. |
 | `packages/engine` | Map-detection pipeline. Pure (no fs/DOM); runs in a Web Worker. |
 | `packages/formats` | RomRaider XML, TunerPro XDF, CSV/JSON, project file. Pure. |
+| `packages/families` | Per-ECU-family byte semantics: image identity and checksum verify/correct. Pure. |
 | `packages/appkit` | Adapter helpers shared by the two apps (definition address framing). Pure. |
 | `packages/eval` | Detection-quality harness (Node CLI) with ground-truth fixtures. |
 | `apps/desktop` | Tauri 2 + Vite + Svelte 5 UI. |
-| `apps/mcp` | Stdio server exposing the engine to external tooling — see [apps/mcp/README.md](apps/mcp/README.md). |
+| `apps/mcp` | Stdio server exposing the engine — and, when attached to a running app, that live session — to external tooling. See [apps/mcp/README.md](apps/mcp/README.md). |
 
-File I/O lives only in `apps/*` and `packages/eval`; the four `packages/*`
+File I/O lives only in `apps/*` and `packages/eval`; the five `packages/*`
 libraries above them are pure and import nothing from an app.
 
 ## Prerequisites
@@ -84,13 +89,14 @@ Real ECU firmware dumps are copyrighted and **never committed** — see [fixture
 
 ## Continuous integration
 
-Every push/PR runs `pnpm install`, `pnpm typecheck`, `pnpm test`, and the
-detection-quality gate (`pnpm eval` + `pnpm eval holdout`) against the
-committed synthetic fixtures — see
-[.github/workflows/ci.yml](.github/workflows/ci.yml). The real-MS41
-acceptance gate only runs locally, on a machine with the (gitignored) real
-firmware fixtures in `fixtures/ms41/` — CI never has them, and both eval
-commands are designed to pass cleanly without them.
+Every push/PR runs `pnpm install`, `pnpm typecheck`, `pnpm test`, and three
+detection-quality gates — `pnpm eval`, `pnpm eval holdout` (anti-overfitting)
+and `pnpm eval accept` — see
+[.github/workflows/ci.yml](.github/workflows/ci.yml). The first two score the
+committed synthetic fixtures. `pnpm eval accept` is the real-firmware
+acceptance gate: it runs in CI as well, but the real MS41 bins are gitignored
+and never present there, so it skips those rows cleanly and only does real work
+on a machine that has them in `fixtures/ms41/`.
 
 ## Contributing
 
