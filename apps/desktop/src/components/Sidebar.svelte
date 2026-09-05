@@ -32,9 +32,9 @@
     </div>
     {#if filtered}<button onclick={() => actions.setMapFilter(DEFAULT_MAP_FILTER)}>Clear filters</button>{/if}
   </div>
-  {#if selectedPotential}
-    <p class="evidence" aria-label="Detection evidence">{detectionDescription(selectedPotential)}</p>
-  {/if}
+  <p class="evidence" aria-label="Detection evidence">{selectedPotential
+    ? detectionDescription(selectedPotential)
+    : 'Select a potential map for detection evidence.'}</p>
   <h2>Maps ({filtered ? `${shownMaps.length}/` : ''}{$maps.length})</h2>
   <ul>
     {#each shownMaps as m (m.id)}
@@ -93,4 +93,5 @@
   .filter-row { display: flex; gap: 4px; margin: 4px 0; }
   .filter-row select { width: 50%; min-width: 0; }
   .evidence, .no-results { font-size: 12px; color: var(--fg-dim); margin: 8px 4px; line-height: 1.4; }
+  .evidence { height: 5.6em; overflow: auto; }
 </style>
