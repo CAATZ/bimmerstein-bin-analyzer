@@ -60,12 +60,12 @@ describe('scan() two-pass partial-curve emission', () => {
     it(`${name} matches pinned detections and exact table frames with zero curve-shaped maps`, { timeout: 60_000 }, () => {
       const pinned = {
         'synth-partial-201': {
-          count: 63,
-          digest: 'd29994e1728fdabaaf8ebd020033b0e4a658da83e024d8a97afdd881bbfa30d6',
+          count: 62,
+          digest: '76d80f7b92c109278359fe5990382ab89f312e545077dee681704ee3681132a1',
         },
         'synth-partial-203': {
-          count: 63,
-          digest: '81cfe73529bb7f5e9d41302f93b2ce24440e5ee593d21c3cb2dd1acd2d7e31d4',
+          count: 61,
+          digest: '243e44732b4b677795a2c810c5fe0d82c65bf581b411e5d15682441b3a779d5d',
         },
       }[name];
       const maps = scan(fixtureBytes(name), cfg).potentialMaps;
@@ -182,12 +182,12 @@ describe('scan() two-pass partial-curve emission', () => {
   });
 
   for (const name of ['synth-pcurve-401', 'synth-pcurve-403'] as const) {
-    it(`${name} through scan() stays byte-identical (pre-P3.1 canon)`, { timeout: 60_000 }, () => {
+    it(`${name} through scan() matches pinned detections`, { timeout: 60_000 }, () => {
       // Real-overlap-semantics gate: full scan()/rankAndEmit output pinned,
       // not the spike's any-overlap static predictor (skeptic condition).
       const pinned = {
-        'synth-pcurve-401': { count: 83, digest: 'ec1643fe0fcddd5169ba3eeaf248fac19e509513f8eb960094989275247c62ae' },
-        'synth-pcurve-403': { count: 83, digest: '2251305b2299c3c534489ee74f4678e3caa6eb14a1e3fde2f27a3b1b55c02f28' },
+        'synth-pcurve-401': { count: 80, digest: '5ac1492c9a467f231efd0e8f5551d7f27dcc57305760e71eaa9583a6b2e41e92' },
+        'synth-pcurve-403': { count: 81, digest: 'd842d8d52419012b0ef7bf5cf60af69ab87234668885fdd60014799b2c96b474' },
       }[name];
       expect(canonDigest(scan(fixtureBytes(name), cfg).potentialMaps)).toEqual(pinned);
     });

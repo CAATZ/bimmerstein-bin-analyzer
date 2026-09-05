@@ -47,7 +47,8 @@ import {
  * ever moves up, never down (ratchet rule).
  */
 export const SYNTH_GATE = { locationRecall: 0.9, structureRecall: 0.8, axisRecall: 0.85 };
-export const POOL_GATE = { locationRecall: 0.6, structureRecall: 0.25, axisRecall: 0.9 };
+// Synthetic pool precision ceiling; measured maximum across six seeds is 2423.88.
+export const POOL_GATE = { locationRecall: 0.6, structureRecall: 0.25, axisRecall: 0.9, falsePositiveDensity: 2500 };
 
 /**
  * Real-MS41 acceptance gate (spec §5) — ENFORCED since the v2 code-xref
@@ -140,7 +141,7 @@ export const CURVE_GATE = { locationRecall: 1.0, structureRecall: 1.0, axisRecal
  */
 export const PARTIAL_CURVE_GATE = { locationRecall: 1.0, structureRecall: 1.0, axisRecall: 1.0 };
 
-type Gate = typeof SYNTH_GATE;
+type Gate = typeof SYNTH_GATE & { falsePositiveDensity?: number };
 
 export function gateFor(fixture: string): Gate | undefined {
   // 'synth-pcurve' would also match startsWith('synth') — checked first
@@ -310,7 +311,7 @@ interface Ms41ChecksumCase {
   bin: string;
   /** Boot-sector verdict, or null when the framing carries no boot block (partials). */
   bootOk: boolean | null;
-  /** Blocks reporting ok, out of `totalBlocks` (boot + cal for a full read, cal only for a partial). */
+  /** Blocks reporting ok, out of `totalBlocks` (boot + program + cal for a full read, cal only for a partial). */
   okBlocks: number;
   totalBlocks: number;
   /**
@@ -324,18 +325,10 @@ interface Ms41ChecksumCase {
    * partial, which carries no program checksum at all. Read from the BLOCK it
    * now is — it was in `skipped` until the verified/correctable split.
    *
-   * This is the ONLY real-firmware coverage the program CRC has. It is never
-   * corrected and it is not vouched for, so nothing else exercises its chained
-   * three-region walk or its eight-entry bank map against a known-good image —
-   * a transcription regression there would otherwise be caught by nothing.
-   * `match` is pinned rather than asserted: the e36m3 full read genuinely
-   * matches, and the s52 MS41.3 image genuinely does not — because its stored
-   * value is STALE (it is patched, and its boot verification switch is off), NOT
-   * because its layout differs. MS41.3 is community firmware derived from
-   * official MS41.2 1406464, so its program layout IS MS41.2's; measured at
-   * 0.0-1.7 % byte divergence, against 46-91 % for a real factory variant. The
-   * module refuses to write this checksum because we have no MS41.1 image, not
-   * because of MS41.3. See docs/notes/ms41-program-checksum-variant-spike.md.
+   * These real-image pins cover the chained CRC and bank ordering. `match`
+   * preserves the image's actual state: stock references match, whereas the
+   * modified SS1v2 reference carries a stale stored value. Verification does
+   * not change the policy that the program checksum is never written.
    */
   program?: { stored: number; computed: number; match: boolean };
 }
@@ -348,7 +341,7 @@ interface Ms41ChecksumCase {
  * These are PINNED MEASUREMENTS, cross-checked against the reference
  * `checksum.py` implementation over the real images (see the Task 8 commit
  * message for the full comparison) — not an assertion that every image must
- * verify clean. Two of the four genuinely carry stale checksums: the s52
+ * verify clean. The two SS1v2 images genuinely carry stale checksums: the s52
  * images are MODDED firmware with boot verification DISABLED at file offset
  * 0x605C, so a stale calibration entry there is the firmware's real state,
  * not a transcription bug. The gate below fails on ANY drift from these
@@ -365,13 +358,17 @@ export const MS41_CHECKSUM_CASES: readonly Ms41ChecksumCase[] = [
     program: { stored: 0x27ed, computed: 0x214b, match: false } },
   { key: 'e36m3-partial', bin: 'partial/E36 M3 Stock partial.bin', bootOk: null, okBlocks: 16, totalBlocks: 16, staleIds: [] },
   { key: 's52-partial', bin: 'partial/MS41.3 S52 Stock partial.bin', bootOk: null, okBlocks: 13, totalBlocks: 16, staleIds: ['cal-4', 'cal-6', 'cal-14'] },
+  { key: 'id60-full', bin: 'reference-ms41-id60-full.bin', bootOk: true, okBlocks: 18, totalBlocks: 18, staleIds: [],
+    program: { stored: 0x350f, computed: 0x350f, match: true } },
+  { key: 'id60-partial', bin: 'partial/reference-ms41-id60-partial.bin', bootOk: null, okBlocks: 16, totalBlocks: 16, staleIds: [] },
 ];
 
 export function meetsGate(s: Omit<EvalScores, 'exactStartRecall' | 'exactLayoutRecall' | 'axisPairRecall'>, g: Gate): boolean {
   return (
     s.locationRecall >= g.locationRecall &&
     s.structureRecall >= g.structureRecall &&
-    s.axisRecall >= g.axisRecall
+    s.axisRecall >= g.axisRecall &&
+    (g.falsePositiveDensity === undefined || s.falsePositiveDensity <= g.falsePositiveDensity)
   );
 }
 
@@ -773,14 +770,8 @@ export function runAcceptance(repoRoot: string): number {
     }
   }
 
-  // Checksum acceptance: a regression RATCHET pinning the MEASURED per-image
-  // checksum result, not a "must verify clean" assertion. Two of the four
-  // real images genuinely carry stale checksums — the s52 images are modded
-  // firmware with boot verification DISABLED at file offset 0x605C, which is
-  // a discoverable firmware state, not a per-bin rule this module enforces —
-  // so MS41_CHECKSUM_CASES pins those known-stale results too, and drift in
-  // EITHER direction (a newly-invalid clean entry, or a newly-valid stale
-  // one) fails the gate rather than passing silently.
+  // Pin each image's measured state, including the modified SS1v2 images'
+  // stale checksums. Drift in either direction must fail the gate.
   for (const c of MS41_CHECKSUM_CASES) {
     let bytes: Uint8Array;
     try {

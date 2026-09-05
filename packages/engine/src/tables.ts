@@ -6,7 +6,8 @@ import type { Region } from './regions.js';
 /**
  * Stage 3 — Table candidate scan (spec §4.3).
  * Score rectangular blocks for 2D smoothness: low total variation along rows
- * AND columns relative to value variance; correct column count minimizes
+ * AND columns relative to their range, supported by variation across cells;
+ * correct column count minimizes
  * vertical discontinuity ("jumps align at row boundaries"). This stage emits
  * 2D candidates (rows ≥ minRows); separate detectors handle curves.
  */
@@ -95,7 +96,7 @@ function passesEdge(
 }
 
 export function scanTables(bytes: Uint8Array, regions: Region[], config: ScanConfig): TableCandidate[] {
-  const { minCols, maxCols, minRows, maxRows, colSmoothFactor, growthAbsFloor, minTableScore, emissionEdgeMin } = config.table;
+  const { minCols, maxCols, minRows, maxRows, colSmoothFactor, growthAbsFloor, growthRangeMultiplier, minTableScore, minVariationFraction, emissionEdgeMin } = config.table;
   const out: TableCandidate[] = [];
   for (const region of regions) {
     if (region.kind !== 'data') continue;
@@ -172,7 +173,11 @@ export function scanTables(bytes: Uint8Array, regions: Region[], config: ScanCon
               newColTv += Math.abs(v - vals[prevBase + c]!);
               prevInRow = v;
             }
-            const range = candMax - candMin;
+            // Preserve minimum-size growth; an established block's outlier
+            // must not expand the range used to justify that same row.
+            const candidateRange = candMax - candMin;
+            const range = rows > minRows && candidateRange > growthRangeMultiplier * (max - min)
+              ? max - min : candidateRange;
             const diff = newColTv / cols;
             if (diff > colSmoothFactor * (range + 1) && diff > growthAbsFloor) break;
             // Accept the row: fold its contributions into the running sums.
@@ -186,9 +191,24 @@ export function scanTables(bytes: Uint8Array, regions: Region[], config: ScanCon
             const range = max - min;
             const rowTv = rowTvSum / Math.max(1, rows * (cols - 1));
             const colTv = colTvSum / Math.max(1, (rows - 1) * cols);
-            const score = range <= 0 ? 0.1 : Math.max(0, 1 - (rowTv + colTv) / (range + 1));
+            // A few jumps in flat filler inflate the range without supporting
+            // a whole surface. Variation in either direction supports a cell.
+            let score = range <= 0 ? 0.1 : Math.max(0, 1 - (rowTv + colTv) / (range + 1));
             if (score >= minTableScore && passesEdge(vals, start, rows, cols, n, colTv, emissionEdgeMin)) {
-              out.push({ address: base + start * w, rows, cols, format, score });
+              if (range > 0 && minVariationFraction > 0) {
+                // Count only boundary survivors; stop once the weight is 1.
+                const required = rows * cols * minVariationFraction;
+                let varied = 0;
+                for (let r = 0; r < rows && varied < required; r++) {
+                  const row = start + r * cols;
+                  for (let c = 0; c < cols; c++) {
+                    const i = row + c;
+                    if ((c > 0 && vals[i] !== vals[i - 1]) || (r > 0 && vals[i] !== vals[i - cols])) varied++;
+                  }
+                }
+                score *= Math.min(1, varied / required);
+              }
+              if (score >= minTableScore) out.push({ address: base + start * w, rows, cols, format, score });
             }
           }
           // Always advance by a single element, whether this candidate was

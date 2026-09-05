@@ -27,13 +27,13 @@ describe('scan_bin', () => {
     const r = payload(await call(scanBinTool, { binId }, deps));
     expect(r).not.toHaveProperty('maps');
     expect(r).not.toHaveProperty('potentialMaps');
-    expect(r['potentialMapCount']).toBe(24);
+    expect(r['potentialMapCount']).toBe(23);
     expect((r['regions'] as unknown[]).length).toBe(7);
     expect(r['cached']).toBe(false);
     const byKind = r['byKind'] as Record<string, number>;
-    expect(byKind['grid']! + byKind['curve']! + byKind['switch']! + byKind['param']!).toBe(24);
+    expect(byKind['grid']! + byKind['curve']! + byKind['switch']! + byKind['param']!).toBe(23);
     const byDetector = r['byDetector'] as Record<string, number>;
-    expect(Object.values(byDetector).reduce((s, n) => s + n, 0)).toBe(24);
+    expect(Object.values(byDetector).reduce((s, n) => s + n, 0)).toBe(23);
     const summary = r['regionSummary'] as Record<string, { count: number; bytes: number }>;
     expect(Object.values(summary).reduce((s, v) => s + v.bytes, 0)).toBe(SYNTH1.length);
   });

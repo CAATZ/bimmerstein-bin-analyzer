@@ -97,7 +97,7 @@ describe('stdio server (real launcher, real JSON-RPC)', () => {
     // worker_threads: a vitest parent runs under vite-node, not tsx, so only a
     // spawn through the real launcher exercises it.
     const scan = toolPayload(await client.request(5, 'tools/call', { name: 'scan_bin', arguments: { binId } }));
-    expect(scan['potentialMapCount']).toBe(24);
+    expect(scan['potentialMapCount']).toBe(23);
     expect((scan['regions'] as unknown[]).length).toBe(7);
     expect(scan['cached']).toBe(false);
 
@@ -105,7 +105,7 @@ describe('stdio server (real launcher, real JSON-RPC)', () => {
     expect(cached['cached']).toBe(true);
 
     const page = toolPayload(await client.request(7, 'tools/call', { name: 'list_maps', arguments: { binId, limit: 5 } }));
-    expect(page['total']).toBe(24);
+    expect(page['total']).toBe(23);
     expect((page['maps'] as unknown[]).length).toBe(5);
   });
 

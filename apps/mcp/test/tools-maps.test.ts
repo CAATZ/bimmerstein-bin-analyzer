@@ -27,15 +27,15 @@ describe('list_maps', () => {
   it('pages with a stable total order and reports hasMore', async () => {
     const { deps, binId } = await scanned();
     const p1 = payload<Page>(await call(listMapsTool, { binId, limit: 10 }, deps));
-    expect(p1.total).toBe(24);
+    expect(p1.total).toBe(23);
     expect(p1.returned).toBe(10);
     expect(p1.hasMore).toBe(true);
     const p2 = payload<Page>(await call(listMapsTool, { binId, limit: 10, offset: 10 }, deps));
     const p3 = payload<Page>(await call(listMapsTool, { binId, limit: 10, offset: 20 }, deps));
-    expect(p3.returned).toBe(4);
+    expect(p3.returned).toBe(3);
     expect(p3.hasMore).toBe(false);
     const ids = [...p1.maps, ...p2.maps, ...p3.maps].map((m) => m['id']);
-    expect(new Set(ids).size).toBe(24);
+    expect(new Set(ids).size).toBe(23);
   });
 
   it('sorts by confidence descending by default and by address on request', async () => {
@@ -53,9 +53,9 @@ describe('list_maps', () => {
     const window = payload<Page>(await call(listMapsTool, { binId, addressMin: 0, addressMax: '0x1000', limit: 200 }, deps));
     expect(window.maps.every((m) => (m['address'] as number) < 0x1000)).toBe(true);
     const floor0 = payload<Page>(await call(listMapsTool, { binId, minConfidence: 0, limit: 200 }, deps));
-    expect(floor0.total).toBe(24);
+    expect(floor0.total).toBe(23);
     const floor1 = payload<Page>(await call(listMapsTool, { binId, minConfidence: 1, limit: 200 }, deps));
-    expect(floor1.total).toBeLessThanOrEqual(24);
+    expect(floor1.total).toBeLessThanOrEqual(23);
     expect(floor1.maps.every((m) => (m['confidence'] as number) >= 1)).toBe(true);
     expect(errorText(await call(listMapsTool, { binId, minConfidence: 1.5 }, deps))).toContain('between 0 and 1');
   });
@@ -115,6 +115,6 @@ describe('get_map', () => {
     const { deps, binId } = await scanned();
     const text = errorText(await call(getMapTool, { binId, mapId: 'no-such-map' }, deps));
     expect(text).toContain('list_maps');
-    expect(text).toContain('24');
+    expect(text).toContain('23');
   });
 });

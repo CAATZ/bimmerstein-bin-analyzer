@@ -53,7 +53,7 @@ describe('real-bin acceptance (pnpm eval accept)', () => {
   it('accounts for EVERY case it could not run, so the summary cannot read as full coverage', () => {
     // Exit 0 alone would still hold if the checksum loop were short-circuited
     // by the missing-definition early return again — the skip lines are what
-    // prove each of the ten cases was considered and named.
+    // prove each case was considered and named.
     const root = mkdtempSync(join(tmpdir(), 'binacc-'));
     mkdirSync(join(root, 'fixtures', 'ms41'), { recursive: true });
     const lines: string[] = [];
@@ -151,8 +151,18 @@ describe('real-bin checksum acceptance', () => {
     // Checksum coverage differs by framing: a partial carries only the cal
     // table. Both must be exercised or the partial path is unguarded.
     expect(MS41_CHECKSUM_CASES.map((c) => c.key).sort()).toEqual(
-      ['e36m3-full', 'e36m3-partial', 's52-full', 's52-partial'].sort()
+      ['e36m3-full', 'e36m3-partial', 's52-full', 's52-partial', 'id60-full', 'id60-partial'].sort()
     );
+  });
+
+  it('pins the independently verified MS41.1 program and both calibration framings', () => {
+    expect(MS41_CHECKSUM_CASES.find(c => c.key === 'id60-full')).toMatchObject({
+      bootOk: true, okBlocks: 18, totalBlocks: 18, staleIds: [],
+      program: { stored: 0x350f, computed: 0x350f, match: true },
+    });
+    expect(MS41_CHECKSUM_CASES.find(c => c.key === 'id60-partial')).toMatchObject({
+      bootOk: null, okBlocks: 16, totalBlocks: 16, staleIds: [],
+    });
   });
 
   it('every case names a bin path under fixtures/ms41', () => {
@@ -205,6 +215,16 @@ describe('holdout', () => {
 });
 
 describe('gateFor (per-family gate dispatch)', () => {
+  it('rejects excessive pool false positives even when recall is perfect', () => {
+    const scores = { locationRecall: 1, structureRecall: 1, axisRecall: 1,
+      truthCount: 20, detectedCount: 220, falsePositiveDensity: 2501 };
+    expect(meetsGate(scores, POOL_GATE)).toBe(false);
+    expect(meetsGate({ ...scores, falsePositiveDensity: 2500 }, POOL_GATE)).toBe(true);
+    expect(meetsGate({ ...scores, falsePositiveDensity: NaN }, POOL_GATE)).toBe(false);
+    // Real reference truth is incomplete, so its unmatched maps have no cap.
+    expect(meetsGate(scores, MS41_GATE)).toBe(true);
+  });
+
   it('selects the pool gate for synth-pool fixtures before the synth prefix matches', () => {
     expect(gateFor('synth-pool-101')).toBe(POOL_GATE);
     expect(gateFor('synth-1')).toBe(SYNTH_GATE);

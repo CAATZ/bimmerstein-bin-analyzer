@@ -42,12 +42,15 @@ export interface AxisPtrOpts {
   minCount?: number;
   /** Accept 'plateau'/'dead' runs (default false: 'strict' only — the pre-v2.1 behavior). */
   relaxed?: boolean;
+  /** A following axis prefix can disambiguate byte and word interpretations. */
+  nextPtr?: number;
 }
 
 /**
  * Validate `ptr` as an axis count-prefix pointer: count within
- * [opts.minCount ?? config.axis.minCount, config.axis.maxCount] (u8 tried
- * first, then u16 LE), the CELL run file-contiguous and fully inside cal
+ * [opts.minCount ?? config.axis.minCount, config.axis.maxCount] (u8 first,
+ * unless a word run ends at the next axis prefix), the CELL run file-contiguous
+ * and fully inside cal
  * (saSpanContiguous — a run crossing the SA 0x4000 seam would validate
  * against bytes downstream consumers never read), cells strictly monotone in
  * either direction — optionally with a constant plateau tail (opts.relaxed).
@@ -64,7 +67,8 @@ export function validateAxisPtr(
   const minCount = opts?.minCount ?? config.axis.minCount;
   const relaxed = opts?.relaxed ?? false;
   const { maxCount } = config.axis;
-  for (const width of [1, 2] as const) {
+  const widths: readonly (1 | 2)[] = ptr + 2 + readU16SA(bytes, ptr) * 2 === opts?.nextPtr ? [2, 1] : [1, 2];
+  for (const width of widths) {
     const count = width === 1 ? readU8SA(bytes, ptr) : readU16SA(bytes, ptr);
     if (count < minCount || count > maxCount) continue;
     const dataSA = ptr + width;

@@ -9,31 +9,11 @@ import { ms41Identify } from './identity.js';
  * implementation. Every address here is a FILE OFFSET in the image being
  * checked — no storage-address framing is involved.
  *
- * Confidence is NOT uniform across the three checksums:
- *   - calibration table : verified for MS41.0/.1/.2 AND MS41.3
- *   - boot sector       : verified across variants
- *   - program           : computed here but NEVER written. Verified against real
- *                         MS41.0 and MS41.2 firmware (both match); MS41.1 is the
- *                         one factory program we have no image of.
- *
- * An earlier version of this comment said the MS41.3 layout was unconfirmed and
- * treated that as the blocker. That was wrong, and the correction matters
- * because it changes what "unverified" means here: **MS41.3 is not a factory
- * program.** It is community firmware derived from official MS41.2 1406464 (BMW
- * ships no MS41.3 program), so its layout IS MS41.2's — measured, at 0.0 % /
- * 0.1 % / 1.7 % byte divergence from an MS41.2 stock image across the three
- * regions programComputed walks, against 45.7 % / 88.6 % / 91.0 % for a genuinely
- * different factory variant. Our one MS41.3 fixture mismatches because its stored
- * value is STALE (it is patched, a cal block is stale too, and its boot
- * verification switch is off), not because the layout differs.
- *
- * So boot and cal are authoritative blocks; program is always reported via
- * `skipped`, carrying its numbers in the reason. Promoting it is blocked by
- * something else: `ChecksumReport.valid` is "every block ok" and the desktop's
- * save verdict turns `!valid` into `invalid-after-correction`, so promoting a
- * checksum we deliberately never correct would condemn every save on an image
- * carrying a stale one. `valid` has to separate VERIFIED from CORRECTABLE first.
- * See docs/notes/ms41-program-checksum-variant-spike.md.
+ * Boot and calibration checksums are verified and correctable. The program
+ * checksum is verified against real MS41.0, MS41.1 and MS41.2 reference images,
+ * but remains report-only. MS41.3 is community firmware based on MS41.2; its
+ * modified reference carries a stale stored program checksum. Verification
+ * reports every block, while correction deliberately writes boot/cal only.
  */
 const BOOT_REGION = { start: 0x4000, end: 0x5c14 } as const;
 const BOOT_INIT = 0x4711;
@@ -164,7 +144,7 @@ function verifyImage(bytes: Uint8Array): ChecksumReport {
       correctable: false,
     });
     notes.push(
-      'The program checksum is reported but never written by this tool. It is verified against real MS41.0 and MS41.2 firmware; MS41.1 is unmeasured directly.'
+      'The program checksum is reported but never written by this tool. Its computation is verified against real MS41.0, MS41.1 and MS41.2 reference images.'
     );
     notes.push(switchNote(bytes));
   } else {
@@ -203,8 +183,7 @@ function correctImage(bytes: Uint8Array): {
   };
 
   // Boot (full ROM only). The PROGRAM checksum is deliberately never written —
-  // its layout is unconfirmed for MS41.3 and the reference tooling always
-  // leaves it alone.
+  // verification coverage does not change the report-only program policy.
   if (out.length === FULL_ROM_SIZE) {
     const b = bootBlock(out);
     if (!b.ok) write16(BOOT_STORE, b.computed);

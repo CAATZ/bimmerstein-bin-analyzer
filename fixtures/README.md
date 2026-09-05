@@ -51,21 +51,37 @@ image across the three program-checksum regions, against 45.7 % / 88.6 % / 91.0 
 between two genuinely different factory variants (MS41.2 vs MS41.0). So the S52
 fixture's program-checksum mismatch is a **stale stored value**, and this fixture
 must not be cited as evidence about a distinct factory layout.
-See `docs/notes/ms41-program-checksum-variant-spike.md`.
 
 ## Adding a real-bin fixture locally
 
 Additional definition-matched references live under `fixtures/references/`:
 MS41.0 calibration ID 41 (59 grids) and MS41.1 ID 60 (56 grids), each in full
 and partial framing. Their ground truth binds the exact image hash; firmware
-stays local and untracked. These are detection references, not checksum or
-hardware validation. Published metadata contains only structure; names and
+stays local and untracked. Published metadata contains only structure; names and
 scaling remain in the local matching definition.
+
+The ID41 truth retains all 59 grids and includes three independently checked
+corrections to the older definition: starts `0x26A6` and `0x272E` replace
+`0x26A0` and `0x272D`; the square grid at `0x0F1E` uses columns at `0x0758`
+and rows at `0x075D`. These storage addresses agree with the matching factory
+listing and firmware access paths. Full-read truth applies the usual address
+conversion. Reference corrections are separate from detector score gains.
+
+The ID60 full image also verifies all 18 checksum blocks, including a stored
+and independently computed program checksum of `0x350F`. Its partial verifies
+all 16 calibration blocks. To include these optional checksum acceptance cases,
+copy the local full reference to `fixtures/ms41/reference-ms41-id60-full.bin`
+and its partial to `fixtures/ms41/partial/reference-ms41-id60-partial.bin`.
+The reference metadata binds their exact hashes. This is offline evidence;
+the program checksum remains report-only and is never corrected on save.
 
 Evaluation reports exact starts, exact layouts (including width, signedness,
 byte order and storage order), and complete known-axis pairs alongside the
 older overlap scores. Measured floors in `packages/eval/src/exact-gates.ts`
 protect these properties in fixture evaluation, holdout and real acceptance.
+Synthetic pool fixtures also require at most 2,500 unmatched detections per
+100 KB of data. This precision ceiling applies alongside the recall floors;
+real-image references remain uncapped because their truth is incomplete.
 
 1. Drop `yourbin.bin` into `fixtures/<family>/`.
 2. Build `groundtruth.json` with
