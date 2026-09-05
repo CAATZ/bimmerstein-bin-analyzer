@@ -527,9 +527,17 @@ describe('rankAndEmit — param tier (Switch Phase B)', () => {
     });
   });
 
-  it('a STATELESS param inside ANY kept span is suppressed (the cand−detOnly add-discipline, real overlap semantics)', () => {
+  it('a stateless parameter inside a family grid is suppressed', () => {
     const out = rankAndEmit(new Uint8Array(0x2000), [], [], cfg, [], [grid, param(0x1005)]);
     expect(out).toHaveLength(1); // 1-byte span inside the 16-byte grid → overlapFrac 1 → suppressed
+  });
+
+  it('retains a code-read scalar hidden inside a generic table candidate', () => {
+    const generic = mk(0x1000, 0.95, 0.9);
+    const out = rankAndEmit(new Uint8Array(0x2000), [generic], [], cfg, [], [param(0x1005)]);
+    expect(out).toHaveLength(2);
+    expect(out[0]!.detector).toBe('generic');
+    expect(out[1]!.address).toBe(0x1005);
   });
 
   it('a STATES-BEARING param inside a kept span is EXEMPT from suppression (Decision 10)', () => {

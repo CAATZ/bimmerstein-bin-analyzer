@@ -31,6 +31,85 @@ const jmpr = () => [0x0d, 0x00]; // JMPR (len 2, low nibble 0xD)
 const nop = () => [0xcc, 0x00]; // filler, not an ender
 
 describe('scanParamSites / detectMs41Params — S* census component tests', () => {
+  it('recovers a calibration load staged directly into runtime RAM', () => {
+    const buf = image();
+    buf.set([...loadBZ(0x320), 0xf6, 0xf4, 0x80, 0xe8, 0xfa, 0x00, 0x00, 0x00], CODE);
+    expect(detectMs41Params(buf, cfg)).toMatchObject([{ address: saToFo(0x320), format: { width: 1 } }]);
+    // Storing a different register is not evidence that the loaded value was used.
+    buf[CODE + 5] = 0xf5;
+    expect(detectMs41Params(buf, cfg)).toHaveLength(0);
+  });
+
+  it('recovers a calibration consumed directly by arithmetic', () => {
+    const buf = image();
+    buf.set([0x02, 0xf4, 0x20, 0x03, 0xdb, 0x00], CODE);
+    expect(detectMs41Params(buf, cfg)).toMatchObject([{ address: saToFo(0x320), format: { width: 2 } }]);
+  });
+
+  it('recognizes a byte bias adjustment before sign extension', () => {
+    const buf = image();
+    buf.set([0xf3, 0xf8, 0x20, 0x03, 0x27, 0xf8, 0x80, 0x00, 0xd0, 0x8d, ...calls()], CODE);
+    expect(detectMs41Params(buf, cfg)).toMatchObject([{ address: saToFo(0x320), format: { width: 1, signed: false } }]);
+  });
+
+  it('recognizes a direct calibration word copied to indirect RAM', () => {
+    const buf = image();
+    buf.set([0x84, 0x09, 0x20, 0x03, 0xdb, 0x00], CODE);
+    expect(detectMs41Params(buf, cfg)).toMatchObject([{ address: saToFo(0x320), format: { width: 2 } }]);
+  });
+
+  it('preserves signed-byte evidence from a sign-extending calibration load', () => {
+    const buf = image();
+    buf.set([0xd2, 0xf4, 0x20, 0x03, ...cmpWImm(4), 0xdb, 0x00], CODE);
+    const detected = detectMs41Params(buf, cfg)[0]!;
+    expect(detected.format).toMatchObject({ width: 1, signed: true });
+    expect(detected.states).toBeUndefined(); // Switch states require unsigned raw bytes.
+  });
+
+  it.each([
+    [0x1b, 0x94], // MULU r9,r4
+    [0x0b, 0x45], // MUL r4,r5
+    [0x5c, 0x84], // SHL r4,#8
+    [0x00, 0x49], // ADD r4,r9
+    [0x00, 0xc4], // ADD r12,r4
+    [0xf0, 0xd4], // MOV r13,r4
+    [0x88, 0x40], // MOV [-r0],r4
+  ])('recognizes an arithmetic or register consumer %j of the loaded calibration', (...consumer) => {
+    const buf = image();
+    buf.set([...loadBZ(0x320), ...consumer, 0xdb, 0x00], CODE);
+    expect(detectMs41Params(buf, cfg)).toMatchObject([{ address: saToFo(0x320) }]);
+  });
+
+  it('recognizes an argument and a returned value without extending unrelated CALLS windows', () => {
+    const buf = image();
+    buf.set([0xf2, 0xfd, 0x20, 0x03, ...nop(), ...nop(), ...calls()], CODE);
+    expect(detectMs41Params(buf, cfg)).toMatchObject([{ address: saToFo(0x320) }]);
+    const returned = image();
+    returned.set([0xf3, 0xf8, 0x40, 0x03, 0xdb, 0x00], CODE);
+    expect(detectMs41Params(returned, cfg)).toMatchObject([{ address: saToFo(0x340) }]);
+  });
+
+  it.each([
+    [0xe0, 0x94], // MOV r4,#9: destination is the low nibble.
+    [0xe1, 0x98], // MOVB RL4,#9: clobbers the low byte of r4.
+    [0xc0, 0x44], // MOVBZ r4,RL2
+    [0xd0, 0x44], // MOVBS r4,RL2
+    [0xa8, 0x45], // MOV r4,[r5]
+    [0xa9, 0x85], // MOVB RL4,[r5]
+    [0xd4, 0x45, 0x10, 0x00], // MOV r4,[r5+#0x10]
+    [0xf4, 0x85, 0x10, 0x00], // MOVB RL4,[r5+#0x10]
+  ])('does not claim a returned calibration after replacement by %j', (...replacement) => {
+    const buf = image();
+    buf.set([...loadW(0x320), ...replacement, 0xdb, 0x00], CODE);
+    expect(detectMs41Params(buf, cfg)).toHaveLength(0);
+  });
+
+  it('includes calibration reads in the executable half of a mixed bank', () => {
+    const buf = image();
+    buf.set([...loadB(0x320), ...cmpBImm(4)], 0x12000);
+    buf.set([...loadB(0x340), ...cmpBImm(4)], 0x10000);
+    expect(scanParamSites(buf, 6).map(s => s.sa)).toEqual([0x320]);
+  });
   it('a: plain byte load + reg-matching CMPB #imm → V1b param, u8', () => {
     const buf = image();
     let o = CODE;

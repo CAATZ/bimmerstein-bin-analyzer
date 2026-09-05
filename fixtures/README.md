@@ -18,7 +18,7 @@ fixtures/
   formats and axis bindings, keyed to the bin by sha256. This is enforced by
   the generator, not by convention: `gt-from-romraider` reduces every row to
   the fields the eval harness actually consumes. Map and axis **names**, the
-  **category** taxonomy, free-text **notes** and the reverse-engineered
+  **category** taxonomy, free-text **notes**, named **states** and the reverse-engineered
   **scaling** are dropped (`name` becomes the structural id and `scaling`
   becomes identity, since `MapDef` requires both).
   That matters because these files are committed while the definition XML they
@@ -82,6 +82,26 @@ protect these properties in fixture evaluation, holdout and real acceptance.
 Synthetic pool fixtures also require at most 2,500 unmatched detections per
 100 KB of data. This precision ceiling applies alongside the recall floors;
 real-image references remain uncapped because their truth is incomplete.
+
+The separate `reference-ms41-id41-catalog-*` references expand the ID41 benchmark
+to the complete matched factory catalog: 110 grids, 140 curves/arrays and 420
+scalars in each address frame. The existing 59-grid subset is unchanged.
+`buildCatalogGroundTruth` takes explicitly selected imported objects and retains
+uniform values, signed formats and static axes; it rejects duplicate starts and
+invalid spans. Selection uses the source catalog and the matching definition's
+adjudication ledger, never detector output. Scans receive only the binary.
+
+The source listing SHA-256 is
+`d51a47a8cc33dea10e6342acedd6b9b2f4cccf58526a37675997bd61a262fb1d`;
+the matching humanized definition SHA-256 is
+`5ba19b65fb16c2affe0c966a2f9da465d27d6a6b134905f965892b2e9fc068bd`.
+Each fixture binds its full or partial binary hash. Full and partial calibration
+bytes agree after address conversion. Scalar references remain present for
+partial files even though code-based scalar recovery requires a full ROM;
+their current zero recall is reported explicitly. Catalog membership proves
+reference coverage, not firmware consumption or physical tuning behavior.
+Scalar classes use exact-start and exact-layout gates; the older overlap gate's
+axis requirement applies to grids and curves, which have axes to recover.
 
 1. Drop `yourbin.bin` into `fixtures/<family>/`.
 2. Build `groundtruth.json` with

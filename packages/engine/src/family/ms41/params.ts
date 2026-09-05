@@ -9,10 +9,10 @@ import { MS41_CAL_SA_MAX, MS41_CAL_SA_MIN, inCalWindow, saSpanContiguous, saToFo
  * config.family.ms41.paramCallsMax (2; the ladder's pinned output ran at 3 —
  * S3-measured truth-flat, sheds 3 junk SAs/bin).
  *
- * Every SA the code direct-mem READS and tests/consumes (S* = V1a∪V1b∪V1c∪V1d)
+ * Every SA the code direct-mem READS and tests/consumes
  * emits a 1×1 potential map: kind 'param', tier 9, width from the byte-DATA
- * opcode class, address fo-framed. rankAndEmit places these LAST — below
- * every other tier — so any existing detection's span suppresses them.
+ * opcode class, address fo-framed. Structural maps and their axes suppress
+ * overlapping params; generic guesses do not hide direct code evidence.
  */
 
 /** Params rank below every grid (0–3) and curve (4–8) tier. */
@@ -33,8 +33,8 @@ const V1C_JMPR_MAX = 2;
 const READ_MEM = new Set([0x02, 0x03, 0x22, 0x23, 0x42, 0x43, 0x52, 0x53, 0x62, 0x63, 0x72, 0x73, 0xf2, 0xf3, 0xc2, 0xd2]);
 const SELF_TEST_MEM = new Set([0x42, 0x43, 0x52, 0x53, 0x62, 0x63, 0x72, 0x73]); // CMP/XOR/AND/OR reg,mem
 const PLAIN_LOAD = new Set([0xf2, 0xf3, 0xc2, 0xd2]); // MOV/MOVB/MOVBZ/MOVBS reg,mem
-/** Loaded DATUM is one byte (incl. zero/sign-extended loads) → emission width u8. */
-const BYTE_DATA = new Set([0x03, 0x23, 0x43, 0x53, 0x63, 0x73, 0xf3, 0xc2, 0xd2]);
+/** Loaded DATUM is one byte, including zero/sign-extended loads. */
+const BYTE_DATA = new Set([0x03, 0x23, 0x43, 0x53, 0x63, 0x73, 0xf3, 0xc2, 0xd2, 0xa4]);
 const TEST_IMM_W = new Set([0x46, 0x56, 0x66, 0x76]); // CMP/XOR/AND/OR Rwn,#imm16
 const TEST_IMM_B = new Set([0x47, 0x57, 0x67, 0x77]); // CMPB/XORB/ANDB/ORB Rbn,#imm8
 const TEST_RR_W = new Set([0x40, 0x50, 0x60, 0x70]);
@@ -114,8 +114,10 @@ function writtenReg(op: number, b1: number): { byteForm: boolean; dest: number }
   if (fForm && (op === 0xf2 || op === 0xc2 || op === 0xd2)) return { byteForm: false, dest: lo }; // MOV/MOVBZ/MOVBS → word dest
   if (fForm && op === 0xf3) return { byteForm: true, dest: lo }; // MOVB Rbn,mem
   if (fForm && op === 0xe6) return { byteForm: false, dest: lo }; // MOV Rwn,#data16
-  if (op === 0xe0) return { byteForm: false, dest: hi }; // MOV Rwn,#data4
-  if (op === 0xe1) return { byteForm: true, dest: hi }; // MOVB Rbn,#data4
+  if (op === 0xe0 || op === 0xc0 || op === 0xd0) return { byteForm: false, dest: lo }; // MOV #data4 / MOVBZ / MOVBS
+  if (op === 0xe1) return { byteForm: true, dest: lo }; // MOVB Rbn,#data4
+  if (op === 0xa8 || op === 0x98 || op === 0xd4) return { byteForm: false, dest: hi }; // indirect word loads
+  if (op === 0xa9 || op === 0x99 || op === 0xf4) return { byteForm: true, dest: hi }; // indirect byte loads
   return undefined;
 }
 
@@ -143,12 +145,16 @@ export interface ParamSite {
   regTestDist: number;
   jmprDist: number;
   callsDist: number;
+  /** The still-live loaded value is stored to a direct runtime RAM address. */
+  ramStore: boolean;
+  /** A live loaded value feeds arithmetic, a store, a call argument or a return. */
+  valueUsed: boolean;
   /** Equality-compare immediates (CMP/CMPB, long + #data3 short) observed in
    *  the window. Task 4 narrows collection to register-still-holds-load. */
   eqImms: number[];
 }
 
-/** Decode forward from a load site collecting test evidence (ladder-exact). */
+/** Decode a bounded window for tests and live-value consumers. */
 function analyzeWindow(
   bytes: Uint8Array,
   end: number,
@@ -157,19 +163,45 @@ function analyzeWindow(
   reg: number,
   byteOp: boolean,
   kWindow: number
-): Pick<ParamSite, 'regTestDist' | 'jmprDist' | 'callsDist' | 'eqImms'> {
+): Pick<ParamSite, 'regTestDist' | 'jmprDist' | 'callsDist' | 'eqImms' | 'ramStore' | 'valueUsed'> {
   let o = o0 + L0;
   let regTestDist = -1;
   let jmprDist = -1;
   let callsDist = -1;
   const eqImms: number[] = [];
   let alive = true;
+  let ramStore = false;
+  let valueUsed = false;
   for (let i = 1; i <= kWindow && o + 1 < end; i++) {
     const op = bytes[o]!;
     let L = C166_OPCODE_LEN[op]!;
     if (L === 0) L = 2;
     if (o + L > end) break;
     const b1 = bytes[o + 1]!;
+    if (alive) {
+      const hi = b1 >> 4;
+      const lo = b1 & 0x0f;
+      const uses = (byteForm: boolean, source: number): boolean =>
+        clobbers({ byteForm, dest: source }, byteOp, reg);
+      const family = op >> 4;
+      const form = op & 0x0f;
+      // Arithmetic consumes both operands; a move consumes only its source.
+      if (family <= 7 && form <= 1 && (uses(form === 1, hi) || uses(form === 1, lo))) valueUsed = true;
+      if (family <= 7 && (form === 6 || form === 7) && hi === 0x0f && uses(form === 7, lo)) valueUsed = true;
+      if ((op === 0xf0 || op === 0xf1) && uses(op === 0xf1, lo)) valueUsed = true;
+      if ((op === 0x0b || op === 0x1b) && (uses(false, hi) || uses(false, lo))) valueUsed = true;
+      if ((op === 0x5c || op === 0x7c || op === 0xac || op === 0xbc) && uses(false, lo)) valueUsed = true;
+      if ((op === 0x88 || op === 0xc4 || op === 0xe4) && uses(op === 0xe4, hi)) valueUsed = true;
+      if (op === OP_CALLS && !byteOp && reg >= 12) valueUsed = true;
+      if ((op === 0xdb || op === 0xcb) && uses(false, 4)) valueUsed = true;
+    }
+    if (alive && L === 4 && (op === 0xf6 || op === 0xf7) && (b1 & 0xf0) === 0xf0) {
+      const address = bytes[o + 2]! | (bytes[o + 3]! << 8);
+      const source = b1 & 0x0f;
+      const same = op === 0xf6 ? !byteOp && source === reg
+        : byteOp ? source === reg : source === reg * 2;
+      if (same && address >= 0xe000 && address < 0xfe00) ramStore = true;
+    }
     if ((op & 0x0f) === 0x0d && L === 2) {
       if (jmprDist < 0) jmprDist = i;
     } else if (byteOp && TEST_D4_B.has(op) && (b1 >> 4) === reg) {
@@ -195,23 +227,25 @@ function analyzeWindow(
     if (w !== undefined && clobbers(w, byteOp, reg)) alive = false;
     o += L;
   }
-  return { regTestDist, jmprDist, callsDist, eqImms };
+  return { regTestDist, jmprDist, callsDist, eqImms, ramStore, valueUsed };
 }
 
-/** Chunked linear sweep (0x4000, cal-window chunks skipped) — ladder-exact. */
+/** Chunked linear sweep, excluding calibration but preserving mixed-bank code. */
 export function scanParamSites(bytes: Uint8Array, kWindow: number): ParamSite[] {
   const sites: ParamSite[] = [];
   for (let chunk = 0; chunk < bytes.length; chunk += 0x4000) {
-    if (inCalWindow(chunk)) continue;
+    const start = chunk === 0x10000 ? 0x12000 : chunk;
+    if (inCalWindow(start)) continue;
     const end = Math.min(chunk + 0x4000, bytes.length);
-    let o = chunk;
+    let o = start;
     while (o + 1 < end) {
       const op = bytes[o]!;
       let L = C166_OPCODE_LEN[op]!;
       if (L === 0) L = 2;
       if (o + L > end) break;
       const b1 = bytes[o + 1]!;
-      if (L === 4 && READ_MEM.has(op) && (b1 & 0xf0) === 0xf0) {
+      const directCopy = (op === 0x84 || op === 0xa4) && (b1 & 0xf0) === 0;
+      if (L === 4 && ((READ_MEM.has(op) && (b1 & 0xf0) === 0xf0) || directCopy)) {
         const operand = bytes[o + 2]! | (bytes[o + 3]! << 8);
         // The ladder collected to 0x7fff for a frame-junk statistic and
         // filtered ≤ MS41_CAL_SA_MAX in every rung — filtering at collection
@@ -237,8 +271,8 @@ export function scanParamSites(bytes: Uint8Array, kWindow: number): ParamSite[] 
 }
 
 /**
- * S* = V1a ∪ V1b ∪ V1c ∪ V1d → one 1×1 emission per SA. Width u8 if ANY
- * byte-DATA site reads the SA (smallest claim), else u16-LE.
+ * One 1×1 emission per consumed SA. Any byte-DATA read gives byte width;
+ * sign-extending loads without conflicting zero-extension give signed bytes.
  */
 export function detectMs41Params(bytes: Uint8Array, config: ScanConfig): FamilyDetection[] {
   const { paramTestWindow, paramCallsMax, paramConfidence } = config.family.ms41;
@@ -253,7 +287,8 @@ export function detectMs41Params(bytes: Uint8Array, config: ScanConfig): FamilyD
     const v1b = PLAIN_LOAD.has(s.op) && s.regTestDist >= 0;
     const v1c = PLAIN_LOAD.has(s.op) && s.regTestDist < 0 && s.jmprDist >= 0 && s.jmprDist <= V1C_JMPR_MAX;
     const v1d = PLAIN_LOAD.has(s.op) && s.regTestDist < 0 && s.callsDist >= 0 && s.callsDist <= paramCallsMax;
-    if (v1a || v1b || v1c || v1d) sStar.add(s.sa);
+    const arithmetic = s.op === 0x02 || s.op === 0x03 || s.op === 0x22 || s.op === 0x23 || s.op === 0x84 || s.op === 0xa4;
+    if (v1a || v1b || v1c || v1d || arithmetic || (PLAIN_LOAD.has(s.op) && (s.ramStore || s.valueUsed))) sStar.add(s.sa);
   }
   const out: FamilyDetection[] = [];
   for (const sa of [...sStar].sort((a, b) => a - b)) {
@@ -266,12 +301,12 @@ export function detectMs41Params(bytes: Uint8Array, config: ScanConfig): FamilyD
       address: fo,
       rows: 1,
       cols: 1,
-      format: w === 1 ? u8Fmt : u16Fmt,
+      format: w === 1 ? { ...u8Fmt, signed: ss.some(s => s.op === 0xd2) && !ss.some(s => s.op === 0xc2) } : u16Fmt,
       score: paramConfidence,
       tier: PARAM_TIER,
       kind: 'param',
     };
-    if (w === 1) {
+    if (w === 1 && !det.format.signed) {
       // BYTE-DATA plain loads only (Decision 3). A word MOV (0xF2) site on a
       // mixed-evidence SA reads TWO bytes — its ≤0xFF word compares test a
       // 16-bit value, not this byte, and must never become a state.

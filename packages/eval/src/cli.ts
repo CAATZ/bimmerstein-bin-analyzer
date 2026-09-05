@@ -144,6 +144,9 @@ export const PARTIAL_CURVE_GATE = { locationRecall: 1.0, structureRecall: 1.0, a
 type Gate = typeof SYNTH_GATE & { falsePositiveDensity?: number };
 
 export function gateFor(fixture: string): Gate | undefined {
+  // Scalar classes have no axes. Their exact-start/layout floors are enforced
+  // separately by meetsExactGate; the legacy overlap gate describes grids.
+  if (fixture.endsWith('-param')) return undefined;
   // 'synth-pcurve' would also match startsWith('synth') — checked first
   // (Phase-3 plan Task 4: order matters).
   if (fixture.startsWith('synth-pcurve')) return PARTIAL_CURVE_GATE;

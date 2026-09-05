@@ -57,10 +57,8 @@ export interface ReaderCall {
  * Linear sweep of the non-cal file, tracking MOV r12,#data16 (E6 FC lo hi)
  * freshness up to the next CALLS. Decode alignment resets at every 0x4000
  * boundary (bank halves are independently coherent in the raw file); the two
- * chunks whose START is in the cal window (0x10000, 0x14000) are skipped —
- * cal data is not code. NOTE this also skips file [0x12000,0x14000), 8 KB of
- * real code sharing the first chunk: a measured-in approximation (all spike
- * and integrated recall numbers include it — see the plan's Out of scope).
+ * calibration ranges are skipped, preserving the executable half of the
+ * mixed bank at file [0x12000,0x14000).
  *
  * r12-clobber (conservative lite set — abort freshness):
  *  - 4-byte reg,#imm16 ALU/mov forms: opcode low nibble 6, second byte 0xFC
@@ -75,9 +73,10 @@ export interface ReaderCall {
 export function scanReaderCalls(bytes: Uint8Array, maxDist: number): ReaderCall[] {
   const calls: ReaderCall[] = [];
   for (let chunk = 0; chunk < bytes.length; chunk += 0x4000) {
-    if (inCalWindow(chunk)) continue;
+    const start = chunk === 0x10000 ? 0x12000 : chunk;
+    if (inCalWindow(start)) continue;
     const end = Math.min(chunk + 0x4000, bytes.length);
-    let o = chunk;
+    let o = start;
     let r12val = -1;
     let r12dist = Infinity;
     while (o + 1 < end) {

@@ -31,6 +31,14 @@ describe('C166_OPCODE_LEN', () => {
 });
 
 describe('scanReaderCalls', () => {
+  it('scans the executable half of a mixed calibration/code bank', () => {
+    const bytes = new Uint8Array(0x18000);
+    const call = [0xe6, 0xfc, 0x34, 0x12, 0xda, 0x03, 0xa6, 0x4b];
+    bytes.set(call, 0x10000);
+    bytes.set(call, 0x12000);
+    bytes.set(call, 0x14000);
+    expect(scanReaderCalls(bytes, 6)).toEqual([{ siteFile: 0x12004, targetCpu: 0x034ba6, sa: 0x1234, dist: 0 }]);
+  });
   it.each([0x08, 0x18, 0x28, 0x38, 0x58, 0x68, 0x78])('rejects a stale pointer after short ALU opcode %i writes r12', (op) => {
     const bytes = code([0xe6, 0xfc, 0x34, 0x12, op, 0xc1, 0xda, 0x03, 0xa6, 0x4b]);
     expect(scanReaderCalls(bytes, 6)).toEqual([]);
