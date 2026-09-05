@@ -396,6 +396,10 @@ export interface ScanConfig {
        * value.
        */
       paramTestWindow: number;
+      /** Maximum decoded instructions per raw-value/control-flow trace. */
+      consumerMaxInstructions: number;
+      /** Maximum helper-call or RAM-publication links followed by a trace. */
+      consumerMaxDepth: number;
       /**
        * V1d arg-pass rung: max instruction distance from a plain load to the
        * CALLS consuming it. Measured (S3 sensitivity): S* truth FLAT at
@@ -532,6 +536,8 @@ export const DEFAULT_SCAN_CONFIG: ScanConfig = {
       curveActivateMin: 20,
       curveEmitMinCount: 2,
       paramTestWindow: 8,
+      consumerMaxInstructions: 128,
+      consumerMaxDepth: 2,
       paramCallsMax: 2,
       paramMinReaders: 3,
       paramConfidence: 0.3,
