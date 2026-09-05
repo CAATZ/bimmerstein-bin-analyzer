@@ -154,6 +154,8 @@
       y: yLabels[r] ?? String(r),
     };
   });
+  const selectedInfoText = $derived(selectedInfo === null ? '' :
+    `cell [${selectedInfo.y}, ${selectedInfo.x}] = ${selectedInfo.phys}${map?.scaling.units ? ' ' + map.scaling.units : ''} (raw ${selectedInfo.raw})`);
 
   // `seed` is the exact text the input opened with (C1, final whole-branch
   // review). commitEdit MUST compare the committed text to `seed` by TEXT —
@@ -281,12 +283,7 @@
         {map.format.width * 8}-bit {map.format.signed ? 'signed' : 'unsigned'} ·
         {map.scaling.units === '' ? 'raw' : map.scaling.units}
       </span>
-      {#if selectedInfo !== null}
-        <span class="cell">
-          cell [{selectedInfo.y}, {selectedInfo.x}] = {selectedInfo.phys}{map.scaling.units === '' ? '' : ' ' + map.scaling.units}
-          (raw {selectedInfo.raw})
-        </span>
-      {/if}
+      <span class="cell" title={selectedInfoText}>{selectedInfoText}</span>
       {#if $showOriginal}
         <span class="origbadge">showing ORIGINAL values (F11)</span>
       {/if}
@@ -388,6 +385,12 @@
     flex: 1;
   }
   .cell {
+    /* Keep selection from moving the table between the two clicks of an edit. */
+    flex: 0 0 15rem;
+    height: 1.5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     color: var(--accent);
     font-size: 12px;
     font-family: Consolas, monospace;

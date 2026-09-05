@@ -3,12 +3,14 @@ import type { ValueFormat } from '@binanalyzer/core';
 import type { ScanConfig } from '../../config.js';
 import type { FamilyDetection, FamilyAnalyzer } from '../types.js';
 import { scanReaderCalls, type ReaderCall } from './c166.js';
-import { MS41_CAL_SA_MAX, MS41_CAL_SA_MIN, MS41_MIN_BIN_LEN, inCalWindow, saSpanContiguous, saToFo } from './frame.js';
+import { MS41_CAL_SA_MAX, MS41_CAL_SA_MIN, MS41_MIN_BIN_LEN, foToSA, inCalWindow, saSpanContiguous, saToFo } from './frame.js';
 import { readU16SA, validateAxisPtr } from './header.js';
 import { scanPlateauCalAxes, type FamilyPoolAxis } from './plateau.js';
 import { selfLocateCurveReaders, selfLocateReaders, type ReaderEntry } from './readers.js';
 import { CURVE_FALLBACK_TIER, detectMs41Curves, detectMs41CurveFallbacks } from './curves.js';
 import { detectMs41Params } from './params.js';
+import { analyzeMs41Consumers, supportsSignedStorage } from './consumers.js';
+import { resolveMs41CurveAxes } from './runtime-axes.js';
 
 /**
  * MS41 code-xref detection core (spec §4.6). Given the filtered start set
@@ -316,16 +318,30 @@ export const ms41Analyzer: FamilyAnalyzer = {
             ...detectMs41CurveFallbacks(bytes, calls, curveReaders, config),
           ]
         : [];
+    const runtimeAxes = resolveMs41CurveAxes(bytes, calls, curveReaders, config);
+    for (const curve of curves) {
+      const axis = runtimeAxes.get(foToSA(curve.address));
+      if (axis && curve.tier <= CURVE_FALLBACK_TIER && axis.count === curve.rows && curve.cols === 1) {
+        curve.yAxis = { address: saToFo(axis.dataSA), count: axis.count, format: axisFmt(axis.width) };
+      }
+    }
     // Param tier (Switch Phase B): S* census behind the defense-in-depth
     // readers-trio guard (both real bins locate 3; curve synths locate 2).
     // The pinned zero-emission fixture tests remain the authority.
+    const consumerWidths = new Map([...readers.map(r => [r.target, r.width] as const), ...curveReaders]);
+    const consumers = analyzeMs41Consumers(bytes, calls, consumerWidths, config);
     const params =
-      readers.length >= config.family.ms41.paramMinReaders ? detectMs41Params(bytes, config) : [];
-    return [
+      readers.length >= config.family.ms41.paramMinReaders ? detectMs41Params(bytes, config, consumers.memory) : [];
+    const tables = [
       ...detectMs41Tables(bytes, starts, pool, config),
       ...scanRelaxedHeaderTables(bytes, starts, config, curves),
       ...curves,
-      ...params,
     ];
+    for (const table of tables) {
+      const sa = foToSA(table.address);
+      const evidence = consumers.tables.get(sa);
+      if (supportsSignedStorage(bytes, table.address, table.rows * table.cols, table.format, evidence)) table.format = { ...table.format, signed: true };
+    }
+    return [...tables, ...params];
   },
 };

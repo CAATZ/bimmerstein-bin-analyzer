@@ -21,8 +21,8 @@ it('rejects any loss in exact starts, layouts or axis pairs despite perfect over
 it('pins all six complete ID41 catalog classes without changing the older subset gates', () => {
   const expected = {
     'full-grid': [1, 109 / 110, 108 / 110],
-    'full-curve': [1, 133 / 140, 132 / 140],
-    'full-param': [418 / 420, 400 / 420, 0],
+    'full-curve': [1, 136 / 140, 136 / 140],
+    'full-param': [419 / 420, 408 / 420, 0],
     'partial-grid': [109 / 110, 107 / 110, 106 / 110],
     'partial-curve': [139 / 140, 130 / 140, 129 / 140],
     'partial-param': [0, 0, 0], // No program code is present in the partial.

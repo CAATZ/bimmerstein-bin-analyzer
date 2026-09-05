@@ -2,6 +2,7 @@ import type { ScanConfig } from '../../config.js';
 import type { FamilyDetection } from '../types.js';
 import type { ValueFormat } from '@binanalyzer/core';
 import { C166_OPCODE_LEN } from './c166.js';
+import { supportsSignedStorage, type ValueEvidence } from './consumers.js';
 import { MS41_CAL_SA_MAX, MS41_CAL_SA_MIN, inCalWindow, saSpanContiguous, saToFo } from './frame.js';
 
 /**
@@ -274,7 +275,7 @@ export function scanParamSites(bytes: Uint8Array, kWindow: number): ParamSite[] 
  * One 1×1 emission per consumed SA. Any byte-DATA read gives byte width;
  * sign-extending loads without conflicting zero-extension give signed bytes.
  */
-export function detectMs41Params(bytes: Uint8Array, config: ScanConfig): FamilyDetection[] {
+export function detectMs41Params(bytes: Uint8Array, config: ScanConfig, consumers?: Map<string, ValueEvidence>): FamilyDetection[] {
   const { paramTestWindow, paramCallsMax, paramConfidence } = config.family.ms41;
   const sites = scanParamSites(bytes, paramTestWindow);
   const bySA = new Map<number, ParamSite[]>();
@@ -288,7 +289,8 @@ export function detectMs41Params(bytes: Uint8Array, config: ScanConfig): FamilyD
     const v1c = PLAIN_LOAD.has(s.op) && s.regTestDist < 0 && s.jmprDist >= 0 && s.jmprDist <= V1C_JMPR_MAX;
     const v1d = PLAIN_LOAD.has(s.op) && s.regTestDist < 0 && s.callsDist >= 0 && s.callsDist <= paramCallsMax;
     const arithmetic = s.op === 0x02 || s.op === 0x03 || s.op === 0x22 || s.op === 0x23 || s.op === 0x84 || s.op === 0xa4;
-    if (v1a || v1b || v1c || v1d || arithmetic || (PLAIN_LOAD.has(s.op) && (s.ramStore || s.valueUsed))) sStar.add(s.sa);
+    const consumed = consumers?.get(`${s.sa}:${BYTE_DATA.has(s.op) ? 1 : 2}`)?.used;
+    if (v1a || v1b || v1c || v1d || arithmetic || (PLAIN_LOAD.has(s.op) && (s.ramStore || s.valueUsed || consumed))) sStar.add(s.sa);
   }
   const out: FamilyDetection[] = [];
   for (const sa of [...sStar].sort((a, b) => a - b)) {
@@ -297,11 +299,13 @@ export function detectMs41Params(bytes: Uint8Array, config: ScanConfig): FamilyD
     if (!saSpanContiguous(sa, w)) continue; // the SA 0x3fff→0x4000 seam
     const fo = saToFo(sa);
     if (!inCalWindow(fo) || fo + w > bytes.length) continue;
+    const evidence = consumers?.get(`${sa}:${w}`);
+    const signed = supportsSignedStorage(bytes, fo, 1, w === 1 ? u8Fmt : u16Fmt, evidence) || (w === 1 && ss.some(s => s.op === 0xd2) && !ss.some(s => s.op === 0xc2));
     const det: FamilyDetection = {
       address: fo,
       rows: 1,
       cols: 1,
-      format: w === 1 ? { ...u8Fmt, signed: ss.some(s => s.op === 0xd2) && !ss.some(s => s.op === 0xc2) } : u16Fmt,
+      format: { ...(w === 1 ? u8Fmt : u16Fmt), signed },
       score: paramConfidence,
       tier: PARAM_TIER,
       kind: 'param',
