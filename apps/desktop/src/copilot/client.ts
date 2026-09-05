@@ -35,6 +35,7 @@ export class CoPilotClient {
   private retryHandle: unknown = null;
   private pushHandle: unknown = null;
   private running = false;
+  private generation = 0;
 
   constructor(private readonly deps: ClientDeps) {}
 
@@ -48,6 +49,7 @@ export class CoPilotClient {
 
   stop(): void {
     this.running = false;
+    this.generation++;
     if (this.retryHandle !== null) this.deps.cancel(this.retryHandle);
     if (this.pushHandle !== null) this.deps.cancel(this.pushHandle);
     this.retryHandle = null;
@@ -95,8 +97,10 @@ export class CoPilotClient {
 
   private async dial(): Promise<void> {
     if (!this.running) return;
+    const generation = this.generation;
     // Re-read every attempt: a restarted server writes a NEW port and token.
     const link = await this.deps.readLink();
+    if (!this.running || generation !== this.generation) return;
     if (link === null) {
       this.scheduleRetry();
       return;

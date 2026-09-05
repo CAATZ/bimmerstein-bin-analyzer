@@ -13,8 +13,8 @@ import {
  * Deliberately NOT `Project`: a Project has seven keys and cannot carry
  * regions, scanStatus, selection, viewParams or framePromptAnswered, and
  * applyProject re-validates and DROPS maps — correct when loading a file from
- * disk, a data-loss hazard for undo. Within one session the bytes never change,
- * so a snapshot taken here was valid when taken and needs no re-validation.
+ * disk, a data-loss hazard for undo. Within one session the original image and
+ * its size never change, so snapshots need no re-validation against the bin.
  *
  * That premise is ENFORCED, not assumed: every path that swaps the loaded bin
  * (setBin, applyProject, resetStores) calls clearUndo, so no snapshot can

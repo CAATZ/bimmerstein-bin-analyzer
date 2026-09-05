@@ -111,7 +111,7 @@ export class WsCoPilotLink implements CoPilotLink {
     });
 
     ws.send(JSON.stringify({
-      v: PROTOCOL_VERSION, type: 'hello', server: 'bimmerstein-mcp/0.1.0', protocol: PROTOCOL_VERSION,
+      v: PROTOCOL_VERSION, type: 'hello', server: 'bimmerstein-mcp/0.2.0', protocol: PROTOCOL_VERSION,
     }));
   }
 

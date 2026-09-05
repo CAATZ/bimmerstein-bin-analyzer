@@ -14,6 +14,30 @@ const ok: MapDef = {
 const BIN = 1024;
 
 describe('validateMapDef', () => {
+  it('rejects fractional or non-finite byte spans', () => {
+    for (const value of [0.5, NaN, Infinity]) {
+      expect(validateMapDef({ ...ok, address: value }, BIN).ok).toBe(false);
+      expect(validateMapDef({ ...ok, rows: value, cols: value, xAxis: { kind: 'index', count: value }, yAxis: { kind: 'index', count: value } }, BIN).ok).toBe(false);
+      expect(validateMapDef({ ...ok, xAxis: { ...ok.xAxis!, address: value } }, BIN).ok).toBe(false);
+    }
+  });
+
+  it('rejects unsupported float widths for maps and referenced axes', () => {
+    const format: ValueFormat = { ...u16be, float: true };
+    expect(validateMapDef({ ...ok, format }, BIN).ok).toBe(false);
+    expect(validateMapDef({ ...ok, xAxis: { ...ok.xAxis!, format } }, BIN).ok).toBe(false);
+    expect(validateMapDef({ ...ok, format: { ...format, width: 4 } }, BIN).ok).toBe(true);
+  });
+
+  it('rejects unsupported display precision for maps and axes', () => {
+    for (const digits of [-1, 0.5, 101, Infinity, NaN]) {
+      const scaling = { ...ok.scaling, digits };
+      expect(validateMapDef({ ...ok, scaling }, BIN).ok).toBe(false);
+      expect(validateMapDef({ ...ok, xAxis: { ...ok.xAxis!, scaling } }, BIN).ok).toBe(false);
+    }
+    expect(validateMapDef({ ...ok, scaling: { ...ok.scaling, digits: 100 } }, BIN).ok).toBe(true);
+  });
+
   it('accepts a valid map', () => {
     expect(validateMapDef(ok, BIN)).toEqual({ ok: true, value: ok });
   });

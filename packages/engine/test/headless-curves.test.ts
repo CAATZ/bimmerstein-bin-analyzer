@@ -9,7 +9,7 @@ import { DEFAULT_SCAN_CONFIG, type ScanConfig } from '../src/config.js';
 
 /**
  * P3.1-S1 headerless overlay (spike docs/notes/ms41-p31-headerless-spike.md,
- * transcribed from scratch/spike-p31-final.ts s1()). Component tests craft
+ * transcribed from the measured acceptance algorithm). Component tests craft
  * minimal buffers; junk-suppression bytes (far pointers / parse blockers) are
  * REQUIRED scaffolding — the discriminator is deliberately junk-permissive
  * (25% emission precision on real bins) and chained artifacts are real

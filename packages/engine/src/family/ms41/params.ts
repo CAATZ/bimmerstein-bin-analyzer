@@ -5,10 +5,7 @@ import { C166_OPCODE_LEN } from './c166.js';
 import { MS41_CAL_SA_MAX, MS41_CAL_SA_MIN, inCalWindow, saSpanContiguous, saToFo } from './frame.js';
 
 /**
- * S* code-referenced-parameter census (Switch Phase B, spec 2026-07-23;
- * spike docs/notes/ms41-switch-detection-spike.md). EXACT transcription of
- * scratch/spike-swb-ladder.ts memSites/analyzeWindow (the pinned-number
- * source), with ONE deliberate divergence: the V1d CALLS distance comes from
+ * S* code-referenced-parameter census. The V1d CALLS distance comes from
  * config.family.ms41.paramCallsMax (2; the ladder's pinned output ran at 3 —
  * S3-measured truth-flat, sheds 3 junk SAs/bin).
  *

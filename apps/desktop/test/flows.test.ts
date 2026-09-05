@@ -88,6 +88,11 @@ function confirmedMap(id: string, address: number): MapDef {
 beforeEach(() => a.resetStores());
 
 describe('path helpers', () => {
+  it.each(['/', 'C:\\', 'C:/'])('keeps the filesystem root %s when locating a sibling bin', (root) => {
+    expect(dirname(`${root}project.binproj.json`)).toBe(root);
+    expect(joinPath(dirname(`${root}project.binproj.json`), 'dump.bin')).toBe(`${root}dump.bin`);
+  });
+
   it('handle both separators', () => {
     expect(basename('C:\\bins\\a.bin')).toBe('a.bin');
     expect(basename('/x/y/a.bin')).toBe('a.bin');

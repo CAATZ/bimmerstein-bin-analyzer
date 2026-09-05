@@ -1,4 +1,5 @@
 import type { Result, Scaling, ValueFormat } from '@binanalyzer/core';
+import { isValueFormat } from '@binanalyzer/core';
 
 /** One table's worth of a tune: what to write, and what the author started from. */
 export interface PackTable {
@@ -18,7 +19,7 @@ export interface PackTable {
 }
 
 /**
- * A shareable tune (docs/superpowers/specs/2026-08-22-map-packs-design.md).
+ * A shareable tune, bound to a calibration identity.
  *
  * Applies only to a bin of the same `source.calId`: within a CAL-ID an address
  * is exact (0-4 % of tables move), across one 72-97 % of tables relocate, which
@@ -77,16 +78,6 @@ export function serializePack(pack: MapPack): string {
   return `${JSON.stringify(canonical, null, 2)}\n`;
 }
 
-const isFormat = (v: unknown): v is ValueFormat => {
-  if (typeof v !== 'object' || v === null) return false;
-  const f = v as Partial<ValueFormat>;
-  return (
-    (f.width === 1 || f.width === 2 || f.width === 4) &&
-    typeof f.signed === 'boolean' &&
-    (f.endianness === 'little' || f.endianness === 'big')
-  );
-};
-
 const isScaling = (v: unknown): v is Scaling => {
   if (typeof v !== 'object' || v === null) return false;
   const s = v as Partial<Scaling>;
@@ -97,7 +88,7 @@ const isScaling = (v: unknown): v is Scaling => {
     Number.isFinite(s.offset) &&
     typeof s.units === 'string' &&
     typeof s.digits === 'number' &&
-    Number.isInteger(s.digits)
+    Number.isInteger(s.digits) && s.digits >= 0 && s.digits <= 100
   );
 };
 
@@ -132,7 +123,7 @@ function tableError(v: unknown, i: number): string | undefined {
   if (t.orientation !== 'row-major' && t.orientation !== 'col-major') {
     return `${at}.orientation must be "row-major" or "col-major"`;
   }
-  if (!isFormat(t.format)) return `${at}.format must be a valid ValueFormat`;
+  if (!isValueFormat(t.format)) return `${at}.format must be a valid ValueFormat`;
   if (!isScaling(t.scaling)) return `${at}.scaling must be a valid Scaling`;
   return (
     gridError(t.values, t.rows, t.cols, `${at}.values`) ??

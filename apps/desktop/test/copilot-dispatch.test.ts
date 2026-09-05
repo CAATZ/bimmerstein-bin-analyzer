@@ -6,7 +6,7 @@ import * as a from '../src/store/actions.js';
 import {
   NO_BIN_OPEN, SINGLE_CHANGE_BURST, applyProposal, dispatchOp, resetBurstWindow,
 } from '../src/copilot/dispatch.js';
-import { axisLibrary, bin, maps, potentialMaps, proposals, selection, toasts, viewParams, workingBytes } from '../src/store/stores.js';
+import { axisLibrary, bin, maps, proposals, selection, toasts, viewParams, workingBytes } from '../src/store/stores.js';
 
 function testBin() {
   return createBinImage(Uint8Array.from({ length: 4096 }, (_, i) => i & 0xff), 'live.bin');

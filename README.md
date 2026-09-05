@@ -2,15 +2,16 @@
 
 [![CI](https://github.com/CAATZ/bimmerstein-bin-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/CAATZ/bimmerstein-bin-analyzer/actions/workflows/ci.yml)
 
-An open-source desktop app for **ECU bin file tuning-table analysis**: load a raw ECU firmware dump, view it as hexdump / 2D / 3D, automatically detect tuning tables ("maps") and their axes, refine them manually, and export RomRaider XML / TunerPro XDF / CSV / JSON definitions.
+An open-source desktop app for **ECU bin file tuning-table analysis and editing**: load a raw ECU firmware dump, view it as hexdump / 2D / 3D, automatically detect tuning tables ("maps") and their axes, refine and edit them, and export RomRaider XML / TunerPro XDF / CSV / JSON definitions.
 
-**Status: v0.1.1 — preview, under active development.**
+**Status: v0.2.0 — preview, under active development.**
 
-The **downloadable v0.1.1 release is analysis-only**: it reads a bin and never
-modifies its bytes. Value editing, checksum verification and correction, map
-packs, and drop-in family modules are **built and tested on `main` but not yet
-released** — to use them today, build from source with the steps below. A later
-release will include them.
+The **v0.2.0 release includes value and axis editing**, undo/redo, original-value
+display, checksum verification and supported correction, map packs, family
+modules, and project lineage. Save Bin writes a separate output, protects the
+loaded source path, and verifies the file by reading it back. Checksum reports
+distinguish corrected, verified, and unchecked regions; MS41 program checksums
+are reported but never rewritten. The older v0.1.1 download remains analysis-only.
 
 Currently targets Windows. macOS/Linux builds are untested (Tauri supports
 them, but nothing here has been verified on those platforms yet).

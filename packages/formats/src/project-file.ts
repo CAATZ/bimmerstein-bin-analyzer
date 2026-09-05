@@ -1,17 +1,15 @@
-import type { AxisDef, AxisLibEntry, MapDef, Project, Result, Scaling, ValueFormat } from '@binanalyzer/core';
-import { validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
+import type { AxisDef, AxisLibEntry, MapDef, Project, Result, Scaling } from '@binanalyzer/core';
+import { isValueFormat, validateAxisLibEntry, validateMapDef } from '@binanalyzer/core';
 
 /**
  * .binproj.json save/load (spec §3, §8): JSON with canonical key order,
- * schemaVersion 1|2 accepted (2 written, v1 normalized on load; anything newer
+ * schemaVersion 1|2|3 accepted (3 written, older versions normalized on load; anything newer
  * rejected with a clear message), bin referenced by name+sha256+size — never
  * embedded. parseProject guarantees the spec §8 invariant "a project that
  * loads is fully readable": every map passes validateMapDef against the
  * recorded size, maps[] carries only non-auto provenance, potentialMaps[] only
  * auto. Comparing the recorded sha256 against the actual bin bytes is the
- * app's job (it has the bytes). schemaVersion 2 is written unconditionally; v1
- * documents are accepted and normalized on load (2026-07-29 shared-axis-library
- * spec §3).
+ * app's job (it has the bytes). Schema version 3 also preserves image lineage.
  */
 export function serializeProject(project: Project): string {
   const canonical: Project = {
@@ -27,16 +25,6 @@ export function serializeProject(project: Project): string {
     potentialMaps: project.potentialMaps,
   };
   return `${JSON.stringify(canonical, null, 2)}\n`;
-}
-
-function isValueFormat(v: unknown): v is ValueFormat {
-  if (typeof v !== 'object' || v === null) return false;
-  const f = v as Partial<ValueFormat>;
-  return (
-    (f.width === 1 || f.width === 2 || f.width === 4) &&
-    typeof f.signed === 'boolean' &&
-    (f.endianness === 'little' || f.endianness === 'big')
-  );
 }
 
 function isFiniteNumber(v: unknown): v is number {

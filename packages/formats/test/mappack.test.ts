@@ -57,6 +57,20 @@ describe('map pack round trip', () => {
 });
 
 describe('map pack validation', () => {
+  it('rejects invalid float formats and display precision before previewing a pack', () => {
+    const bad = pack();
+    bad.tables[0]!.format.float = true;
+    expect(parsePack(serializePack(bad)).ok).toBe(false);
+    bad.tables[0]!.format = { width: 4, signed: false, endianness: 'little' };
+    for (const float of ['false', 1]) {
+      expect(parsePack(JSON.stringify({ ...bad, tables: [{ ...bad.tables[0], format: { ...bad.tables[0]!.format, float } }] })).ok).toBe(false);
+    }
+    for (const digits of [-1, 101]) {
+      bad.tables[0]!.scaling.digits = digits;
+      expect(parsePack(serializePack(bad)).ok).toBe(false);
+    }
+  });
+
   const err = (json: string): string => {
     const r = parsePack(json);
     return r.ok ? '(unexpectedly ok)' : r.error;

@@ -321,7 +321,7 @@ function craftHeaderPlusAdj(): {
 describe('detectMs41CurveFallbacks — tier 6 adjacency', () => {
   it('forward u8-prefix: [prefix c][axis c×u8][data] with axis ending at sa', () => {
     // prefix at p = sa - 1*(c+1), c=4: u8[p]=4, 4 strictly-monotone u8 cells, data at sa
-    const { bytes, calls, readers, sa, axisDataSA } = craftFwdAdjCurve({ c: 4, aw: 1 });
+    const { bytes, calls, readers, axisDataSA } = craftFwdAdjCurve({ c: 4, aw: 1 });
     const fb = detectMs41CurveFallbacks(bytes, calls, readers, DEFAULT_SCAN_CONFIG);
     expect(fb).toHaveLength(1);
     expect(fb[0]!.tier).toBe(CURVE_ADJ_TIER);

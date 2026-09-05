@@ -25,11 +25,6 @@ export const tauriHost: PlatformHost = {
   writeText: (path: string, contents: string) => writeTextFile(path, contents),
   writeBinary: (path: string, bytes: Uint8Array) => writeFile(path, bytes),
   exists: (path: string) => exists(path),
-  /**
-   * Uses the fs scope the app already has (`fs:scope **` plus
-   * `fs:allow-read-text-file`) — no new Tauri capability. Absent, unreadable
-   * and malformed all collapse to null so the co-pilot dial just retries.
-   */
   async readDir(path: string): Promise<string[]> {
     try {
       const entries = await readDir(path);
@@ -47,6 +42,7 @@ export const tauriHost: PlatformHost = {
       /* Already there, or not creatable — the caller's readDir will report []. */
     }
   },
+  /** Missing or unreadable handshake files cause the co-pilot dial to retry. */
   readTextIfExists: async (path: string): Promise<string | null> => {
     try {
       return (await exists(path)) ? await readTextFile(path) : null;

@@ -39,6 +39,16 @@ describe('parseAffineExpression', () => {
 });
 
 describe('render + inverse', () => {
+  it('round-trips scientific notation emitted for small and large coefficients', () => {
+    for (const [factor, offset] of [[1e-7, -1e-8], [-2.5e-8, 1e21], [0, 1e-9]] as const) {
+      expect(parseAffineExpression(renderAffineExpression(factor, offset, 'x'))).toEqual({ factor, offset });
+    }
+    expect(parseAffineExpression('X*2.5E-3+1E+2')).toEqual({ factor: 0.0025, offset: 100 });
+    for (const expr of ['x*1e', 'x*1e+', 'x*1e--2', 'x*1e999']) {
+      expect(parseAffineExpression(expr)).toBeNull();
+    }
+  });
+
   it('renders canonical forms', () => {
     expect(renderAffineExpression(1, 0, 'x')).toBe('x');
     expect(renderAffineExpression(0.0025, 0, 'x')).toBe('x*0.0025');

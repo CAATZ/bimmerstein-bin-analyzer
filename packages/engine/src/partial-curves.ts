@@ -313,7 +313,7 @@ export function partialCurveDetections(
 
   // feasible widths per candidate: free, or vetoed only by chain-waived grids
   const feas = new Map<number, Array<1 | 2>>();
-  for (const [p, ax] of cands) {
+  for (const p of cands.keys()) {
     const pv = preVet.get(p)!;
     const ws: Array<1 | 2> = [];
     for (const w of [1, 2] as const) {
@@ -413,9 +413,8 @@ interface HeadlessCand {
 }
 
 /**
- * P3.1-S1 HEADERLESS overlay (spike docs/notes/ms41-p31-headerless-spike.md;
- * EXACT transcription of scratch/spike-p31-final.ts s1() — the function that
- * produced every pinned number. The spike ladder's extra
+ * P3.1-S1 HEADERLESS overlay, using the measured acceptance algorithm.
+ * The experimental extra
  * passed-sweep-position/passBlocks skips are deliberately NOT kept: they were
  * a different harness, and the pinned real-hit/emission sets come from THIS
  * semantics).
