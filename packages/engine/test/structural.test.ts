@@ -59,6 +59,60 @@ describe('poolStructuralActive', () => {
 });
 
 describe('poolStructuralTables — header path', () => {
+  it('uses an adjacent axis prefix to resolve an ambiguous byte/word axis', () => {
+    const b = new Uint8Array(0x2000);
+    b.set([4, 0, 16, 18, 24, 35, 48, 52, 80, 69], 0x100);
+    b.set([4, 0, 100, 0, 200, 0, 44, 1, 144, 1], 0x10a);
+    w16(b, 0x3fc, 0x100); w16(b, 0x3fe, 0x10a);
+    b.set(Array.from({ length: 16 }, (_, i) => 30 + i), 0x400);
+    const table = poolStructuralTables(b, [], cfg, true).find(t => t.address === 0x400);
+    expect(table?.xAxis).toMatchObject({ address: 0x102, count: 4, format: { width: 2 } });
+  });
+
+  it.each([1, 2] as const)('uses a following pair of curve descriptors to pin the final grid width (%i)', (width) => {
+    const b = new Uint8Array(0x3000);
+    const { yData } = plantTable(b, 0x100, 4, 6, 0x800);
+    const end = 0x800 + 24 * width;
+    b.fill(50, 0x800, end);
+    for (const at of [end, end + 8]) {
+      w16(b, at, yData - 1);
+      b.fill(60, at + 2, at + 8);
+    }
+    const table = poolStructuralTables(b, [], cfg, true).find(t => t.address === 0x800);
+    expect(table?.format.width).toBe(width);
+    if (width === 1) {
+      b.fill(0, end + 8, end + 10); // a lone curve pointer is insufficient
+      expect(poolStructuralTables(b, [], cfg, true).find(t => t.address === 0x800)?.format.width).toBe(2);
+    }
+  });
+
+  it('prefers a nearby axis pair over an overlapping header forged by small cell values', () => {
+    const b = new Uint8Array(0x3000);
+    b.set([2, 1, 2], 0x101); // an unrelated valid axis
+    for (const at of [0x1000, 0x1044, 0x1088]) {
+      plantTable(b, 0x200, 4, 16, at);
+      for (let r = 0; r < 16; r++) for (let c = 0; c < 4; c++) {
+        b[at + r * 4 + c] = r < 2 ? 1 : 1 + (r + c) % 2;
+      }
+    }
+    const out = poolStructuralTables(b, [], cfg, true);
+    expect(out).toContainEqual(expect.objectContaining({ address: 0x1000, rows: 16, cols: 4,
+      format: expect.objectContaining({ width: 1 }) }));
+    expect(out.some(t => t.address === 0x1002)).toBe(false);
+  });
+
+  it('does not use curve boundaries to admit an isolated scattered grid header', () => {
+    const b = new Uint8Array(0x3000);
+    const { yData } = plantTable(b, 0x100, 4, 6, 0x800);
+    b.set(b.slice(yData - 1, yData + 6), 0x700);
+    w16(b, 0x7fe, 0x700);
+    for (const at of [0x818, 0x820]) {
+      w16(b, at, 0x700);
+      b.fill(60, at + 2, at + 8);
+    }
+    expect(poolStructuralTables(b, [], cfg, true).some(t => t.address === 0x800)).toBe(false);
+  });
+
   it('uses a neighboring packed header to corroborate distant shared axes, including the last table', () => {
     const b = new Uint8Array(0x4000);
     const at = 0x2000, cols = 6, rows = 4, size = cols * rows;
@@ -89,16 +143,24 @@ describe('poolStructuralTables — header path', () => {
     expect(poolStructuralTables(b, [], cfg, true).find(t => t.address === at)?.format.width).toBe(1);
   });
 
-  it('keeps a packed word table when its data also decodes as a header', () => {
+  it.each([false, true])('keeps a packed word table when its data also decodes as a header (scattered axes: %s)', (scattered) => {
     const b = new Uint8Array(0x4000);
     const at = 0x2000, size = 6 * 4 * 2;
-    plantTable(b, 0x100, 6, 4, at);
+    const { yData } = plantTable(b, 0x100, 6, 4, at);
+    if (scattered) {
+      b.set(b.slice(yData - 1, yData + 4), 0x700);
+      w16(b, at - 2, 0x700);
+    }
     for (let i = 0; i < 24; i++) w16(b, at + i * 2, 100 + i * 5);
     const next = at + size + 4;
     plantTable(b, 0x140, 4, 4, next);
     // A false header in the last row must not become the packing boundary.
     plantTable(b, 0x180, 6, 4, 0x2800);
     b.set(b.slice(0x2800 - 4, 0x2800), at + size - 12);
+    if (scattered) {
+      plantTable(b, 0x1c0, 2, 2, 0x2900);
+      b.set(b.slice(0x2900 - 4, 0x2900), at + 8);
+    }
     const out = poolStructuralTables(b, [], cfg, true);
     expect(out).toContainEqual(expect.objectContaining({ address: at, rows: 4, cols: 6,
       format: expect.objectContaining({ width: 2 }) }));

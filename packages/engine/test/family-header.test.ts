@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_SCAN_CONFIG } from '../src/config.js';
 import { saToFo } from '../src/family/ms41/frame.js';
 import { readU16SA, readU8SA, validateAxisPtr } from '../src/family/ms41/header.js';
+import { detectMs41Tables } from '../src/family/ms41/analyzer.js';
 
 /** SA-addressed byte plants into a cal-window-capable buffer. */
 function calImage(): Uint8Array {
@@ -21,6 +22,18 @@ describe('SA-frame reads', () => {
 });
 
 describe('validateAxisPtr', () => {
+  it('uses the adjacent axis boundary to disambiguate a word axis with a monotone byte prefix', () => {
+    const bytes = calImage();
+    putSA(bytes, 0x100, [4, 0, 16, 18, 24, 35, 48, 52, 80, 69]);
+    putSA(bytes, 0x10a, [4, 0, 100, 0, 200, 0, 44, 1, 144, 1]);
+    putSA(bytes, 0x3fc, [0, 1, 10, 1]);
+    putSA(bytes, 0x400, Array.from({ length: 16 }, (_, i) => 30 + i));
+    const tables = detectMs41Tables(bytes, [{ sa: 0x400, fo: saToFo(0x400), w: 1 }], [], DEFAULT_SCAN_CONFIG);
+    expect(tables[0]?.xAxis).toEqual({ address: saToFo(0x102), count: 4,
+      format: { width: 2, signed: false, endianness: 'little' } });
+    expect(tables[0]?.yAxis?.address).toBe(saToFo(0x10c));
+  });
+
   it('validates a u8 count-prefixed monotone axis', () => {
     const bytes = calImage();
     putSA(bytes, 0x100, [6, 10, 20, 30, 40, 50, 60]);

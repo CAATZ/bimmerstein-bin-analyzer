@@ -35,14 +35,15 @@ interface AxisRun { count: number; width: 1 | 2; kind: AxisKind; dataAddr: numbe
 
 /**
  * Validate a file-offset pointer as a count-prefixed axis run. Reads the count
- * at `ptr` (u8 tried first, then u16 LE) and requires `count in [minCount,
- * maxCount]`, the cell run in-bounds, and cells strictly monotone — optionally
+ * at `ptr` (word preferred when it ends at the next axis prefix) and requires
+ * `count in [minCount, maxCount]`, the cell run in-bounds, and cells strictly monotone — optionally
  * (relaxed) followed by a constant plateau tail (count includes the tail), or
  * all-equal ('dead', measured on zero-filled MAF axes). Direct offsets only.
  */
-function validateAxisAt(bytes: Uint8Array, ptr: number, minCount: number, maxCount: number, relaxed: boolean): AxisRun | undefined {
+function validateAxisAt(bytes: Uint8Array, ptr: number, minCount: number, maxCount: number, relaxed: boolean, nextPtr?: number): AxisRun | undefined {
   if (ptr < 0 || ptr > bytes.length - 2) return undefined;
-  for (const width of [1, 2] as const) {
+  const widths: readonly (1 | 2)[] = ptr + 2 + r16(bytes, ptr) * 2 === nextPtr ? [2, 1] : [1, 2];
+  for (const width of widths) {
     const count = width === 1 ? bytes[ptr]! : r16(bytes, ptr);
     if (count < minCount || count > maxCount) continue;
     const dataAddr = ptr + width;
@@ -105,8 +106,8 @@ function decodeHeader(bytes: Uint8Array, off: number, config: ScanConfig, packed
   if (xp === yp || !(xp < off && yp < off)) return undefined;
   if (xp === 0 || yp === 0 || xp === 0xffff || yp === 0xffff) return undefined;
   if (packedAxes && Math.abs(xp - yp) > pairSpan) return undefined;
-  const xa = validateAxisAt(bytes, xp, structHeaderAxisMinCount, structAxisMaxCount, true);
-  const ya = validateAxisAt(bytes, yp, structHeaderAxisMinCount, structAxisMaxCount, true);
+  const xa = validateAxisAt(bytes, xp, structHeaderAxisMinCount, structAxisMaxCount, true, yp);
+  const ya = validateAxisAt(bytes, yp, structHeaderAxisMinCount, structAxisMaxCount, true, xp);
   if (!xa || !ya) return undefined;
   if (xa.count < minCols || xa.count > maxCols || ya.count < minRows || ya.count > maxRows) return undefined;
   return { xa, ya };
@@ -139,9 +140,8 @@ interface Cand {
   tier: number; score: number;
 }
 
-/** Component A — header sweep (tier 0). Packing to another header selects the
- *  width and corroborates headers whose shared axes are not a nearby pair.
- *  The activation gate and overlap ranking remain unchanged. */
+/** Component A — header sweep (tier 0). Packing corroborates scattered
+ *  headers and selects the cell width. */
 function headerCandidates(bytes: Uint8Array, config: ScanConfig): Cand[] {
   const out: Cand[] = [];
   const headers = new Map<number, NonNullable<ReturnType<typeof decodeHeader>>>();
@@ -155,6 +155,24 @@ function headerCandidates(bytes: Uint8Array, config: ScanConfig): Cand[] {
     if (headers.has(end + 4)) return end + 4;
     if (end % 2 === 1 && headers.has(end + 5)) return end + 5;
     return undefined;
+  };
+  const curveAt = (off: number): AxisRun | undefined => {
+    if (off > bytes.length - 2) return undefined;
+    const ptr = r16(bytes, off);
+    if (ptr === 0 || ptr >= off) return undefined;
+    const axis = validateAxisAt(bytes, ptr, config.pool.curvePartialMinCount, config.pool.structAxisMaxCount, false);
+    return axis && axis.end <= off && off + 2 + axis.count <= bytes.length ? axis : undefined;
+  };
+  // A pair of consecutive curve descriptors also marks the end of a grid.
+  // One pointer alone is too easily forged by ordinary cell values.
+  const curveSuccessor = (end: number): boolean => {
+    const axis = curveAt(end);
+    if (!axis) return false;
+    return config.table.widths.some(w => {
+      if (w !== 1 && w !== 2) return false;
+      const next = end + 2 + axis.count * w;
+      return curveAt(next) !== undefined || (next % 2 === 1 && curveAt(next + 1) !== undefined);
+    });
   };
   const preceded = new Set<number>();
   for (const [off, d] of headers) for (const w of config.table.widths) {
@@ -171,7 +189,7 @@ function headerCandidates(bytes: Uint8Array, config: ScanConfig): Cand[] {
       const byteLen = rows * cols * w;
       if (off + byteLen > bytes.length) continue;
       const sc = frameScore(bytes, off, rows, cols, fmtOf(w));
-      const exact = successor(off + byteLen) !== undefined;
+      const exact = successor(off + byteLen) !== undefined || curveSuccessor(off + byteLen);
       // TOTAL order: exact-packing wins; then higher score; then smaller width.
       if (
         best === undefined ||
@@ -183,8 +201,13 @@ function headerCandidates(bytes: Uint8Array, config: ScanConfig): Cand[] {
       }
     }
     if (!best) continue;
-    const packed = best.exact || preceded.has(off);
-    if (!packed && !decodeHeader(bytes, off, config)) continue;
+    // Curve boundaries choose width only; scattered axes still need a grid neighbor.
+    const packed = successor(off + rows * cols * best.w) !== undefined || preceded.has(off);
+    const nearby = decodeHeader(bytes, off, config) !== undefined;
+    if (!packed && !nearby) continue;
+    // A nearby pair followed by small cell values can also decode two bytes
+    // late as [old yPtr][unrelated ptr]. Keep the complete nearby pair.
+    if (!nearby && off >= 6 && decodeHeader(bytes, off - 2, config)) continue;
     out.push({
       address: off, rows, cols, format: fmtOf(best.w), tier: 0, score: Math.max(0.01, best.score),
       xAxis: { address: d.xa.dataAddr, count: d.xa.count, format: fmtOf(d.xa.width) },

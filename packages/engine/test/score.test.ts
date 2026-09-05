@@ -190,6 +190,19 @@ describe('rankAndEmit pool tier', () => {
     expect(out).toHaveLength(1); // the sub-block overlaps and is dropped
   });
 
+  it('prefers the stronger pair of boundaries over a smoother one-byte shifted frame', () => {
+    const b = bytes.slice();
+    b.fill(200, 392, 400);
+    b.fill(200, 448, 464);
+    const truth = cand(400, 6, 8, 0.78);
+    const shifted = cand(401, 6, 8, 0.94);
+    for (const c of [truth, shifted]) {
+      expect(startEdgeOk(b, c.table, cfg.pool.edgeMin)).toBe(true);
+      expect(endEdgeOk(b, c.table, cfg.pool.endEdgeMin)).toBe(true);
+    }
+    expect(rankAndEmit(b, [shifted, truth], [], cfg, pool)[0]?.address).toBe(400);
+  });
+
   it('below activateMinCount the pool is ignored (behavior identical to 4-arg call)', () => {
     const truth = cand(400, 6, 8, 0.7);
     const sub = cand(408, 5, 8, 0.95);

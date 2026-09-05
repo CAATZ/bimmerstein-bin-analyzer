@@ -80,16 +80,21 @@ function shearOk(bytes: Uint8Array, t: TableCandidate, config: ScanConfig): bool
  * w1 framings measure 3–12× when their neighbors are smooth).
  * An out-of-bounds previous row counts as an edge.
  */
-export function startEdgeOk(bytes: Uint8Array, t: TableCandidate, edgeMin: number): boolean {
+function startEdgeStrength(bytes: Uint8Array, t: TableCandidate): number | undefined {
   const w = t.format.width;
   const prevRowAddr = t.address - t.cols * w;
-  if (prevRowAddr < 0) return true;
+  if (prevRowAddr < 0) return Infinity;
   const boundary = colTvAt(bytes, prevRowAddr, 2, t.cols, t.format);
-  if (boundary === undefined) return true;
+  if (boundary === undefined) return Infinity;
   const internal = colTvAt(bytes, t.address, t.rows, t.cols, t.format);
-  if (internal === undefined) return false;
+  if (internal === undefined) return undefined;
   // 1e-9: structural divide-by-zero guard (same role as shearOk's).
-  return boundary / (internal + 1e-9) >= edgeMin;
+  return boundary / (internal + 1e-9);
+}
+
+export function startEdgeOk(bytes: Uint8Array, t: TableCandidate, edgeMin: number): boolean {
+  const strength = startEdgeStrength(bytes, t);
+  return strength !== undefined && strength >= edgeMin;
 }
 
 /**
@@ -100,15 +105,20 @@ export function startEdgeOk(bytes: Uint8Array, t: TableCandidate, edgeMin: numbe
  * candidates that a single top edge admitted (a misframe inside smooth data has
  * no real bottom boundary). An out-of-bounds next row counts as an edge.
  */
-export function endEdgeOk(bytes: Uint8Array, t: TableCandidate, edgeMin: number): boolean {
+function endEdgeStrength(bytes: Uint8Array, t: TableCandidate): number | undefined {
   const w = t.format.width;
   const lastRowAddr = t.address + (t.rows - 1) * t.cols * w;
   const boundary = colTvAt(bytes, lastRowAddr, 2, t.cols, t.format);
-  if (boundary === undefined) return true;
+  if (boundary === undefined) return Infinity;
   const internal = colTvAt(bytes, t.address, t.rows, t.cols, t.format);
-  if (internal === undefined) return false;
+  if (internal === undefined) return undefined;
   // 1e-9: structural divide-by-zero guard (same role as startEdgeOk's).
-  return boundary / (internal + 1e-9) >= edgeMin;
+  return boundary / (internal + 1e-9);
+}
+
+export function endEdgeOk(bytes: Uint8Array, t: TableCandidate, edgeMin: number): boolean {
+  const strength = endEdgeStrength(bytes, t);
+  return strength !== undefined && strength >= edgeMin;
 }
 
 /**
@@ -164,6 +174,7 @@ export function rankAndEmit(
       anchor: undefined as Anchor | undefined,
       poolAnchor: undefined as PoolAnchor | undefined,
       poolTier: false,
+      boundary: 0,
       shear: false,
     }))
     .filter((s) => s.confidence >= minConfidence);
@@ -175,17 +186,20 @@ export function rankAndEmit(
     if (s.anchor) s.shear = shearOk(bytes, s.c.table, config);
     if (pidx) {
       s.poolAnchor = findPoolAnchor(s.c.table, pidx, config);
-      if (s.poolAnchor)
+      if (s.poolAnchor) {
+        const start = startEdgeStrength(bytes, s.c.table) ?? -Infinity;
+        const end = endEdgeStrength(bytes, s.c.table) ?? -Infinity;
+        s.boundary = Math.min(start, end);
         s.poolTier = s.c.table.cluster
           ? true // separator-backed cluster candidate: the periodic separator IS the boundary evidence
-          : startEdgeOk(bytes, s.c.table, config.pool.edgeMin) &&
-            endEdgeOk(bytes, s.c.table, config.pool.endEdgeMin);
+          : start >= config.pool.edgeMin && end >= config.pool.endEdgeMin;
+      }
     }
   }
   // Rank tiers: pool-anchored+edge (pool-rich bins only) > zero-gap anchored >
-  // unanchored. Pool tier orders by plain confidence — the exact-count pair
-  // plus the start edge already pin the framing; span/shear ordering was
-  // measured worse here. The anchored tier keeps its shear→byte-span order,
+  // unanchored. Pool tier prefers the stronger pair of boundaries: normalized
+  // smoothness alone can reward a shifted frame that includes an outlier.
+  // The anchored tier keeps its shear→byte-span order,
   // and the unanchored tier keeps the pre-existing confidence order.
   const tierOf = (s: (typeof scored)[number]): number =>
     s.poolTier ? 2 : s.anchor ? 1 : 0;
@@ -193,6 +207,7 @@ export function rankAndEmit(
     const ta = tierOf(a);
     const tb = tierOf(b);
     if (tb !== ta) return tb - ta;
+    if (ta === 2 && a.boundary !== b.boundary) return b.boundary - a.boundary;
     if (ta === 1) {
       const d =
         Number(b.shear) - Number(a.shear) ||

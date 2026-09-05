@@ -96,8 +96,8 @@ export function detectMs41Tables(
     const yp = readU16SA(bytes, s.sa - 2);
     const hdrBlocked = xp === yp || !(xp < s.sa && yp < s.sa);
     const hdrOpts = { minCount: config.family.ms41.headerAxisMinCount };
-    const xAx = hdrBlocked ? undefined : validateAxisPtr(bytes, xp, config, hdrOpts);
-    const yAx = hdrBlocked ? undefined : validateAxisPtr(bytes, yp, config, hdrOpts);
+    const xAx = hdrBlocked ? undefined : validateAxisPtr(bytes, xp, config, { ...hdrOpts, nextPtr: yp });
+    const yAx = hdrBlocked ? undefined : validateAxisPtr(bytes, yp, config, { ...hdrOpts, nextPtr: xp });
     if (xAx && yAx) {
       const cols = xAx.count;
       const rows = yAx.count;
@@ -208,8 +208,8 @@ export function scanRelaxedHeaderTables(
     const yp = readU16SA(bytes, sa - 2);
     if (xp === yp || xp === 0 || yp === 0 || xp === 0xffff || yp === 0xffff) continue;
     if (!(xp < sa && yp < sa)) continue; // v2.1: backward-pointer guard (see detectMs41Tables)
-    const x = validateAxisPtr(bytes, xp, config, relaxedOpts);
-    const y = validateAxisPtr(bytes, yp, config, relaxedOpts);
+    const x = validateAxisPtr(bytes, xp, config, { ...relaxedOpts, nextPtr: yp });
+    const y = validateAxisPtr(bytes, yp, config, { ...relaxedOpts, nextPtr: xp });
     if (!x || !y) continue;
     const cols = x.count;
     const rows = y.count;

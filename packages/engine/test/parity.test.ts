@@ -19,26 +19,26 @@ function digestOf(fixture: string): { count: number; digest: string } {
 describe('detection pinning (committed synthetic fixtures)', () => {
   it('synth-1 output is stable', { timeout: 60_000 }, () => {
     expect(digestOf('synth-1')).toEqual({
-      count: 24,
-      digest: '96d43d07af013b92ec1f5123cf37085c816db23f2e04ee0e133d5ce5f0470bfe',
+      count: 23,
+      digest: '7530873ecb68331cad3408388fb7aab0a2198dcc6296d3e94a4ffe3d4c130d62',
     });
   });
   it('synth-2 output is stable', { timeout: 60_000 }, () => {
     expect(digestOf('synth-2')).toEqual({
-      count: 66,
-      digest: 'dee8f97345d5e08981fc287b5b63b0863a21808789e0e2555612d78e2dd6d330',
+      count: 65,
+      digest: '34d3a86fe9ea9f295cac7fce1fb6aa28980539662f164e153e890a99291a8944',
     });
   });
   it('synth-pool-101 output is stable', { timeout: 60_000 }, () => {
     expect(digestOf('synth-pool-101')).toEqual({
-      count: 241,
-      digest: 'c9d62ca58f827e916ec707a7821e3e9be8abc20243193a1d015b60218fd6448b',
+      count: 223,
+      digest: '247edd1716fcb1f949e9140c9e6bd4dad49c74e4e31bedb42dc916d16f9e255b',
     });
   });
   it('synth-pool-103 output is stable', { timeout: 60_000 }, () => {
     expect(digestOf('synth-pool-103')).toEqual({
-      count: 210,
-      digest: 'a3a542675d7d4b9edc6d395fc9201961b38ed32e2103b7cf78e72ebc99274918',
+      count: 193,
+      digest: '6f6d5ed1c136a70452560ee91fe65f11ff4f82d2aa84e6c4e9fdef2a27022dd8',
     });
   });
 });

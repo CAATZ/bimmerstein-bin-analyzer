@@ -22,6 +22,40 @@ function plantMap(bytes: Uint8Array, offset: number, rows: number, cols: number)
 }
 
 describe('scanTables', () => {
+  it('does not grow through an outlier that enlarges the accepted table range', () => {
+    const bytes = new Uint8Array(64).fill(200);
+    for (let r = 0; r < 6; r++) bytes.fill(50 + r, 16 + r * 4, 20 + r * 4);
+    bytes.set([200, 56, 56, 56], 40);
+    const cfg = { ...DEFAULT_SCAN_CONFIG, table: { ...DEFAULT_SCAN_CONFIG.table,
+      widths: [1] as Array<1>, minCols: 4, maxCols: 4 } };
+    const found = scanTables(bytes, [{ start: 0, end: bytes.length, kind: 'data' }], cfg);
+    expect(found).toContainEqual(expect.objectContaining({ address: 16, rows: 6, cols: 4 }));
+    expect(found.some(t => t.address === 16 && t.rows > 6)).toBe(false);
+  });
+
+  it('does not promote an isolated outlier in a flat block to a table', () => {
+    const bytes = new Uint8Array(64).fill(50);
+    bytes[31] = 51;
+    const cfg = { ...DEFAULT_SCAN_CONFIG, table: { ...DEFAULT_SCAN_CONFIG.table,
+      widths: [1] as Array<1>, minRows: 16, maxRows: 16, minCols: 4, maxCols: 4 } };
+    const regions: Region[] = [{ start: 0, end: bytes.length, kind: 'data' }];
+    expect(scanTables(bytes, regions, cfg)).toEqual([]);
+    const unweighted = { ...cfg, table: { ...cfg.table, minVariationFraction: 0 } };
+    expect(scanTables(bytes, regions, unweighted)).toContainEqual(expect.objectContaining({
+      address: 0, rows: 16, cols: 4, score: expect.any(Number),
+    }));
+
+    // Quantized maps may be flat across each row but vary along the other axis.
+    for (let r = 0; r < 16; r++) bytes.fill(50 + Math.floor(r / 2), r * 4, (r + 1) * 4);
+    expect(scanTables(bytes, regions, cfg)).toContainEqual(expect.objectContaining({
+      address: 0, rows: 16, cols: 4, format: expect.objectContaining({ width: 1 }),
+    }));
+    for (let i = 0; i < bytes.length; i++) bytes[i] = 50 + Math.floor((i % 4) / 2);
+    expect(scanTables(bytes, regions, cfg)).toContainEqual(expect.objectContaining({
+      address: 0, rows: 16, cols: 4, format: expect.objectContaining({ width: 1 }),
+    }));
+  });
+
   it('finds a planted 6×8 u16be map with the right column count', () => {
     const bytes = new Uint8Array(1024); // zero sea
     plantMap(bytes, 256, 6, 8);

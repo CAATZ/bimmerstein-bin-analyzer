@@ -12,7 +12,7 @@ describe('InlineScanner', () => {
     const viaScanner = await new InlineScanner().scan(bytes);
     expect(viaScanner.potentialMaps.length).toBe(direct.potentialMaps.length);
     expect(viaScanner.regions.length).toBe(direct.regions.length);
-    expect(viaScanner.potentialMaps.length).toBe(24);
+    expect(viaScanner.potentialMaps.length).toBe(23);
     expect(viaScanner.regions.length).toBe(7);
   });
 
@@ -32,7 +32,7 @@ describe('WorkerScanner', () => {
     const scanner = new WorkerScanner();
     try {
       const res = await scanner.scan(bytes);
-      expect(res.potentialMaps.length).toBe(24);
+      expect(res.potentialMaps.length).toBe(23);
       expect(res.regions.length).toBe(7);
     } finally {
       await scanner.dispose();

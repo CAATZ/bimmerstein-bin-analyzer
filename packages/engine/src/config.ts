@@ -66,8 +66,13 @@ export interface ScanConfig {
      * Measured stable 1–2; 0.5 is insufficient (steps are exactly 1).
      */
     growthAbsFloor: number;
+    /** Range expansion that triggers an established-block boundary check. */
+    growthRangeMultiplier: number;
     /** Emit table candidates with composite smoothness score ≥ this. */
     minTableScore: number;
+    /** Fraction of cells differing from a left/upper neighbor needed for full
+     *  smoothness weight. Sparse outliers receive less weight; 0 disables it. */
+    minVariationFraction: number;
     /**
      * Pre-emission edge-boundary floor (stage-3, spec §4.3 feed reduction). A
      * candidate is emitted only if BOTH its top and bottom edge ratio — the mean
@@ -477,7 +482,9 @@ export const DEFAULT_SCAN_CONFIG: ScanConfig = {
     widths: [2, 1],
     colSmoothFactor: 0.4,
     growthAbsFloor: 1,
+    growthRangeMultiplier: 2,
     minTableScore: 0.5,
+    minVariationFraction: 0.2,
     emissionEdgeMin: 2,
   },
   associate: { maxAxisDistance: 512, adjacencyBonus: 1.2, anchorMaxGap: 0 },
