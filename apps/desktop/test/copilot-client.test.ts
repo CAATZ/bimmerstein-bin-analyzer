@@ -55,6 +55,36 @@ beforeEach(() => {
 });
 
 describe('CoPilotClient', () => {
+  it.each([null, { port: 51733, token: 'tok' }])('does not dial or retry after stopping a pending handshake (%j)', async (link) => {
+    const h = harness();
+    let resolveLink!: (value: typeof link) => void;
+    h.deps.readLink = () => new Promise((resolve) => { resolveLink = resolve; });
+    const c = new CoPilotClient(h.deps);
+    c.start();
+    c.stop();
+    resolveLink(link);
+    await tick();
+    expect(h.sockets).toHaveLength(0);
+    expect(h.timers).toHaveLength(0);
+    expect(get(coPilotStatus)).toBe('off');
+  });
+
+  it('ignores an old handshake after a stop and restart', async () => {
+    const h = harness();
+    const resolvers: Array<(value: { port: number; token: string }) => void> = [];
+    h.deps.readLink = () => new Promise((resolve) => { resolvers.push(resolve); });
+    const c = new CoPilotClient(h.deps);
+    c.start();
+    c.stop();
+    c.start();
+    resolvers[1]!({ port: 51734, token: 'new' });
+    await tick();
+    resolvers[0]!({ port: 51733, token: 'old' });
+    await tick();
+    expect(h.sockets.map((s) => s.url)).toEqual(['ws://127.0.0.1:51734/?token=new']);
+    c.stop();
+  });
+
   it('dials the port and token from the handshake file', async () => {
     const h = harness();
     new CoPilotClient(h.deps).start();

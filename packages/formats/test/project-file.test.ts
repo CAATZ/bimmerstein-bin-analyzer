@@ -47,6 +47,31 @@ function sampleProject(): Project {
 }
 
 describe('serializeProject / parseProject', () => {
+  it('rejects invalid float flags in every value-format position', () => {
+    for (const format of [
+      { width: 2, signed: false, endianness: 'little', float: true },
+      { width: 4, signed: false, endianness: 'little', float: 'false' },
+    ]) {
+      const p = sampleProject();
+      expect(parseProject(JSON.stringify({ ...p, valueDefaults: format })).ok).toBe(false);
+      expect(parseProject(JSON.stringify({ ...p, maps: [{ ...confirmedMap(), format }] })).ok).toBe(false);
+      const map = confirmedMap();
+      expect(parseProject(JSON.stringify({ ...p, maps: [{ ...map, xAxis: { ...map.xAxis, format } }] })).ok).toBe(false);
+    }
+  });
+
+  it('rejects precision that would crash map rendering', () => {
+    const p = sampleProject();
+    p.maps[0]!.scaling.digits = 101;
+    expect(parseProject(JSON.stringify(p)).ok).toBe(false);
+  });
+
+  it('rejects fractional map addresses instead of truncating them during reads', () => {
+    const p = sampleProject();
+    p.maps[0]!.address = 0.5;
+    expect(parseProject(JSON.stringify(p)).ok).toBe(false);
+  });
+
   it('round-trips deep-equal with a trailing newline', () => {
     const json = serializeProject(sampleProject());
     expect(json.endsWith('}\n')).toBe(true);

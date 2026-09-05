@@ -1,6 +1,6 @@
 <!-- apps/desktop/src/components/MapPropertiesDialog.svelte -->
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import type { AxisDef, AxisLibEntry, MapDef, Scaling } from '@binanalyzer/core';
   import * as actions from '../store/actions.js';
   import { axisLibrary, maps } from '../store/stores.js';
@@ -19,12 +19,14 @@
     return () => actions.popModal();
   });
 
-  let name = $state(map.name);
-  let category = $state(map.category ?? '');
-  let units = $state(map.scaling.units);
-  let factor = $state(String(map.scaling.factor));
-  let offset = $state(String(map.scaling.offset));
-  let digits = $state(String(map.scaling.digits));
+  // Seed staged edits once; live axis changes must not reset these fields.
+  const initial = untrack(() => map);
+  let name = $state(initial.name);
+  let category = $state(initial.category ?? '');
+  let units = $state(initial.scaling.units);
+  let factor = $state(String(initial.scaling.factor));
+  let offset = $state(String(initial.scaling.offset));
+  let digits = $state(String(initial.scaling.digits));
 
   // Axis operations apply IMMEDIATELY via setMapAxis (each validated + toasted);
   // name/category/scaling stay staged on Save as before. Read the live map from

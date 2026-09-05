@@ -97,16 +97,35 @@ export async function loadBinFromPath(host: PlatformHost, path: string): Promise
   }
 }
 
+// One save for the single-bin UI; scope by session if multiple tabs are added.
+let binSaveInProgress = false;
+
 /**
  * Write the edited image (spec 2026-08-11-binary-write-path §4). Resolves TRUE
  * only when a file was written AND read back with a matching hash.
  *
  * Step order is the safety property: prompt, refuse the source file, correct
- * PURELY, write, verify from disk, and only then mutate the session. Every
- * early return leaves the buffer, the journal and the save target exactly as
- * they were.
+ * PURELY, write, verify from disk, and only then update the originating session.
+ * Corrections land only if its bytes still match the snapshot. A failed save
+ * leaves the buffer, the journal and the save target exactly as they were.
  */
 export async function saveBinFlow(
+  host: PlatformHost,
+  opts: { promptAlways: boolean }
+): Promise<boolean> {
+  if (binSaveInProgress) {
+    actions.pushToast('info', 'A bin save is already in progress. Wait for it to finish.');
+    return false;
+  }
+  binSaveInProgress = true;
+  try {
+    return await saveCurrentBin(host, opts);
+  } finally {
+    binSaveInProgress = false;
+  }
+}
+
+async function saveCurrentBin(
   host: PlatformHost,
   opts: { promptAlways: boolean }
 ): Promise<boolean> {
@@ -117,7 +136,7 @@ export async function saveBinFlow(
   }
   const existing = get(saveTarget);
   const fail = (path: string | null, reason: string): false => {
-    actions.setLastSave({ ok: false, path, reason });
+    if (get(bin) === image) actions.setLastSave({ ok: false, path, reason });
     actions.pushToast('error', reason);
     return false;
   };
@@ -125,11 +144,16 @@ export async function saveBinFlow(
   let path: string | null;
   if (opts.promptAlways || existing === null) {
     const suggested = existing?.name ?? `${stemOf(image.name)}-edited.bin`;
-    path = await host.saveFile('Save bin', suggested, BIN_FILTERS);
+    try {
+      path = await host.saveFile('Save bin', suggested, BIN_FILTERS);
+    } catch (e) {
+      return fail(null, `Save failed: ${errText(e)}`);
+    }
   } else {
     path = existing.path;
   }
   if (path === null) return false; // cancelled: not an outcome, nothing to report
+  if (get(bin) !== image) return fail(path, 'Save cancelled because the loaded bin changed. Save the current bin again.');
 
   const source = get(binPath);
   if (source !== null && samePath(source, path)) {
@@ -141,6 +165,7 @@ export async function saveBinFlow(
 
   const c = actions.correctForSave();
   if (c === null) return fail(path, 'Nothing to save — no working buffer');
+  const before = sha256Hex(get(workingBytes)!);
   if (c.bytes.length !== image.size) {
     return fail(path, `Refusing to write ${c.bytes.length} bytes for a ${image.size}-byte image`);
   }
@@ -162,10 +187,20 @@ export async function saveBinFlow(
     return fail(path, `${basename(path)} does not match what was written — do not flash it. Try a different location.`);
   }
 
-  // Verified. NOW the session may change.
-  actions.applySaveCorrection(c.changed);
-  actions.setSaveTarget({ path, name: basename(path), sha256: want, size: c.bytes.length });
   const verdict = saveVerdict({ report: c.report, editedOffsets: c.editedOffsets });
+  if (get(bin) !== image) {
+    actions.pushToast(
+      verdict.kind === 'corrected' ? 'info' : 'error',
+      `Saved ${basename(path)} from ${image.name}. ${verdictHeadline(verdict)} The currently loaded bin was left unchanged.`
+    );
+    return true;
+  }
+
+  // The verified file describes this snapshot, even if newer edits arrived during I/O.
+  const current = get(workingBytes);
+  const unchanged = current !== null && sha256Hex(current) === before;
+  if (unchanged) actions.applySaveCorrection(c.changed);
+  actions.setSaveTarget({ path, name: basename(path), sha256: want, size: c.bytes.length });
   actions.setLastSave({
     ok: true,
     path,
@@ -178,7 +213,9 @@ export async function saveBinFlow(
     editedBytes: c.editedOffsets.length,
   });
   // The toast half of §6; the modal half is the caller's, driven by isModalOutcome.
-  if (verdict.kind === 'corrected') {
+  if (!unchanged) {
+    actions.pushToast('error', `Saved ${basename(path)}, but newer edits were not saved. They remain in the editor; save again to include them.`);
+  } else if (verdict.kind === 'corrected') {
     actions.pushToast('info', `Saved ${basename(path)} — ${verdictHeadline(verdict)}`);
   }
   return true;
@@ -269,6 +306,7 @@ export async function openProjectFlow(host: PlatformHost): Promise<void> {
     }
   }
   const { droppedMaps, droppedPotentials, droppedAxisEntries, clearedStamps } = actions.applyProject(image, project);
+  actions.setBinPath(binPath);
   actions.runChecksumVerify(); // applyProject cleared the old verdict — recompute for this bin
   // Provenance is read at exactly the moment it is being asked for
   // (2026-08-24-project-lineage-design.md §5).

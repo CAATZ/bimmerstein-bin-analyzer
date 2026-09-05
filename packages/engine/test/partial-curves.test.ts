@@ -10,7 +10,7 @@ import { DEFAULT_SCAN_CONFIG } from '../src/config.js';
 /**
  * Phase-3 trusted-structure tiling discriminator (spike
  * docs/notes/ms41-p3-partial-curves-spike.md, FINAL R8 stack of
- * scratch/spike-p3-ladder2.ts). One crafted buffer per component.
+ * the measured detector). One crafted buffer per component.
  */
 
 const cfg = DEFAULT_SCAN_CONFIG;

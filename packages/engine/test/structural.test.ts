@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { DEFAULT_SCAN_CONFIG } from '../src/config.js';
-import { scanPrefixedAxes, type PrefixedAxis } from '../src/pool.js';
+import { scanPrefixedAxes } from '../src/pool.js';
 import { classifyRegions } from '../src/regions.js';
 import { poolStructuralHeaderCount, poolStructuralActive, poolStructuralTables, STRUCT_MAX_BIN_LEN } from '../src/structural.js';
 

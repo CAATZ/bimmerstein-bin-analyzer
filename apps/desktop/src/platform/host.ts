@@ -59,7 +59,9 @@ export function basename(path: string): string {
 
 export function dirname(path: string): string {
   const i = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
-  return i === -1 ? '' : path.slice(0, i);
+  if (i === -1) return '';
+  const isRoot = i === 0 || (i === 2 && /^[a-z]:/i.test(path));
+  return path.slice(0, isRoot ? i + 1 : i);
 }
 
 export function joinPath(dir: string, name: string): string {

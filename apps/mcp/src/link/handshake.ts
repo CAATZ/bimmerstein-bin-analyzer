@@ -53,7 +53,7 @@ export function writeHandshake(port: number, token: string, at: string = linkFil
     token,
     pid: process.pid,
     startedAt: new Date().toISOString(),
-    server: 'bimmerstein-mcp/0.1.0',
+    server: 'bimmerstein-mcp/0.2.0',
   };
   writeFileSync(at, JSON.stringify(record), { encoding: 'utf8', mode: 0o600 });
   // writeFileSync's mode is masked by umask, and does nothing when the file

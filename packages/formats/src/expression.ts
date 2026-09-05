@@ -18,7 +18,7 @@ interface State {
 
 function tokenize(expr: string): Token[] | null {
   const tokens: Token[] = [];
-  const re = /(\d+\.?\d*|\.\d+)|([xX])|([+\-*/()])|(\S)/g;
+  const re = /((?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)|([xX])|([+\-*/()])|(\S)/g;
   for (const m of expr.matchAll(re)) {
     if (m[1] !== undefined) tokens.push({ kind: 'num', value: Number.parseFloat(m[1]) });
     else if (m[2] !== undefined) tokens.push({ kind: 'x' });

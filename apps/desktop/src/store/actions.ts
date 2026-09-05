@@ -199,12 +199,9 @@ export function runChecksumVerify(): void {
  * checksum chip vanish instead of turning red. `activeChecksums.verify`
  * still handles a gate-breaking edit correctly — it reports `applies: false`
  * rather than throwing — so the report is never fabricated, only honest.
- */
-/**
  * Exported for the co-pilot's batch apply, which must verify ONCE after the
- * whole proposal rather than 200 times inside it. Zero-argument on purpose (the
- * B1 review's lesson): it reads `bin` internally, so no caller can hand it the
- * wrong buffer and re-gate the family module.
+ * whole proposal rather than for every row. It reads `workingBytes` internally
+ * and keeps the family module selected when the image loaded.
  */
 export function reverifyChecksums(): void {
   const working = get(workingBytes);

@@ -152,6 +152,10 @@
   // must never rewrite the byte it merely displayed.
   let editing = $state<{ r: number; c: number; seed: string; text: string } | null>(null);
 
+  function focusEditor(input: HTMLInputElement): void {
+    input.focus();
+  }
+
   function beginEdit(r: number, c: number): void {
     const g = grid;
     const m = map;
@@ -298,6 +302,7 @@
                 ondblclick={() => beginAxisEdit('x', i)}
                 >{#if axisEditing?.which === 'x' && axisEditing?.index === i}<input
                     class="celledit"
+                    use:focusEditor
                     bind:value={axisEditing.text}
                     onblur={commitAxisEdit}
                     onkeydown={(ev) => {
@@ -317,6 +322,7 @@
                 ondblclick={() => beginAxisEdit('y', r)}
                 >{#if axisEditing?.which === 'y' && axisEditing?.index === r}<input
                     class="celledit"
+                    use:focusEditor
                     bind:value={axisEditing.text}
                     onblur={commitAxisEdit}
                     onkeydown={(ev) => {
@@ -332,6 +338,7 @@
                   ondblclick={() => beginEdit(r, c)}
                 >{#if editing?.r === r && editing?.c === c}<input
                       class="celledit"
+                      use:focusEditor
                       bind:value={editing.text}
                       onblur={commitEdit}
                       onkeydown={(ev) => {

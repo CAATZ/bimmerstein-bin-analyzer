@@ -1,4 +1,4 @@
-import type { AxisDef, AxisLibEntry, MapDef, Result } from './types.js';
+import type { AxisDef, AxisLibEntry, MapDef, Result, Scaling, ValueFormat } from './types.js';
 
 /**
  * MapDef invariants (spec §8): a MapDef accepted here is always fully readable.
@@ -8,18 +8,47 @@ import type { AxisDef, AxisLibEntry, MapDef, Result } from './types.js';
  * - referenced axes fully inside the bin
  * - confidence present iff provenance === 'auto'
  * - detector (detection tier) only on provenance === 'auto' maps
- * Implemented in plan Phase 1 (TDD).
  */
+
+/** Shared runtime gate for imported formats and validated map/axis definitions. */
+export function isValueFormat(v: unknown): v is ValueFormat {
+  if (typeof v !== 'object' || v === null) return false;
+  const f = v as Partial<ValueFormat>;
+  return (
+    (f.width === 1 || f.width === 2 || f.width === 4) &&
+    typeof f.signed === 'boolean' &&
+    (f.endianness === 'little' || f.endianness === 'big') &&
+    (f.float === undefined || typeof f.float === 'boolean') &&
+    (f.float !== true || f.width === 4)
+  );
+}
+
+function scalingError(scaling: Scaling): string | undefined {
+  if (!Number.isFinite(scaling.factor) || !Number.isFinite(scaling.offset)) {
+    return 'scaling factor and offset must be finite numbers';
+  }
+  // Number.toFixed supports at most 100 decimal places.
+  if (!Number.isInteger(scaling.digits) || scaling.digits < 0 || scaling.digits > 100) {
+    return 'scaling digits must be an integer in [0, 100]';
+  }
+  return undefined;
+}
 
 function fail(error: string): Result<MapDef> {
   return { ok: false, error };
 }
 
 function axisError(axis: AxisDef, expectedCount: number, binSize: number, label: string): string | undefined {
+  if (!Number.isSafeInteger(axis.count) || axis.count < 1) return `${label} axis count must be an integer ≥ 1`;
   if (axis.count !== expectedCount) return `${label} axis count ${axis.count} !== ${expectedCount}`;
+  if (axis.format !== undefined && !isValueFormat(axis.format)) return `${label} axis format is invalid`;
+  if (axis.scaling !== undefined) {
+    const error = scalingError(axis.scaling);
+    if (error !== undefined) return `${label} axis ${error}`;
+  }
   if (axis.kind === 'referenced') {
     if (axis.address === undefined || !axis.format) return `${label} referenced axis missing address/format`;
-    if (axis.address < 0 || axis.address + axis.count * axis.format.width > binSize) {
+    if (!Number.isSafeInteger(axis.address) || axis.address < 0 || axis.address + axis.count * axis.format.width > binSize) {
       return `${label} axis out of bounds`;
     }
   }
@@ -30,8 +59,13 @@ function axisError(axis: AxisDef, expectedCount: number, binSize: number, label:
 }
 
 export function validateMapDef(map: MapDef, binSize: number): Result<MapDef> {
-  if (map.rows < 1 || map.cols < 1) return fail('rows and cols must be ≥ 1');
-  if (map.address < 0) return fail('address must be ≥ 0');
+  if (!Number.isSafeInteger(map.rows) || !Number.isSafeInteger(map.cols) || map.rows < 1 || map.cols < 1) {
+    return fail('rows and cols must be integers ≥ 1');
+  }
+  if (!Number.isSafeInteger(map.address) || map.address < 0) return fail('address must be an integer ≥ 0');
+  if (!isValueFormat(map.format)) return fail('invalid format');
+  const scalingErr = scalingError(map.scaling);
+  if (scalingErr !== undefined) return fail(scalingErr);
   const dataEnd = map.address + map.rows * map.cols * map.format.width;
   if (dataEnd > binSize) return fail(`map data [${map.address}, ${dataEnd}) exceeds bin size ${binSize}`);
   // row-major: xAxis spans cols, yAxis spans rows; col-major swaps them.

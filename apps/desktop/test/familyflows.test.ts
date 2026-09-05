@@ -18,8 +18,6 @@ const MOD = (id: string): string =>
   ` verify: () => ({ familyId: '${id}', applies: true, blocks: [], valid: false, skipped: [], notes: [] }),` +
   ` correct: (b) => ({ bytes: b, report: { familyId: '${id}', applies: true, blocks: [], valid: false, skipped: [], notes: [] }, changed: [] }) };`;
 
-const lastToast = (): string => get(toasts).at(-1)?.text ?? '';
-
 describe('reloadFamilies', () => {
   beforeEach(() => {
     a.resetStores();

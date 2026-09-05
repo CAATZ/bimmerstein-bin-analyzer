@@ -7,9 +7,8 @@ import type { Region } from './regions.js';
  * Stage 3 — Table candidate scan (spec §4.3).
  * Score rectangular blocks for 2D smoothness: low total variation along rows
  * AND columns relative to value variance; correct column count minimizes
- * vertical discontinuity ("jumps align at row boundaries"). 1D-curve
- * detection (rows === 1) is deferred past Plan A (spec §4.3); v1.0 emits
- * 2D candidates only (rows ≥ minRows). Implemented in plan Phase 2 (TDD).
+ * vertical discontinuity ("jumps align at row boundaries"). This stage emits
+ * 2D candidates (rows ≥ minRows); separate detectors handle curves.
  */
 export interface TableCandidate {
   address: number;
@@ -40,55 +39,8 @@ function tableFormats(config: ScanConfig): ValueFormat[] {
 }
 
 /**
- * Reference definition — mean |v[row+1][j] − v[row][j]| between two consecutive
- * rows. `scanTables` no longer calls this on the hot path (it inlines the same
- * arithmetic incrementally as the block grows), but it is retained as the
- * canonical, readable formula the incremental bookkeeping mirrors bit-for-bit.
- */
-function meanColDiff(vals: Float64Array, start: number, cols: number, row: number): number {
-  let sum = 0;
-  for (let j = 0; j < cols; j++) {
-    sum += Math.abs(vals[start + (row + 1) * cols + j]! - vals[start + row * cols + j]!);
-  }
-  return sum / cols;
-}
-
-/**
- * Reference definition of a block's range / row-total-variation /
- * column-total-variation. `scanTables` maintains these three quantities
- * incrementally on its hot path (O(cols) per added row) rather than calling
- * this O(rows×cols) recompute, but this remains the canonical formula the
- * incremental sums reproduce exactly — and the documented home for any future
- * scoring/variance changes.
- */
-function blockStats(vals: Float64Array, start: number, cols: number, rows: number) {
-  let min = Infinity;
-  let max = -Infinity;
-  let rowTv = 0;
-  let rowTvN = 0;
-  let colTv = 0;
-  let colTvN = 0;
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const v = vals[start + r * cols + c]!;
-      if (v < min) min = v;
-      if (v > max) max = v;
-      if (c > 0) {
-        rowTv += Math.abs(v - vals[start + r * cols + c - 1]!);
-        rowTvN++;
-      }
-      if (r > 0) {
-        colTv += Math.abs(v - vals[start + (r - 1) * cols + c]!);
-        colTvN++;
-      }
-    }
-  }
-  return { range: max - min, rowTv: rowTv / Math.max(1, rowTvN), colTv: colTv / Math.max(1, colTvN) };
-}
-
-/**
  * Mean row-to-row |Δ| of an rows×cols block read directly from bytes — the
- * same quantity as blockStats().colTv, but standalone so stage 5 can probe a
+ * same column-total-variation used by scanTables, so stage 5 can probe a
  * candidate's vertical discontinuity at alternative column counts (spec §4.3
  * "correct column count minimizes vertical discontinuity"). Returns undefined
  * when the block doesn't fit or is degenerate.
@@ -163,10 +115,8 @@ export function scanTables(bytes: Uint8Array, regions: Region[], config: ScanCon
           // range. Running statistics are maintained INCREMENTALLY as the block
           // grows one row at a time — each added row costs O(cols), so growing
           // to R rows costs O(R×cols) total instead of the O(R²×cols) of
-          // recomputing blockStats/meanColDiff from scratch at every step. The
-          // accept/reject decisions and final score are bit-for-bit identical
-          // to the from-scratch formulas in blockStats()/meanColDiff() (defined
-          // above as the reference definitions the running sums mirror exactly):
+          // recomputing the block statistics from scratch at every step.
+          // The running sums use these formulas:
           //   range   = max − min over all cells
           //   rowTv   = Σ|v[r][c]−v[r][c−1]| (c>0)   / (rows·(cols−1)), ≥1 denom
           //   colTv   = Σ|v[r][c]−v[r−1][c]| (r>0)   / ((rows−1)·cols), ≥1 denom

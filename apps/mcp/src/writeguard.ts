@@ -1,5 +1,5 @@
-import { existsSync, realpathSync, statSync } from 'node:fs';
-import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { lstatSync, realpathSync, statSync } from 'node:fs';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import type { Result } from '@binanalyzer/core';
 
 /**
@@ -34,14 +34,22 @@ export function resolveWriteTarget(root: string | undefined, outPath: string): R
   } catch {
     return { ok: false, error: `the directory of "${outPath}" does not exist — create it first (this server does not create directories)` };
   }
-  const target = join(realParent, basename(absolute));
+  let target = join(realParent, basename(absolute));
+  try {
+    // Resolve the final component too, including broken links that existsSync misses.
+    if (lstatSync(target, { throwIfNoEntry: false }) !== undefined) {
+      target = realpathSync(target);
+      if (statSync(target).isDirectory()) {
+        return { ok: false, error: `"${target}" is an existing directory` };
+      }
+    }
+  } catch {
+    return { ok: false, error: `cannot resolve existing target "${outPath}"` };
+  }
 
   const rel = relative(realRoot, target);
-  if (rel === '' || rel.startsWith('..') || isAbsolute(rel)) {
+  if (rel === '' || rel === '..' || rel.startsWith(`..${sep}`) || isAbsolute(rel)) {
     return { ok: false, error: `"${outPath}" resolves to "${target}", which is outside the granted --allow-write root "${realRoot}"` };
-  }
-  if (existsSync(target) && statSync(target).isDirectory()) {
-    return { ok: false, error: `"${target}" is an existing directory` };
   }
   return { ok: true, value: target };
 }

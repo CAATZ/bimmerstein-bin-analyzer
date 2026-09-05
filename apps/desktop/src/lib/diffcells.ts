@@ -1,6 +1,4 @@
-import type { EditJournal, MapDef } from '@binanalyzer/core';
-import { gridFromMap } from './griddata.js';
-import type { SurfaceGrid } from './griddata.js';
+import type { EditJournal } from '@binanalyzer/core';
 
 /**
  * Does any byte of the cell at `offset` differ from the file as opened?
@@ -23,23 +21,6 @@ export function originalBytes(working: Uint8Array, journal: EditJournal): Uint8A
   const scratch = Uint8Array.from(working);
   for (const [offset, e] of journal) scratch[offset] = e.original;
   return scratch;
-}
-
-/**
- * The same grid the view shows, decoded from the FILE AS OPENED (F11).
- *
- * Reconstructed from the working buffer plus the journal's `original` values
- * rather than read from the bin image's own byte array. Two reasons: no view
- * then needs to touch the original buffer at all, so the guard test stays
- * absolute; and the F11 display and the diff highlighting are driven by the
- * SAME journal, so they cannot drift apart.
- */
-export function originalGrid(
-  working: Uint8Array,
-  journal: EditJournal,
-  m: MapDef
-): SurfaceGrid {
-  return gridFromMap(originalBytes(working, journal), m);
 }
 
 /**
