@@ -210,8 +210,8 @@ function buildActiveImage(secondReader: boolean): { bytes: Uint8Array; sas: numb
     for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) data.push(100 + r * 2 + c);
     putSA(bytes, sa, data);
   }
-  bytes.set([0xa9, 0x24], 0x1000); // byte-reader body A
-  bytes.set([0xa9, 0x24], 0x1200); // byte-reader body B
+  bytes.set([0xa9, 0x24], 0x5000); // byte-reader body at CPU 0x1000
+  bytes.set([0xa9, 0x24], 0x5200); // byte-reader body at CPU 0x1200
   let o = 0x40;
   const aSites = secondReader ? 190 : 195;
   for (let i = 0; i < aSites; i++) {
@@ -246,7 +246,7 @@ function addCurveReader(bytes: Uint8Array): number[] {
   putSA(bytes, 0x150, [4, 1, 2, 3, 4]); // curve axis: count 4, strictly increasing
   const curveSas = [0x700, 0x740, 0x780, 0x7c0, 0x800, 0x840];
   for (const sa of curveSas) putSA(bytes, sa - 2, [0x50, 0x01]); // LE(0x150), backward
-  bytes.set([0xa9, 0x24], 0x1400); // byte-reader body at cpu 0x1400
+  bytes.set([0xa9, 0x24], 0x5400); // byte-reader body at cpu 0x1400
   let o = 0x680; // free space after buildActiveImage's 200 MOV+CALLS sites
   for (const sa of curveSas) {
     bytes.set([0xe6, 0xfc, sa & 0xff, sa >> 8, 0xda, 0x00, 0x00, 0x14], o); // MOV r12,#sa; CALLS 0x001400

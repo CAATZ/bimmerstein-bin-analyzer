@@ -1,6 +1,6 @@
 import { createBinImage } from '@binanalyzer/core';
 import type { MapDef, ValueFormat } from '@binanalyzer/core';
-import { saToFo } from '@binanalyzer/engine';
+import { cpuToFile, saToFo } from '@binanalyzer/engine';
 import type { GroundTruth } from './groundtruth.js';
 
 /**
@@ -564,8 +564,8 @@ export function generateCurveSynthetic(spec: CurveSyntheticSpec): { bytes: Uint8
   }
   const GRID_A_CPU = 0x1000;
   const GRID_B_CPU = 0x1200;
-  bytes.set([0xa9, 0x24], GRID_A_CPU); // FETCH_BYTE reader body
-  bytes.set([0xa9, 0x24], GRID_B_CPU); // FETCH_BYTE reader body
+  bytes.set([0xa9, 0x24], cpuToFile(GRID_A_CPU)); // FETCH_BYTE reader body
+  bytes.set([0xa9, 0x24], cpuToFile(GRID_B_CPU)); // FETCH_BYTE reader body
 
   let o = 0x40;
   for (let i = 0; i < 190; i++) {
@@ -585,8 +585,8 @@ export function generateCurveSynthetic(spec: CurveSyntheticSpec): { bytes: Uint8
   // reader's 4-byte header test — addCurveReader's exclusion idiom. ---
   const CURVE_A_CPU = 0x1400; // w1 (byte) reader
   const CURVE_B_CPU = 0x1600; // w2 (LE word) reader
-  bytes.set([0xa9, 0x24], CURVE_A_CPU); // FETCH_BYTE
-  bytes.set([0xa8, 0x24], CURVE_B_CPU); // FETCH_WORD
+  bytes.set([0xa9, 0x24], cpuToFile(CURVE_A_CPU)); // FETCH_BYTE
+  bytes.set([0xa8, 0x24], cpuToFile(CURVE_B_CPU)); // FETCH_WORD
 
   const U8fmt: ValueFormat = { width: 1, signed: false, endianness: 'big' };
   const U16LEfmt: ValueFormat = { width: 2, signed: false, endianness: 'little' };

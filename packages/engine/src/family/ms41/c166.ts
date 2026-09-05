@@ -8,8 +8,8 @@ import { cpuToFile, inCalWindow } from './frame.js';
  * linear-sweep disassembly by per-opcode majority vote (198/256 opcodes
  * observed, zero conflicts; spike 2026-07-09). The engine has NO runtime
  * dependency on that external source — this table plus its unit tests ARE the
- * contract. Known deliberate wart: 0xFA (JMPS, truly 4 bytes) was unobserved
- * and decodes as 2; all measured detection numbers include this behavior.
+ * contract. JMPS (0xFA) is four bytes even though it was absent from that
+ * corpus; treating its address operand as an instruction loses alignment.
  * Structural ISA facts — not heuristics — hence not in config.ts.
  */
 export const C166_OPCODE_LEN: readonly number[] = [
@@ -28,7 +28,7 @@ export const C166_OPCODE_LEN: readonly number[] = [
   2, 0, 4, 0, 4, 4, 4, 0, 2, 2, 4, 2, 2, 2, 2, 2, // 0xc0
   2, 0, 4, 0, 4, 0, 0, 0, 2, 0, 4, 2, 2, 2, 2, 2, // 0xd0
   2, 2, 0, 0, 4, 0, 4, 4, 2, 0, 4, 0, 2, 2, 2, 2, // 0xe0
-  2, 2, 4, 4, 4, 0, 4, 4, 0, 0, 0, 2, 2, 2, 2, 2, // 0xf0
+  2, 2, 4, 4, 4, 0, 4, 4, 0, 0, 4, 2, 2, 2, 2, 2, // 0xf0
 ];
 
 /** MOV Rwn,#data16 general form; second byte 0xFC selects r12 as destination. */
@@ -67,6 +67,7 @@ export interface ReaderCall {
  *    (E6 FC itself refreshes instead);
  *  - 2-byte reg,reg forms with destination r12: opcode < 0x60 or 0xF0, low
  *    nibble 0, second-byte high nibble 0xC;
+ *  - short ALU forms writing r12 (including #data3 and indirect operands);
  *  - any WINDOW_ENDERS opcode (CALLS itself records, then resets).
  * Measured (spike 2026-07-09): recovers 61/62 (e36m3) and 67/68 (s52) truth
  * table starts at maxDist 6.
@@ -106,6 +107,9 @@ export function scanReaderCalls(bytes: Uint8Array, maxDist: number): ReaderCall[
         } else if (L === 2 && (op < 0x60 || op === 0xf0) && (b1 & 0xf0) === 0xc0 && lowNib === 0) {
           r12val = -1;
           r12dist = Infinity;
+        } else if (L === 2 && op < 0x80 && op !== 0x48 && lowNib === 8 && (b1 & 0xf0) === 0xc0) {
+          r12val = -1;
+          r12dist = Infinity;
         } else if (r12val >= 0) r12dist++;
       }
       o += L;
@@ -126,6 +130,7 @@ const RETURN_OPS = new Set([0xdb, 0xcb, 0xfb]); // RETS / RET / RETI
  * match truth width on every recalled table (61/61, 67/67).
  */
 export function classifyReaderWidth(bytes: Uint8Array, entryCpu: number, maxInstr: number): 1 | 2 | 0 {
+  if (entryCpu >= 0xc000 && entryCpu < 0x10000) return 0; // segment-0 RAM/SFR window has no flash body
   let o = cpuToFile(entryCpu);
   const bankEnd = (Math.floor(o / 0x4000) + 1) * 0x4000;
   for (let i = 0; i < maxInstr && o + 1 < Math.min(bankEnd, bytes.length); i++) {

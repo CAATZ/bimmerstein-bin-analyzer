@@ -59,6 +59,79 @@ describe('poolStructuralActive', () => {
 });
 
 describe('poolStructuralTables — header path', () => {
+  it('uses a neighboring packed header to corroborate distant shared axes, including the last table', () => {
+    const b = new Uint8Array(0x4000);
+    const at = 0x2000, cols = 6, rows = 4, size = cols * rows;
+    const { xData, yData } = plantTable(b, 0x100, cols, rows, at);
+    b.set(b.slice(yData - 1, yData + rows), 0x700);
+    w16(b, at - 2, 0x700);
+    const next = at + size + 4;
+    b.set(b.slice(at - 4, at + size), next - 4);
+    expect(poolStructuralHeaderCount(b, cfg)).toBe(0); // activation stays conservative
+    const out = poolStructuralTables(b, [], cfg, true);
+    for (const address of [at, next]) {
+      expect(out).toContainEqual(expect.objectContaining({ address, rows, cols,
+        format: expect.objectContaining({ width: 1 }),
+        xAxis: expect.objectContaining({ address: xData }),
+        yAxis: expect.objectContaining({ address: 0x701 }),
+      }));
+    }
+    b.fill(0, next - 4, next); // an isolated scattered header has no packing evidence
+    expect(poolStructuralTables(b, [], cfg, true).some(t => t.address === at)).toBe(false);
+  });
+
+  it('allows one alignment byte after odd-sized data when selecting width', () => {
+    const b = new Uint8Array(0x4000);
+    const at = 0x2000, size = 7 * 5;
+    plantTable(b, 0x100, 5, 7, at);
+    b.fill(0x42, at, at + size * 2);
+    plantTable(b, 0x140, 4, 4, at + size + 1 + 4);
+    expect(poolStructuralTables(b, [], cfg, true).find(t => t.address === at)?.format.width).toBe(1);
+  });
+
+  it('keeps a packed word table when its data also decodes as a header', () => {
+    const b = new Uint8Array(0x4000);
+    const at = 0x2000, size = 6 * 4 * 2;
+    plantTable(b, 0x100, 6, 4, at);
+    for (let i = 0; i < 24; i++) w16(b, at + i * 2, 100 + i * 5);
+    const next = at + size + 4;
+    plantTable(b, 0x140, 4, 4, next);
+    // A false header in the last row must not become the packing boundary.
+    plantTable(b, 0x180, 6, 4, 0x2800);
+    b.set(b.slice(0x2800 - 4, 0x2800), at + size - 12);
+    const out = poolStructuralTables(b, [], cfg, true);
+    expect(out).toContainEqual(expect.objectContaining({ address: at, rows: 4, cols: 6,
+      format: expect.objectContaining({ width: 2 }) }));
+    expect(out.some(t => t.address === at + size - 8)).toBe(false);
+    expect(out.some(t => t.address === next)).toBe(true);
+  });
+
+  it('does not let coincidentally packed headers inside smooth data outrank the whole table', () => {
+    const b = new Uint8Array(0x4000);
+    const at = 0x2000;
+    plantTable(b, 0x100, 16, 16, at);
+    for (let r = 0; r < 16; r++) for (let c = 0; c < 16; c++) w16(b, at + (r * 16 + c) * 2, 100 + r * 10 + c * 3);
+    plantTable(b, 0x180, 2, 2, 0x2800);
+    const fakeHeader = b.slice(0x2800 - 4, 0x2800);
+    b.set(fakeHeader, at + 100);
+    b.set(fakeHeader, at + 108); // a 2x2 byte table would fit between these
+    expect(poolStructuralTables(b, [], cfg, true)).toContainEqual(expect.objectContaining({
+      address: at, rows: 16, cols: 16, format: expect.objectContaining({ width: 2 }),
+    }));
+  });
+
+  it('excludes the next table header when choosing a packed table width', () => {
+    const b = new Uint8Array(0x4000);
+    const at = 0x3000;
+    plantTable(b, 0x100, 6, 5, at);
+    b.fill(0x42, at, at + 6 * 5 * 2);
+    plantTable(b, 0x140, 6, 5, at + 6 * 5 * 2 + 4);
+    // Both widths see constant cells. Only width 2 fills the data span up
+    // to the next four-byte header; its bytes are not part of this table.
+    const out = poolStructuralTables(b, [], cfg, true);
+    expect(out.find(t => t.address === at)?.format.width).toBe(2);
+  });
+
   it('recovers a header-backed table with EXACT dims + axis addresses', () => {
     const b = new Uint8Array(0x4000);
     let ax = 0x80, tp = 0x1004;
@@ -151,6 +224,51 @@ function plantPackedRun(b: Uint8Array, axAt: number, cols: number, rows: number,
 }
 
 describe('poolStructuralTables — packed tiling (Component C)', () => {
+  it.each([1, 2] as const)('uses the chained row/column axis order when a square packed table cannot distinguish roles by smoothness (width %i)', (width) => {
+    const bytes = Uint8Array.from({ length: 0x4000 }, (_, i) => (i * 73 + 19) % 251);
+    bytes.fill(0xff, 0, 0x2600); // table values must not also point into plausible low-address axes
+    const at = 0x2800, count = 20, size = count * count * width;
+    const { xData: rowAxis, yData: colAxis } = plantPackedRun(bytes, 0x2600, count, count, at, 4);
+    bytes.fill(0xff, at - count * width, at);
+    for (let t = 0; t < 4; t++) for (let r = 0; r < count; r++) for (let c = 0; c < count; c++) {
+      const offset = at + t * size + (r * count + c) * width;
+      const value = 100 + r * 2 + c * 3 + t;
+      if (width === 2) w16(bytes, offset, value); else bytes[offset] = value;
+    }
+    const found = poolStructuralTables(bytes, [], cfg, true);
+    for (let t = 0; t < 4; t++) expect(found).toContainEqual(expect.objectContaining({
+      address: at + t * size, rows: count, cols: count,
+      format: expect.objectContaining({ width }),
+      xAxis: expect.objectContaining({ address: colAxis }),
+      yAxis: expect.objectContaining({ address: rowAxis }),
+    }));
+  });
+
+  it('preserves explicit square-table header roles even when their storage order differs from a headerless chain', () => {
+    const bytes = new Uint8Array(0x2000);
+    const { xData, yData } = plantTable(bytes, 0x100, 8, 8, 0x500);
+    expect(poolStructuralTables(bytes, [], cfg, true)).toContainEqual(expect.objectContaining({
+      address: 0x500, xAxis: expect.objectContaining({ address: xData }), yAxis: expect.objectContaining({ address: yData }),
+    }));
+  });
+
+  it.each([1, 2] as const)('pins every packed table to the leading boundary instead of clipping preceding bytes (width %i)', (width) => {
+    const b = new Uint8Array(0x4000);
+    const runAt = 0x2800;
+    const cols = 8, rows = 10, size = rows * cols * width;
+    plantPackedRun(b, 0x2600, cols, rows, runAt, 4);
+    b.fill(0xff, runAt - 64, runAt);
+    for (let t = 0; t < 4; t++) for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const at = runAt + t * size + (r * cols + c) * width;
+      const value = 100 + r * 2 + c * 3 + t;
+      if (width === 2) w16(b, at, value); else b[at] = value;
+    }
+    const out = poolStructuralTables(b, [], cfg, true);
+    const inRun = out.filter(t => t.address >= runAt - size && t.address < runAt + 4 * size).sort((a, b) => a.address - b.address);
+    expect(inRun.map(t => [t.address, t.rows, t.cols, t.format.width])).toEqual(
+      Array.from({ length: 4 }, (_, i) => [runAt + i * size, rows, cols, width]));
+  });
+
   it('recovers a >= structTileMinRun packed custom run bound to a tight plateau pair', () => {
     const b = new Uint8Array(0x4000);
     // header density to open the gate

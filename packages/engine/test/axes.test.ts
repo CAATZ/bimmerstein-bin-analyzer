@@ -11,6 +11,15 @@ function putU16be(bytes: Uint8Array, offset: number, values: number[]): void {
 }
 
 describe('scanAxes', () => {
+  it.each([1, 2] as const)('keeps the first descending breakpoint after a direction change next to fill (width %i)', (width) => {
+    const format = { width, signed: false, endianness: 'big' as const };
+    const bytes = new Uint8Array(5 * width);
+    [0, 100, 80, 50, 10].forEach((v, i) => { bytes[(i + 1) * width - 1] = v; });
+    const found = scanAxes(bytes, [{ start: 0, end: bytes.length, kind: 'data' }],
+      { ...DEFAULT_SCAN_CONFIG, axis: { ...DEFAULT_SCAN_CONFIG.axis, candidateFormats: [format] } });
+    expect(found).toEqual([expect.objectContaining({ address: width, count: 4, direction: 'dec' })]);
+  });
+
   it('finds a planted ascending u16be axis', () => {
     const bytes = new Uint8Array(256); // zeros break monotonicity around the plant
     const axis = [520, 760, 1000, 1500, 2000, 2520, 3000, 3520, 4000, 4520, 5000, 5520];

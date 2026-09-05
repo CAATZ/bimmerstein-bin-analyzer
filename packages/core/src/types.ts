@@ -73,13 +73,13 @@ export type Provenance = 'auto' | 'manual' | 'imported';
 
 /**
  * Which detection tier produced an auto-detected map (spec §4.5/§4.6), ordered
- * by evidence strength: `family` = code-xref-proven (a cal-reader CALL site
- * references it — only on full firmware reads); `structural` = placed from a
+ * by precedence: `family` = family-specific analysis, combining code references
+ * and structural fallbacks; `structural` = placed from a
  * count-prefixed axis pair's stored lengths (pool.ts); `pool` = byte-detected
  * and bound to a shared count-prefixed axis pair; `generic` = pure byte-
  * smoothness heuristic. Only valid on `provenance === 'auto'` maps (the engine
- * sets it on every auto detection); lets the UI and exports distinguish
- * code-proven maps from heuristic ones.
+ * sets it on every auto detection). The tier identifies the detection method;
+ * it does not certify an exact address or prove a code reference.
  */
 export type DetectorTier = 'family' | 'structural' | 'pool' | 'generic';
 

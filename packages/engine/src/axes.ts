@@ -80,27 +80,9 @@ export function scanAxes(bytes: Uint8Array, regions: Region[], config: ScanConfi
             if (d === dir) j++;
             else break;
           }
-          // The run currently spans indices [i, j]. values[i] can end up as the
-          // run's leading element merely because the direction sign flips
-          // relative to whatever came before it (see the dir===0 skip above) —
-          // that predecessor relationship is where the plan's reference fixture
-          // trips up ("plateau-tail" false start). Coincidental numeric equality
-          // between values[i] and values[i - 1] is NOT on its own a reliable
-          // padding signal — real ECU axes can legitimately share a breakpoint
-          // value with whatever precedes them (e.g. two tables both using a
-          // 4000 RPM breakpoint), so trimming on value equality alone risks
-          // silently amputating a genuine first sample. Instead, only trim
-          // (at most) that single leading element, and only when the RAW BYTES
-          // immediately preceding it are a canonical fill pattern — all 0x00 or
-          // all 0xFF for the format's width — matching the same fill-byte
-          // convention regions.ts uses for its Stage 1 empty-region classifier.
-          // Checked against raw bytes (not decoded values) so a signed format's
-          // decoded -1 (raw 0xFFFF) is recognized as fill regardless of numeric
-          // value. This is a single-step trim, not a repeated walk-back: once
-          // the immediate predecessor is fill, only the one element sitting on
-          // the fill/run boundary is suspect, not however many further-back
-          // elements happen to also be flat.
-          const start = i < j && i > 0 && isFillByteRun(bytes, base + (i - 1) * w, w) ? i + 1 : i;
+          // Trim only the final fill-plateau cell. A direction change next to
+          // fill can be a genuine breakpoint and must keep its first sample.
+          const start = i > 0 && values[i] === values[i - 1] && isFillByteRun(bytes, base + (i - 1) * w, w) ? i + 1 : i;
           emit(format, base + start * w, values.slice(start, j + 1), dir);
           i = j;
         }

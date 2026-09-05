@@ -51,8 +51,22 @@ export function gridFromSelection(
 }
 
 /** Caller passes a VALIDATED MapDef (store invariant) — readGrid cannot go out of range. */
-export function gridFromMap(bytes: Uint8Array, map: MapDef): SurfaceGrid {
-  return withMinMax(map.rows, map.cols, readGrid(bytes, map));
+export function gridFromMap(bytes: Uint8Array, map: MapDef, transposed = false): SurfaceGrid {
+  const values = readGrid(bytes, map);
+  if (transposed && map.rows > 1 && map.cols > 1) {
+    return withMinMax(map.cols, map.rows, Array.from({ length: map.cols }, (_, c) => values.map((row) => row[c]!)));
+  }
+  return withMinMax(map.rows, map.cols, values);
+}
+
+/** Transposition is its own inverse; selections stay in the map's original coordinates. */
+export function sourceCell(row: number, col: number, transposed: boolean): { row: number; col: number } {
+  return transposed ? { row: col, col: row } : { row, col };
+}
+
+export function sourceAxis(which: 'x' | 'y', transposed: boolean, orientation: MapDef['orientation'] = 'row-major'): 'x' | 'y' {
+  // Column-major definitions bind X to rows and Y to columns.
+  return transposed !== (orientation === 'col-major') ? (which === 'x' ? 'y' : 'x') : which;
 }
 
 export function seriesFromRange(bytes: Uint8Array, start: number, count: number, format: ValueFormat): number[] {

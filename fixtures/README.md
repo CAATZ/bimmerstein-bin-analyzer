@@ -55,6 +55,18 @@ See `docs/notes/ms41-program-checksum-variant-spike.md`.
 
 ## Adding a real-bin fixture locally
 
+Additional definition-matched references live under `fixtures/references/`:
+MS41.0 calibration ID 41 (59 grids) and MS41.1 ID 60 (56 grids), each in full
+and partial framing. Their ground truth binds the exact image hash; firmware
+stays local and untracked. These are detection references, not checksum or
+hardware validation. Published metadata contains only structure; names and
+scaling remain in the local matching definition.
+
+Evaluation reports exact starts, exact layouts (including width, signedness,
+byte order and storage order), and complete known-axis pairs alongside the
+older overlap scores. Measured floors in `packages/eval/src/exact-gates.ts`
+protect these properties in fixture evaluation, holdout and real acceptance.
+
 1. Drop `yourbin.bin` into `fixtures/<family>/`.
 2. Build `groundtruth.json` with
    `pnpm eval gt-from-romraider <def.xml> <bin> --fixture <name> --id-prefix <prefix> --rom <xmlid> --fo`

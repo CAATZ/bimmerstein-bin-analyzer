@@ -22,12 +22,6 @@ import { colTvAt } from './tables.js';
  *  makes full-read safety STRUCTURAL (not merely the empirical header count) and
  *  bounds the tiling's work. Equals MS41_MIN_BIN_LEN. */
 export const STRUCT_MAX_BIN_LEN = 0x18000;
-/** Bounded forward scan for a packed run's first tile past a tight axis pair.
- *  No real-firmware distance is on record yet for this gap (unlike
- *  structTileFrameMin, which IS measured against real SS1v2 customs) — this is
- *  a generous cap chosen only to comfortably clear incidental padding between
- *  an axis pool's end and its bound run, while staying O(window) bounded. */
-const STRUCT_TILE_WINDOW = 1024;
 /** Defensive cap on tiling steps per pair (structural fact; bounds work). */
 const STRUCT_TILE_MAX_STEPS = 64;
 
@@ -100,17 +94,17 @@ function frameScore(bytes: Uint8Array, addr: number, rows: number, cols: number,
   return range <= 0 ? 0.1 : Math.max(0, 1 - (rt + ct) / (range + 1));
 }
 
-/** True when [off-4 .. off) decodes as a valid backward header pointing to a
- *  packed axis pair (both pointers < off, xPtr != yPtr, |xPtr-yPtr| <= pairSpan),
- *  each a count-prefixed monotone/plateau/dead axis run. */
-function decodeHeader(bytes: Uint8Array, off: number, config: ScanConfig): { xa: AxisRun; ya: AxisRun } | undefined {
+/** Decode backward pointers to count-prefixed monotone/plateau/dead axes.
+ *  The density gate requires a nearby pair; candidate generation may also
+ *  inspect scattered pairs, which need separate packing corroboration. */
+function decodeHeader(bytes: Uint8Array, off: number, config: ScanConfig, packedAxes = true): { xa: AxisRun; ya: AxisRun } | undefined {
   const { minCols, maxCols, minRows, maxRows } = config.table;
   const { pairSpan, structHeaderAxisMinCount, structAxisMaxCount } = config.pool;
   const xp = r16(bytes, off - 4);
   const yp = r16(bytes, off - 2);
   if (xp === yp || !(xp < off && yp < off)) return undefined;
   if (xp === 0 || yp === 0 || xp === 0xffff || yp === 0xffff) return undefined;
-  if (Math.abs(xp - yp) > pairSpan) return undefined; // packed pool pair, not scattered
+  if (packedAxes && Math.abs(xp - yp) > pairSpan) return undefined;
   const xa = validateAxisAt(bytes, xp, structHeaderAxisMinCount, structAxisMaxCount, true);
   const ya = validateAxisAt(bytes, yp, structHeaderAxisMinCount, structAxisMaxCount, true);
   if (!xa || !ya) return undefined;
@@ -145,33 +139,39 @@ interface Cand {
   tier: number; score: number;
 }
 
-/** Component A — whole-file header sweep (tier 0). For every valid header, choose
- *  the cell width by exact-gap-to-next-header packing, else higher frameScore,
- *  else the smaller width (a TOTAL order). Emits exact dims + axis addresses. */
+/** Component A — header sweep (tier 0). Packing to another header selects the
+ *  width and corroborates headers whose shared axes are not a nearby pair.
+ *  The activation gate and overlap ranking remain unchanged. */
 function headerCandidates(bytes: Uint8Array, config: ScanConfig): Cand[] {
   const out: Cand[] = [];
-  const hdrOffs: number[] = [];
-  for (let off = 4; off < bytes.length; off++) if (decodeHeader(bytes, off, config)) hdrOffs.push(off);
-  // hdrOffs is ascending by construction (deterministic).
-  const nextHdr = (off: number): number | undefined => {
-    let lo = 0;
-    let hi = hdrOffs.length;
-    while (lo < hi) { const m = (lo + hi) >> 1; if (hdrOffs[m]! <= off) lo = m + 1; else hi = m; }
-    return lo < hdrOffs.length ? hdrOffs[lo] : undefined;
+  const headers = new Map<number, NonNullable<ReturnType<typeof decodeHeader>>>();
+  for (let off = 4; off < bytes.length; off++) {
+    const d = decodeHeader(bytes, off, config, false);
+    if (d) headers.set(off, d);
+  }
+  // Check the expected data end, not the first header-like bytes in the data.
+  // An odd byte-table end may carry one C166 word-alignment pad byte.
+  const successor = (end: number): number | undefined => {
+    if (headers.has(end + 4)) return end + 4;
+    if (end % 2 === 1 && headers.has(end + 5)) return end + 5;
+    return undefined;
   };
-  for (const off of hdrOffs) {
-    const d = decodeHeader(bytes, off, config)!;
+  const preceded = new Set<number>();
+  for (const [off, d] of headers) for (const w of config.table.widths) {
+    if (w !== 1 && w !== 2) continue;
+    const next = successor(off + d.xa.count * d.ya.count * w);
+    if (next !== undefined) preceded.add(next);
+  }
+  for (const [off, d] of headers) {
     const cols = d.xa.count;
     const rows = d.ya.count;
-    const ns = nextHdr(off);
-    const gap = ns !== undefined ? ns - off : undefined;
     let best: { w: 1 | 2; score: number; exact: boolean } | undefined;
     for (const w of config.table.widths) {
       if (w !== 1 && w !== 2) continue;
       const byteLen = rows * cols * w;
       if (off + byteLen > bytes.length) continue;
       const sc = frameScore(bytes, off, rows, cols, fmtOf(w));
-      const exact = gap !== undefined && byteLen === gap;
+      const exact = successor(off + byteLen) !== undefined;
       // TOTAL order: exact-packing wins; then higher score; then smaller width.
       if (
         best === undefined ||
@@ -183,6 +183,8 @@ function headerCandidates(bytes: Uint8Array, config: ScanConfig): Cand[] {
       }
     }
     if (!best) continue;
+    const packed = best.exact || preceded.has(off);
+    if (!packed && !decodeHeader(bytes, off, config)) continue;
     out.push({
       address: off, rows, cols, format: fmtOf(best.w), tier: 0, score: Math.max(0.01, best.score),
       xAxis: { address: d.xa.dataAddr, count: d.xa.count, format: fmtOf(d.xa.width) },
@@ -218,41 +220,32 @@ function plateauAxes(bytes: Uint8Array, config: ScanConfig): PlateauAxis[] {
   return out;
 }
 
-/** True when [off .. off+rows*cols) begins at a genuine data boundary: the
- *  mean col-wise |Δ| between its first row and the pseudo-row immediately
- *  before it is large (>= edgeMin ×) relative to the block's own row-to-row
- *  variation. An out-of-bounds pseudo-row counts as an edge. Same one-sided
- *  ratio test as score.ts's `startEdgeOk` (reused via `colTvAt`, kept local
- *  otherwise) — without it, the forward scan for "first" cannot tell a
- *  genuine table start from a boundary-clipping misframe that merely
- *  straddles the padding-to-data edge: a window starting 1 byte into the
- *  padding, immediately before real data, is still >=90% real cells and
- *  scores nearly as smooth as the true start (reproduced: an off-by-few-byte
- *  misframe outscored the true start in structural.test.ts's minRun-guard
- *  fixture). */
-function hasLeadingEdge(bytes: Uint8Array, off: number, rows: number, cols: number, fmt: ValueFormat, edgeMin: number): boolean {
+/** Leading row's boundary contrast divided by the table's internal row
+ *  variation. A passing ratio alone can include neighboring bytes; its
+ *  local peak supplies the start used by the packed run. */
+function leadingEdge(bytes: Uint8Array, off: number, rows: number, cols: number, fmt: ValueFormat): number {
   const w = fmt.width;
   const prevRowAddr = off - cols * w;
-  if (prevRowAddr < 0) return true;
+  if (prevRowAddr < 0) return Infinity;
   const boundary = colTvAt(bytes, prevRowAddr, 2, cols, fmt);
-  if (boundary === undefined) return true;
+  if (boundary === undefined) return Infinity;
   const internal = colTvAt(bytes, off, rows, cols, fmt);
-  if (internal === undefined) return false;
+  if (internal === undefined) return 0;
   // 1e-9: structural divide-by-zero guard (same role as startEdgeOk's).
-  return boundary / (internal + 1e-9) >= edgeMin;
+  return boundary / (internal + 1e-9);
 }
 
 /** Component C — packed tiling from an adjacency-tight chained plateau pair (the
  *  stock [axisChain][table] law: one axis ends exactly at the other's count
- *  prefix). Locate the first smooth RxC block after the pair (bounded window,
- *  and required to begin at a genuine leading edge — see `hasLeadingEdge`),
+ *  prefix). Locate the first smooth RxC block after the pair in a bounded
+ *  window, refining its start to the strongest edge within one widest row,
  *  then step by byte-length placing consecutive blocks while smooth; emit the
  *  run only if it is at least structTileMinRun long. Restricting to tight
  *  pairs is what keeps this from a combinatorial spurious-run explosion
  *  (measured). */
 function tileCandidates(bytes: Uint8Array, config: ScanConfig): Cand[] {
   const { minCols, maxCols, minRows, maxRows } = config.table;
-  const { structTileFrameMin, structTileMinRun, edgeMin } = config.pool;
+  const { structTileFrameMin, structTileMinRun, structTileWindow, edgeMin } = config.pool;
   const axes = plateauAxes(bytes, config);
   const out: Cand[] = [];
   const bestW = (off: number, rows: number, cols: number): { w: 1 | 2; sc: number } | undefined => {
@@ -270,20 +263,33 @@ function tileCandidates(bytes: Uint8Array, config: ScanConfig): Cand[] {
       if (x.address === y.address) continue;
       // adjacency-tight chain: one axis ends exactly at the other's prefix byte.
       if (y.end !== x.prefixAddr && x.end !== y.prefixAddr) continue;
+      // Equal counts give both axis orders identical grids and scores. Use
+      // the packed [rowAxis][colAxis] layout, as in poolAdjacentTables.
+      if (x.count === y.count && x.end === y.prefixAddr) continue;
       const cols = x.count;
       const rows = y.count;
       if (cols < minCols || cols > maxCols || rows < minRows || rows > maxRows) continue;
       const start0 = Math.max(x.end, y.end);
       let first = -1;
-      for (let off = start0; off <= Math.min(start0 + STRUCT_TILE_WINDOW, bytes.length - rows * cols); off++) {
-        const b = bestW(off, rows, cols);
-        if (b && b.sc >= structTileFrameMin && hasLeadingEdge(bytes, off, rows, cols, fmtOf(b.w), edgeMin)) { first = off; break; }
+      let firstWidth: 1 | 2 = 1;
+      let bestEdge = -Infinity;
+      let searchEnd = Math.min(start0 + structTileWindow, bytes.length - rows * cols);
+      for (let off = start0; off <= searchEnd; off++) {
+        for (const w of [1, 2] as const) {
+          if (frameScore(bytes, off, rows, cols, fmtOf(w)) < structTileFrameMin) continue;
+          const edge = leadingEdge(bytes, off, rows, cols, fmtOf(w));
+          if (edge < edgeMin) continue;
+          // The first passing window can still include part of the preceding
+          // row. Refine locally so a later, unrelated table cannot win.
+          if (first < 0) searchEnd = Math.min(searchEnd, off + cols * 2);
+          if (edge > bestEdge) { first = off; firstWidth = w; bestEdge = edge; }
+        }
       }
       if (first < 0) continue;
       const run: Cand[] = [];
       let off = first;
       for (let step = 0; step < STRUCT_TILE_MAX_STEPS && off + rows * cols <= bytes.length; step++) {
-        const b = bestW(off, rows, cols);
+        const b = step === 0 ? { w: firstWidth, sc: frameScore(bytes, off, rows, cols, fmtOf(firstWidth)) } : bestW(off, rows, cols);
         if (!b || b.sc < structTileFrameMin) break;
         run.push({
           address: off, rows, cols, format: fmtOf(b.w), tier: 2, score: Math.max(0.01, b.sc),

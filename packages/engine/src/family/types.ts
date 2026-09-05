@@ -16,8 +16,8 @@ export interface FamilyDetection {
   format: ValueFormat;
   /**
    * 0..1 frame-smoothness confidence. May be far below score.minConfidence —
-   * family detections are code-proven, so stage 5 emits them anyway (a
-   * code-referenced dead/flat table is still a real table).
+   * stage 5 uses the family evidence tiers instead of that generic cutoff,
+   * preserving code-referenced dead/flat tables and structural fallbacks.
    */
   score: number;
   /** Emission tier: grid tiers 0–3 (header > tight-fb > loose-fb > scan); the

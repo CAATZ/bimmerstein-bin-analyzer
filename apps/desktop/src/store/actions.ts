@@ -8,13 +8,13 @@ import {
   DEFAULT_VIEW_PARAMS, addressFrame, axisLibrary, bin, binPath, cellRange, checksumReport, editJournal, framePromptAnswered,
   lastSave,
   loadedLineage,
-  maps,
+  maps, mapFilter,
   modalOpen,
   pendingPack,
   potentialMaps,
   proposals, regions,
   saveTarget,
-  scanStatus, scrollRequest, selection, toasts, viewParams, workingBytes,
+  scanStatus, scrollRequest, selection, toasts, transposeMaps, viewParams, workingBytes,
   type CellRange, type SaveTarget, type Selection, type Toast, type ViewMode,
 } from './stores.js';
 import type { SaveOutcome } from '../lib/savereport.js';
@@ -22,6 +22,7 @@ import type { PackTable } from '@binanalyzer/formats';
 import type { PackRow } from '../lib/packapply.js';
 import { detachedAxis, libraryAxis, stampAxis } from '../lib/axislib.js';
 import { axisEditability, isMonotonic } from '../lib/axisedit.js';
+import { DEFAULT_MAP_FILTER, filterMaps, type MapFilter } from '../lib/mapfilter.js';
 import { clearUndo, pushUndo, redo as redoInternal, undo as undoInternal, undoTransaction } from './undo.js';
 
 /**
@@ -80,6 +81,7 @@ export function requestScroll(offset: number): void {
 
 /** Test/reset hook — also the app-quit-to-blank state. */
 export function resetStores(): void {
+  mapFilter.set({ ...DEFAULT_MAP_FILTER });
   bin.set(null);
   binPath.set(null);
   maps.set([]);
@@ -91,6 +93,7 @@ export function resetStores(): void {
   scrollRequest.set(null);
   toasts.set([]);
   viewParams.set({ ...DEFAULT_VIEW_PARAMS });
+  transposeMaps.set(false);
   addressFrame.set('none');
   framePromptAnswered.set(false);
   proposals.set([]);
@@ -109,6 +112,7 @@ export function resetStores(): void {
 }
 
 export function setBin(image: BinImage): void {
+  mapFilter.set({ ...DEFAULT_MAP_FILTER });
   bin.set(image);
   binPath.set(null); // a new bin: the caller records its path right after
   maps.set([]);
@@ -118,6 +122,7 @@ export function setBin(image: BinImage): void {
   scanStatus.set({ state: 'idle' });
   selection.set(null);
   viewParams.set({ ...DEFAULT_VIEW_PARAMS });
+  transposeMaps.set(false);
   addressFrame.set('none'); // a new bin is a new frame decision
   framePromptAnswered.set(false);
   proposals.set([]); // a proposal is about maps in the bin that just went away
@@ -968,6 +973,10 @@ export function togglePreview(): void {
   viewParams.update((vp) => ({ ...vp, previewOpen: !vp.previewOpen }));
 }
 
+export function toggleMapTranspose(): void {
+  transposeMaps.update((value) => !value);
+}
+
 /** Ctrl+B (spec §7 "optimize value range"): min/max of the selection at the view word size. */
 export function optimizeValueRange(): void {
   const image = get(bin);
@@ -995,11 +1004,15 @@ export function optimizeValueRange(): void {
   viewParams.update((p) => ({ ...p, valueRange: { min, max } }));
 }
 
-/** F / Shift+F (spec §7): cycle potential maps in ENGINE RANK order, wrap around. */
+export function setMapFilter(filter: MapFilter): void {
+  mapFilter.set({ ...filter });
+}
+
+/** F / Shift+F: cycle visible potential maps in engine rank order, wrapping around. */
 export function stepPotential(delta: 1 | -1): void {
-  const pots = get(potentialMaps);
+  const pots = filterMaps(get(potentialMaps), get(mapFilter));
   if (pots.length === 0) {
-    pushToast('info', 'No potential maps — run a scan first');
+    pushToast('info', get(potentialMaps).length ? 'No potential maps match the filters' : 'No potential maps — run a scan first');
     return;
   }
   const sel = get(selection);
