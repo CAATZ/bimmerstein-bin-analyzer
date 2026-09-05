@@ -1,4 +1,4 @@
-import type { ValueFormat } from '@binanalyzer/core';
+import { readValue, type ValueFormat } from '@binanalyzer/core';
 import type { ScanConfig } from './config.js';
 import type { AxisCandidate } from './axes.js';
 import type { TableCandidate } from './tables.js';
@@ -221,9 +221,9 @@ function coveringRun(
  * monotone in every contiguous sub-window, so the carved window is a valid
  * axis even when scanAxes fused it into a longer run (dominant real case:
  * the y-axis fusing into the map's ascending first row). The two derived
- * windows must come from DISTINCT runs: measured on the synthetic fixtures,
- * single-run carving manufactures anchors inside smooth map interiors and
- * destroys structure recall.
+ * windows normally come from DISTINCT runs: unconstrained single-run carving
+ * manufactures anchors inside smooth map interiors. With bytes available,
+ * two distinct constant steps and a separate join can establish a split.
  *
  * Accepts either the raw candidate array (builds an index — test/one-shot
  * convenience) or a prebuilt AxisIndex (hot path: rankAndEmit builds it once).
@@ -232,7 +232,8 @@ function coveringRun(
 export function findAnchor(
   table: TableCandidate,
   axesOrIndex: AxisCandidate[] | AxisIndex,
-  config: ScanConfig
+  config: ScanConfig,
+  bytes?: Uint8Array
 ): Anchor | undefined {
   const idx = Array.isArray(axesOrIndex) ? buildAxisIndex(axesOrIndex) : axesOrIndex;
   const maxGap = config.associate.anchorMaxGap;
@@ -322,6 +323,31 @@ export function findAnchor(
         xAddress: xD.start, xCount: cols, xFormat: xD.run.format,
         yAddress: yStart, yCount: rows, yFormat: R2.format,
       };
+    }
+  }
+  // A fused run is insufficient by itself. Two constant, unequal steps with
+  // a join matching neither step provide an independent axis boundary.
+  if (bytes && rows >= config.axis.minCount && cols >= config.axis.minCount && tableStart <= bytes.length) {
+    for (const run of covering) {
+      const w = run.format.width;
+      const xStart = tableStart - (rows + cols) * w;
+      if (xStart < run.address || (xStart - run.address) % w !== 0) continue;
+      const yStart = tableStart - rows * w;
+      const step = (start: number, count: number): number | undefined => {
+        const delta = readValue(bytes, start + w, run.format) - readValue(bytes, start, run.format);
+        if (delta === 0) return undefined;
+        for (let i = 2; i < count; i++) {
+          if (readValue(bytes, start + i * w, run.format) - readValue(bytes, start + (i - 1) * w, run.format) !== delta) return undefined;
+        }
+        return delta;
+      };
+      const xStep = step(xStart, cols);
+      const yStep = step(yStart, rows);
+      const join = readValue(bytes, yStart, run.format) - readValue(bytes, yStart - w, run.format);
+      if (xStep !== undefined && yStep !== undefined && xStep !== yStep && join !== xStep && join !== yStep) {
+        return { exact: false, xAddress: xStart, xCount: cols, xFormat: run.format,
+          yAddress: yStart, yCount: rows, yFormat: run.format };
+      }
     }
   }
   return undefined;

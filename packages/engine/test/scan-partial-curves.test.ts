@@ -57,20 +57,25 @@ describe('scan() two-pass partial-curve emission', () => {
   });
 
   for (const name of ['synth-partial-201', 'synth-partial-203'] as const) {
-    it(`${name} through scan() stays byte-identical (pre-change canon) with zero curve-shaped maps`, { timeout: 60_000 }, () => {
+    it(`${name} matches pinned detections and exact table frames with zero curve-shaped maps`, { timeout: 60_000 }, () => {
       const pinned = {
         'synth-partial-201': {
           count: 63,
           digest: 'd29994e1728fdabaaf8ebd020033b0e4a658da83e024d8a97afdd881bbfa30d6',
         },
         'synth-partial-203': {
-          count: 62,
-          digest: 'b41ab4c200789e6c09170eaebb8c2497ea73a5367992edf02269a38d523c5a85',
+          count: 63,
+          digest: '81cfe73529bb7f5e9d41302f93b2ce24440e5ee593d21c3cb2dd1acd2d7e31d4',
         },
       }[name];
       const maps = scan(fixtureBytes(name), cfg).potentialMaps;
       expect(canonDigest(maps)).toEqual(pinned);
       expect(maps.filter(isCurveShaped)).toHaveLength(0);
+      const truth = JSON.parse(readFileSync(new URL(`../../../fixtures/synthetic/${name}.groundtruth.json`, import.meta.url), 'utf8')) as { maps: MapDef[] };
+      expect(truth.maps.length).toBeGreaterThan(0);
+      for (const t of truth.maps) {
+        expect(maps).toContainEqual(expect.objectContaining({ address: t.address, rows: t.rows, cols: t.cols, format: t.format }));
+      }
     });
   }
 

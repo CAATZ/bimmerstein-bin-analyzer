@@ -76,7 +76,7 @@ button.active { border-color: var(--accent); background: #2a3f63; }
   min-width: 0;
 }
 .sidebar li .row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sidebar li .row .addr, .sidebar li .row .conf { color: var(--fg-dim); flex-shrink: 0; }
+.sidebar li .row .addr { color: var(--fg-dim); flex-shrink: 0; }
 .sidebar li .row .tier {
   flex-shrink: 0;
   font-size: 0.68em;
@@ -88,7 +88,7 @@ button.active { border-color: var(--accent); background: #2a3f63; }
   letter-spacing: 0.3px;
   opacity: 0.9;
 }
-/* evidence strength: code-proven → heuristic */
+/* Detection methods. */
 .tier-family { color: #5bc26a; }
 .tier-structural { color: #5b9bd5; }
 .tier-pool { color: #4db6ac; }

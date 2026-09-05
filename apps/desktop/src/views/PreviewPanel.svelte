@@ -1,6 +1,6 @@
 <!-- apps/desktop/src/views/PreviewPanel.svelte -->
 <script lang="ts">
-  import { maps, potentialMaps, selection, viewParams, workingBytes } from '../store/stores.js';
+  import { maps, potentialMaps, selection, transposeMaps, viewParams, workingBytes } from '../store/stores.js';
   import { gridFromMap, gridFromSelection, type SurfaceGrid } from '../lib/griddata.js';
   import { SurfaceRenderer } from './surface.js';
 
@@ -18,7 +18,7 @@
     if (!wb || !sel) return null;
     if (sel.mapId !== undefined) {
       const m = [...$maps, ...$potentialMaps].find((x) => x.id === sel.mapId);
-      if (m) return gridFromMap(wb, m);
+      if (m) return gridFromMap(wb, m, $transposeMaps);
     }
     return gridFromSelection(wb, sel.start, sel.end, sel.cols ?? $viewParams.columns, $viewParams.format);
   });

@@ -1,6 +1,6 @@
 <!-- apps/desktop/src/components/Toolbar.svelte -->
 <script lang="ts">
-  import { bin, coPilotEnabled, maps, scanStatus, viewParams, type ViewMode } from '../store/stores.js';
+  import { bin, coPilotEnabled, maps, potentialMaps, scanStatus, selection, transposeMaps, viewParams, type ViewMode } from '../store/stores.js';
   import * as actions from '../store/actions.js';
   import { tauriHost } from '../platform/tauri.js';
   import {
@@ -22,6 +22,7 @@
   let pendingDef: { xml: string; romIds: string[] } | null = $state(null);
   let axisLibOpen = $state(false);
   let familiesOpen = $state(false);
+  const selectedMap = $derived([...$maps, ...$potentialMaps].find((map) => map.id === $selection?.mapId));
 
   async function onOpenBin(): Promise<void> {
     if (await openBinFlow(tauriHost)) runScan(); // locked decision 5: auto-scan on open
@@ -89,6 +90,13 @@
     <button class:active={$viewParams.viewMode === mode} onclick={() => actions.setViewMode(mode)}>{mode}</button>
   {/each}
   <button class:active={$viewParams.previewOpen} onclick={actions.togglePreview}>preview</button>
+  <button
+    class:active={$transposeMaps}
+    aria-pressed={$transposeMaps}
+    disabled={!selectedMap || selectedMap.rows < 2 || selectedMap.cols < 2}
+    title="Swap rows and columns in the table, 3D view and preview. Stored data stays unchanged."
+    onclick={actions.toggleMapTranspose}
+  >Swap X/Y</button>
   <span class="sep"></span>
   <select bind:value={exportKind}>
     <option value="csv">CSV</option>

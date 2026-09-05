@@ -1,9 +1,12 @@
-import type { MapDef } from '@binanalyzer/core';
+import type { AxisDef, MapDef, ValueFormat } from '@binanalyzer/core';
 
 /**
  * Detection-quality metrics (spec §5). A detection HITS a truth map when
  * byte-range IoU ≥ 0.5.
  * - locationRecall: % truth maps hit
+ * - exactStartRecall: % truth maps hit at the exact first data byte
+ * - exactLayoutRecall: % truth maps with exact start, shape, storage order and format
+ * - axisPairRecall: % axis-bearing truth maps with exact layout and all known axis roles
  * - structureRecall: % truth maps hit with rows×cols exact or transposed
  * - axisRecall: among structure hits whose TRUTH map has ≥1 referenced axis,
  *   % with ≥1 correct detected axis address (0 when none are axis-eligible)
@@ -12,6 +15,9 @@ import type { MapDef } from '@binanalyzer/core';
  */
 export interface EvalScores {
   locationRecall: number;
+  exactStartRecall: number;
+  exactLayoutRecall: number;
+  axisPairRecall: number;
   structureRecall: number;
   axisRecall: number;
   falsePositiveDensity: number;
@@ -36,6 +42,23 @@ function axisAddresses(m: MapDef): number[] {
   return out;
 }
 
+function sameFormat(a: ValueFormat | undefined, b: ValueFormat | undefined): boolean {
+  return a !== undefined && b !== undefined && a.width === b.width && a.signed === b.signed &&
+    (a.float === true) === (b.float === true) && (a.width === 1 || a.endianness === b.endianness);
+}
+
+function knownAxis(axis: AxisDef | undefined): boolean {
+  return axis !== undefined && axis.kind !== 'index';
+}
+
+function sameAxis(detected: AxisDef | undefined, truth: AxisDef | undefined): boolean {
+  if (!knownAxis(truth)) return true;
+  if (!detected || !truth || detected.kind !== truth.kind || detected.count !== truth.count) return false;
+  if (truth.kind === 'referenced') return detected.address === truth.address && sameFormat(detected.format, truth.format);
+  return truth.values !== undefined && detected.values?.length === truth.values.length &&
+    truth.values.every((v, i) => v === detected.values![i]);
+}
+
 export function scoreDetections(
   detected: MapDef[],
   truth: MapDef[],
@@ -58,11 +81,21 @@ export function scoreDetections(
     usedDet.add(p.d);
   }
   let structureHits = 0;
+  let exactStarts = 0;
+  let exactLayouts = 0;
+  let axisPairs = 0;
+  const pairEligible = truth.filter((t) => knownAxis(t.xAxis) || knownAxis(t.yAxis)).length;
   let axisEligible = 0; // structure hits whose TRUTH map has ≥1 referenced axis
   let axisHits = 0;
   for (const [ti, di] of truthMatch) {
     const t = truth[ti]!;
     const d = detected[di]!;
+    if (d.address === t.address) exactStarts++;
+    if (d.address === t.address && d.rows === t.rows && d.cols === t.cols &&
+        d.orientation === t.orientation && sameFormat(d.format, t.format)) {
+      exactLayouts++;
+      if ((knownAxis(t.xAxis) || knownAxis(t.yAxis)) && sameAxis(d.xAxis, t.xAxis) && sameAxis(d.yAxis, t.yAxis)) axisPairs++;
+    }
     const structural = (d.rows === t.rows && d.cols === t.cols) || (d.rows === t.cols && d.cols === t.rows);
     if (!structural) continue;
     structureHits++;
@@ -75,6 +108,9 @@ export function scoreDetections(
   const fp = detected.length - usedDet.size;
   return {
     locationRecall: n === 0 ? 0 : truthMatch.size / n,
+    exactStartRecall: n === 0 ? 0 : exactStarts / n,
+    exactLayoutRecall: n === 0 ? 0 : exactLayouts / n,
+    axisPairRecall: pairEligible === 0 ? 0 : axisPairs / pairEligible,
     structureRecall: n === 0 ? 0 : structureHits / n,
     axisRecall: axisEligible === 0 ? 0 : axisHits / axisEligible,
     falsePositiveDensity: dataRegionBytes <= 0 ? 0 : fp / (dataRegionBytes / 102400),

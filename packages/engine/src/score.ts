@@ -171,7 +171,7 @@ export function rankAndEmit(
   // Anchors, shear, and pool bindings are evaluated only for confidence-gate
   // survivors — pool-wide evaluation would be pure waste.
   for (const s of scored) {
-    s.anchor = findAnchor(s.c.table, idx, config);
+    s.anchor = findAnchor(s.c.table, idx, config, bytes);
     if (s.anchor) s.shear = shearOk(bytes, s.c.table, config);
     if (pidx) {
       s.poolAnchor = findPoolAnchor(s.c.table, pidx, config);
@@ -205,7 +205,7 @@ export function rankAndEmit(
 
   const kept: Array<{ span: [number, number]; def: MapDef }> = [];
   const spans = new SpanIndex();
-  // FAMILY TIER (spec §4.6): code-proven detections rank above every byte
+  // FAMILY TIER (spec §4.6): family detections rank above every byte
   // tier — tier ascending (header > tight-fallback > loose-fallback > scan),
   // then score, then address. They bypass minConfidence (a code-referenced
   // dead table is still a table) and claim spans first in the shared dedup.

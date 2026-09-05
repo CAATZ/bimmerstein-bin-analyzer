@@ -4,7 +4,7 @@ import { COPILOT_TOOLS, HEADLESS_TOOLS } from './tools/index.js';
 import { err, type Deps } from './result.js';
 
 export const SERVER_NAME = 'bimmerstein-bin-analyzer';
-export const SERVER_VERSION = '0.2.0';
+export const SERVER_VERSION = '0.2.1';
 
 /**
  * Sent once, in the initialize response — the right place for the

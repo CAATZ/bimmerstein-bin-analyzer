@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AxisDef, MapDef } from '@binanalyzer/core';
-import { axisLabels, gridFromMap, gridFromSelection, seriesFromRange } from '../src/lib/griddata.js';
+import { axisLabels, gridFromMap, gridFromSelection, seriesFromRange, sourceAxis, sourceCell } from '../src/lib/griddata.js';
 
 const U8 = { width: 1, signed: false, endianness: 'little' } as const;
 const U16BE = { width: 2, signed: false, endianness: 'big' } as const;
@@ -33,6 +33,34 @@ describe('gridFromSelection', () => {
 });
 
 describe('gridFromMap', () => {
+  it.each(['row-major', 'col-major'] as const)('transposes a rectangular %s table while preserving its byte mapping and axes', (orientation) => {
+    const map: MapDef = {
+      id: 'm', name: 'M', address: 8, rows: 2, cols: 3,
+      format: { ...U16BE }, scaling: { factor: 1, offset: 0, units: '', digits: 0 },
+      orientation, provenance: 'manual',
+    };
+    const before = bytes.slice();
+    const original = gridFromMap(bytes, map);
+    const shown = gridFromMap(bytes, map, true);
+    expect([shown.rows, shown.cols]).toEqual([3, 2]);
+    expect(shown.values).toEqual([
+      [original.values[0]![0], original.values[1]![0]],
+      [original.values[0]![1], original.values[1]![1]],
+      [original.values[0]![2], original.values[1]![2]],
+    ]);
+    for (let r = 0; r < shown.rows; r++) for (let c = 0; c < shown.cols; c++) {
+      const cell = sourceCell(r, c, true);
+      expect(shown.values[r]![c]).toBe(original.values[cell.row]![cell.col]);
+      expect(sourceCell(cell.row, cell.col, true)).toEqual({ row: r, col: c });
+    }
+    expect(sourceAxis('x', true)).toBe('y');
+    expect(sourceAxis('y', true)).toBe('x');
+    expect(sourceAxis('x', false)).toBe('x');
+    expect([shown.min, shown.max]).toEqual([original.min, original.max]);
+    expect(bytes).toEqual(before);
+    expect(gridFromMap(bytes, map, false)).toEqual(original);
+  });
+
   it('reads via core readGrid with min/max', () => {
     const map: MapDef = {
       id: 'm', name: 'M', address: 8, rows: 2, cols: 4,

@@ -203,6 +203,8 @@ export interface ScanConfig {
      * partial — do not move without a third-partial holdout.
      */
     structTileFrameMin: number;
+    /** Maximum bytes searched after a tight axis pair for a packed run. */
+    structTileWindow: number;
     /**
      * Component C: a tile RUN must be at least this long to emit (a real custom
      * group is a run of >= 3 packed tables; an isolated spurious block is
@@ -496,6 +498,7 @@ export const DEFAULT_SCAN_CONFIG: ScanConfig = {
     structHeaderAxisMinCount: 2,
     structAxisMaxCount: 64,
     structTileFrameMin: 0.75,
+    structTileWindow: 1024,
     structTileMinRun: 3,
     structTilePlateauStrictMin: 4,
     curvePartialMinCount: 2,

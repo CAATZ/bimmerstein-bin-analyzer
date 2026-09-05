@@ -28,7 +28,7 @@ export const listMapsTool: ToolSpec = {
         description: "potential = this server's own detections from scan_bin; confirmed = maps the user has authored in the app (co-pilot mode); imported = maps from import_definition (headless mode).",
       },
       kind: { enum: [...KINDS], description: 'Shape class: grid, curve (1D), switch (named byte states), param (1x1 scalar).' },
-      detector: { enum: [...DETECTORS], description: 'Evidence tier, strongest first: family (code-proven) > structural > pool > generic (byte smoothness).' },
+      detector: { enum: [...DETECTORS], description: 'Detection precedence: family (code references and structural fallbacks) > structural > pool > generic (byte smoothness). A tier does not certify an exact address.' },
       minConfidence: { type: 'number', minimum: 0, maximum: 1 },
       addressMin: { type: ['integer', 'string'], description: 'File offset, inclusive. Integer or 0x-hex string.' },
       addressMax: { type: ['integer', 'string'], description: 'File offset, EXCLUSIVE.' },

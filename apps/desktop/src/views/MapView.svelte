@@ -2,8 +2,8 @@
 <script lang="ts">
   import { formatPhysical } from '@binanalyzer/core';
   import type { MapDef } from '@binanalyzer/core';
-  import { cellRange, editJournal, maps, potentialMaps, selection, showOriginal, workingBytes } from '../store/stores.js';
-  import { axisLabels, gridFromMap } from '../lib/griddata.js';
+  import { cellRange, editJournal, maps, potentialMaps, selection, showOriginal, transposeMaps, workingBytes } from '../store/stores.js';
+  import { axisLabels, gridFromMap, sourceAxis, sourceCell } from '../lib/griddata.js';
   import { bytesForDisplay, isCellChanged, isUnchangedEdit } from '../lib/diffcells.js';
   import { axisByteOffset, axisEditability, mapsSharingAxis } from '../lib/axisedit.js';
   import * as actions from '../store/actions.js';
@@ -13,6 +13,11 @@
     if (sel?.mapId === undefined) return undefined;
     return [...$maps, ...$potentialMaps].find((m) => m.id === sel.mapId);
   });
+  const transposed = $derived($transposeMaps && map !== undefined && map.rows > 1 && map.cols > 1);
+  const xSlot = $derived(sourceAxis('x', transposed, map?.orientation));
+  const ySlot = $derived(sourceAxis('y', transposed, map?.orientation));
+  const xAxis = $derived(xSlot === 'x' ? map?.xAxis : map?.yAxis);
+  const yAxis = $derived(ySlot === 'y' ? map?.yAxis : map?.xAxis);
 
   // I2 (final whole-branch review): ONE decision — $showOriginal — drives
   // every byte-derived thing F11 shows. The grid AND both axis label lists
@@ -50,7 +55,7 @@
     const journal = $editJournal;
     const m = map;
     if (m === undefined || w === null) return null;
-    return gridFromMap(bytesForDisplay(w, showOrig, journal), m);
+    return gridFromMap(bytesForDisplay(w, showOrig, journal), m, transposed);
   });
   const xLabels = $derived.by((): string[] => {
     const w = $workingBytes;
@@ -58,7 +63,7 @@
     const journal = $editJournal;
     const m = map;
     if (!w || !m) return [];
-    return axisLabels(bytesForDisplay(w, showOrig, journal), m.xAxis, m.orientation === 'row-major' ? m.cols : m.rows);
+    return axisLabels(bytesForDisplay(w, showOrig, journal), xAxis, grid?.cols ?? 0);
   });
   const yLabels = $derived.by((): string[] => {
     const w = $workingBytes;
@@ -66,7 +71,7 @@
     const journal = $editJournal;
     const m = map;
     if (!w || !m) return [];
-    return axisLabels(bytesForDisplay(w, showOrig, journal), m.yAxis, m.orientation === 'row-major' ? m.rows : m.cols);
+    return axisLabels(bytesForDisplay(w, showOrig, journal), yAxis, grid?.rows ?? 0);
   });
 
   /** I3: is the axis breakpoint at `index` on side `which` changed vs the file
@@ -110,7 +115,13 @@
   });
 
   function inRange(r: number, c: number): boolean {
-    return rangeCells.has(`${r},${c}`);
+    const cell = sourceCell(r, c, transposed);
+    return rangeCells.has(`${cell.row},${cell.col}`);
+  }
+
+  function displayedCellOffset(m: MapDef, r: number, c: number): number {
+    const cell = sourceCell(r, c, transposed);
+    return actions.cellOffset(m, cell.row, cell.col);
   }
 
   /** Plain click sets a 1×1 range; shift-click extends it from the existing anchor. */
@@ -118,10 +129,11 @@
     const m = map;
     if (m === undefined) return;
     const cr = $cellRange;
+    const cell = sourceCell(r, c, transposed);
     if (shiftKey && cr !== null && cr.mapId === m.id) {
-      actions.setCellRange(m.id, cr.r0, cr.c0, r, c);
+      actions.setCellRange(m.id, cr.r0, cr.c0, cell.row, cell.col);
     } else {
-      actions.setCellRange(m.id, r, c, r, c);
+      actions.setCellRange(m.id, cell.row, cell.col, cell.row, cell.col);
     }
   }
 
@@ -132,8 +144,7 @@
     const cr = $cellRange;
     const m = map;
     if (!g || !cr || !m || cr.mapId !== m.id) return null;
-    const r = cr.r1;
-    const c = cr.c1;
+    const { row: r, col: c } = sourceCell(cr.r1, cr.c1, transposed);
     if (r < 0 || c < 0 || r >= g.rows || c >= g.cols) return null;
     const raw = g.values[r]![c]!;
     return {
@@ -179,7 +190,8 @@
       actions.pushToast('error', `"${e.text}" is not a number.`);
       return;
     }
-    const res = actions.editCell(m, e.r, e.c, typed);
+    const cell = sourceCell(e.r, e.c, transposed);
+    const res = actions.editCell(m, cell.row, cell.col, typed);
     if (!res.ok) actions.pushToast('error', res.reason);
     else if (res.clamped) actions.pushToast('info', 'Clamped to the format limit.');
   }
@@ -212,7 +224,7 @@
     } else {
       sharedNames = [];
     }
-    const seed = (which === 'x' ? xLabels[index] : yLabels[index]) ?? String(index);
+    const seed = (which === xSlot ? xLabels[index] : yLabels[index]) ?? String(index);
     axisEditing = { which, index, seed, text: seed };
   }
 
@@ -265,7 +277,7 @@
     <header>
       <strong>{map.name}</strong>
       <span class="meta">
-        0x{map.address.toString(16).toUpperCase()} · {map.rows}×{map.cols} ·
+        0x{map.address.toString(16).toUpperCase()} · {grid.rows}×{grid.cols} ·
         {map.format.width * 8}-bit {map.format.signed ? 'signed' : 'unsigned'} ·
         {map.scaling.units === '' ? 'raw' : map.scaling.units}
       </span>
@@ -294,13 +306,13 @@
       <table>
         <thead>
           <tr>
-            <th class="corner">{map.yAxis?.name ?? ''} \ {map.xAxis?.name ?? ''}</th>
+            <th class="corner">{yAxis?.name ?? ''} \ {xAxis?.name ?? ''}</th>
             {#each xLabels as label, i (i)}
               <th
                 class="axishdr"
-                class:changed={axisChanged('x', i)}
-                ondblclick={() => beginAxisEdit('x', i)}
-                >{#if axisEditing?.which === 'x' && axisEditing?.index === i}<input
+                class:changed={axisChanged(xSlot, i)}
+                ondblclick={() => beginAxisEdit(xSlot, i)}
+                >{#if axisEditing?.which === xSlot && axisEditing?.index === i}<input
                     class="celledit"
                     use:focusEditor
                     bind:value={axisEditing.text}
@@ -318,9 +330,9 @@
             <tr>
               <th
                 class="axishdr"
-                class:changed={axisChanged('y', r)}
-                ondblclick={() => beginAxisEdit('y', r)}
-                >{#if axisEditing?.which === 'y' && axisEditing?.index === r}<input
+                class:changed={axisChanged(ySlot, r)}
+                ondblclick={() => beginAxisEdit(ySlot, r)}
+                >{#if axisEditing?.which === ySlot && axisEditing?.index === r}<input
                     class="celledit"
                     use:focusEditor
                     bind:value={axisEditing.text}
@@ -333,7 +345,7 @@
               {#each row as v, c (c)}
                 <td
                   class:inrange={inRange(r, c)}
-                  class:changed={isCellChanged($editJournal, actions.cellOffset(map, r, c), map.format.width)}
+                  class:changed={isCellChanged($editJournal, displayedCellOffset(map, r, c), map.format.width)}
                   onclick={(ev) => clickCell(r, c, ev.shiftKey)}
                   ondblclick={() => beginEdit(r, c)}
                 >{#if editing?.r === r && editing?.c === c}<input

@@ -1,27 +1,43 @@
 <!-- apps/desktop/src/components/Sidebar.svelte -->
 <script lang="ts">
-  import type { MapDef, DetectorTier } from '@binanalyzer/core';
-  import { maps, potentialMaps, selection } from '../store/stores.js';
+  import type { MapDef } from '@binanalyzer/core';
+  import { mapFilter, maps, potentialMaps, selection } from '../store/stores.js';
   import * as actions from '../store/actions.js';
   import { isCurveShaped } from '../lib/curvedata.js';
   import { isSwitch } from '../lib/switchdata.js';
   import MapPropertiesDialog from './MapPropertiesDialog.svelte';
+  import { DEFAULT_MAP_FILTER, DETECTION_METHODS, detectionDescription, filterMaps, type MapFilter } from '../lib/mapfilter.js';
 
   let editing: MapDef | null = $state(null);
 
-  // Detection-tier badge (spec §4.5/§4.6): evidence strength strongest → weakest.
-  const TIER: Record<DetectorTier, { label: string; title: string }> = {
-    family: { label: 'code', title: 'Code-xref proven — a cal-reader CALL site references this address (full reads only)' },
-    structural: { label: 'struct', title: 'Placed from a count-prefixed axis pair’s stored lengths' },
-    pool: { label: 'pool', title: 'Byte-detected, bound to a shared count-prefixed axis pair' },
-    generic: { label: 'byte', title: 'Byte-smoothness heuristic only' },
-  };
+  const shownMaps = $derived(filterMaps($maps, $mapFilter));
+  const shownPotential = $derived(filterMaps($potentialMaps, $mapFilter));
+  const selectedPotential = $derived($potentialMaps.find((m) => m.id === $selection?.mapId));
+  const filtered = $derived($mapFilter.query !== '' || $mapFilter.shape !== 'all' || $mapFilter.detector !== 'all');
 </script>
 
 <aside class="sidebar">
-  <h2>Maps ({$maps.length})</h2>
+  <div class="filters">
+    <input type="search" aria-label="Search maps" placeholder="Name, address or 20x16" value={$mapFilter.query}
+      oninput={(e) => actions.setMapFilter({ ...$mapFilter, query: e.currentTarget.value })} />
+    <div class="filter-row">
+      <select aria-label="Table shape" value={$mapFilter.shape}
+        onchange={(e) => actions.setMapFilter({ ...$mapFilter, shape: e.currentTarget.value as MapFilter['shape'] })}>
+        <option value="all">All shapes</option><option value="grid">Tables</option><option value="curve">Curves</option><option value="switch">Switches</option>
+      </select>
+      <select aria-label="Detection method" value={$mapFilter.detector}
+        onchange={(e) => actions.setMapFilter({ ...$mapFilter, detector: e.currentTarget.value as MapFilter['detector'] })}>
+        <option value="all">All methods</option><option value="family">Family</option><option value="structural">Structural</option><option value="pool">Shared axes</option><option value="generic">Byte patterns</option>
+      </select>
+    </div>
+    {#if filtered}<button onclick={() => actions.setMapFilter(DEFAULT_MAP_FILTER)}>Clear filters</button>{/if}
+  </div>
+  {#if selectedPotential}
+    <p class="evidence" aria-label="Detection evidence">{detectionDescription(selectedPotential)}</p>
+  {/if}
+  <h2>Maps ({filtered ? `${shownMaps.length}/` : ''}{$maps.length})</h2>
   <ul>
-    {#each $maps as m (m.id)}
+    {#each shownMaps as m (m.id)}
       <li class:selected={$selection?.mapId === m.id}>
         <button class="row" onclick={() => actions.selectMap(m)} title={m.name}>
           <span class="name">{m.name}</span>
@@ -37,15 +53,15 @@
       </li>
     {/each}
   </ul>
-  <h2>Potential maps ({$potentialMaps.length})</h2>
+  <h2>Potential maps ({filtered ? `${shownPotential.length}/` : ''}{$potentialMaps.length})</h2>
   <ul>
     <!-- ENGINE RANK ORDER — locked decision 3; never re-sort. -->
-    {#each $potentialMaps as m (m.id)}
-      {@const tier = m.detector ? TIER[m.detector] : undefined}
+    {#each shownPotential as m (m.id)}
+      {@const tier = m.detector ? DETECTION_METHODS[m.detector] : undefined}
       <li class:selected={$selection?.mapId === m.id}>
         <button
           class="row"
-          title="{m.name} — click: select+jump · double-click: promote"
+          title="{m.name} — {detectionDescription(m)} Click: select+jump · double-click: promote"
           onclick={() => actions.selectMap(m)}
           ondblclick={() => {
             if (actions.promoteMap(m.id)) actions.pushToast('info', `Promoted ${m.name}`);
@@ -60,13 +76,21 @@
           {:else if isCurveShaped(m)}
             <span class="oned" title="1D curve (single-axis table)">1D</span>
           {/if}
-          <span class="conf">{Math.round((m.confidence ?? 0) * 100)}%</span>
         </button>
       </li>
     {/each}
   </ul>
+  {#if filtered && shownMaps.length === 0 && shownPotential.length === 0}<p class="no-results" role="status">No maps match these filters.</p>{/if}
 </aside>
 
 {#if editing !== null}
   <MapPropertiesDialog map={editing} onclose={() => (editing = null)} />
 {/if}
+
+<style>
+  .filters { position: sticky; top: -6px; background: var(--bg-panel); padding: 6px 0; z-index: 1; }
+  .filters input { box-sizing: border-box; width: 100%; }
+  .filter-row { display: flex; gap: 4px; margin: 4px 0; }
+  .filter-row select { width: 50%; min-width: 0; }
+  .evidence, .no-results { font-size: 12px; color: var(--fg-dim); margin: 8px 4px; line-height: 1.4; }
+</style>

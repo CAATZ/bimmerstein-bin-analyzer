@@ -10,7 +10,7 @@ function putSA(bytes: Uint8Array, sa: number, vals: number[]): void {
 
 /**
  * Image with one shared axis pair and five header-backed table SAs
- * (0x300,0x340,…,0x400), plus a byte-reader body (A9) at file 0x1000.
+ * (0x300,0x340,…,0x400), plus a byte-reader body (A9) at CPU 0x1000.
  */
 function buildImage(): { bytes: Uint8Array; sas: number[] } {
   const bytes = new Uint8Array(0x18000);
@@ -18,8 +18,8 @@ function buildImage(): { bytes: Uint8Array; sas: number[] } {
   putSA(bytes, 0x200, [4, 50, 60, 70, 80]); // y axis, count 4
   const sas = [0x300, 0x340, 0x380, 0x3c0, 0x400];
   for (const sa of sas) putSA(bytes, sa - 4, [0x00, 0x01, 0x00, 0x02]); // [xPtr 0x100][yPtr 0x200]
-  bytes.set([0xa9, 0x24], 0x1000); // byte-reader body at cpu 0x1000
-  bytes.set([0xa8, 0x24], 0x1100); // word-reader body at cpu 0x1100
+  bytes.set([0xa9, 0x24], 0x5000); // byte-reader body at cpu 0x1000
+  bytes.set([0xa8, 0x24], 0x5100); // word-reader body at cpu 0x1100
   return { bytes, sas };
 }
 
@@ -97,7 +97,7 @@ describe('selfLocateCurveReaders', () => {
     // not pick it up as a grid reader.
     const curveSas = [0x600, 0x640, 0x680, 0x6c0, 0x700];
     for (const sa of curveSas) putSA(bytes, sa - 2, [0x50, 0x01]); // LE(0x150)
-    bytes.set([0xa8, 0x24], 0x1200); // word-reader body at cpu 0x1200
+    bytes.set([0xa8, 0x24], 0x5200); // word-reader body at cpu 0x1200
 
     const calls = [
       ...sas.map((sa) => call(0x1000, sa)), // grid reader: full 4-byte headers -> also valid 2-byte headers
@@ -119,7 +119,7 @@ describe('selfLocateCurveReaders', () => {
     // rate would be 5/5 and the target (classifiable byte-reader body) would be emitted.
     const fwdSas = [0x800, 0x840, 0x880, 0x8c0, 0x8f0];
     for (const sa of fwdSas) putSA(bytes, sa - 2, [0x00, 0x09]); // LE(0x900), ptr > sa
-    bytes.set([0xa9, 0x24], 0x1300); // byte-reader body at cpu 0x1300 (width IS classifiable)
+    bytes.set([0xa9, 0x24], 0x5300); // byte-reader body at cpu 0x1300 (width IS classifiable)
     const calls = fwdSas.map((sa) => call(0x1300, sa));
     expect(selfLocateCurveReaders(bytes, calls, DEFAULT_SCAN_CONFIG)).toEqual(new Map());
   });

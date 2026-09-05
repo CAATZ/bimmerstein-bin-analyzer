@@ -73,4 +73,19 @@ describe('findAnchor', () => {
     // One long run [100,140) covers both the y window [122,128) and the x window [114,122).
     expect(findAnchor(table, [ax(100, 20)], DEFAULT_SCAN_CONFIG)).toBeUndefined();
   });
+
+  it('requires two distinct linear steps and a separate join to split fused axes', () => {
+    const grid = { ...table, rows: 4, cols: 4 };
+    const bytes = new Uint8Array(160);
+    const write = (values: number[]): void => values.forEach((v, i) => new DataView(bytes.buffer).setUint16(112 + i * 2, v));
+    write([10, 20, 30, 40, 70, 120, 170, 220]);
+    expect(findAnchor(grid, [ax(112, 8)], DEFAULT_SCAN_CONFIG, bytes)).toEqual({
+      exact: false, xAddress: 112, xCount: 4, xFormat: u16be,
+      yAddress: 120, yCount: 4, yFormat: u16be,
+    });
+    for (const values of [[10, 20, 30, 40, 50, 60, 70, 80], [10, 20, 30, 40, 50, 100, 150, 200]]) {
+      write(values);
+      expect(findAnchor(grid, [ax(112, 8)], DEFAULT_SCAN_CONFIG, bytes)).toBeUndefined();
+    }
+  });
 });

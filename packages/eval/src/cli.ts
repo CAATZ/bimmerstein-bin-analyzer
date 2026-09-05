@@ -23,6 +23,7 @@ import { checksumsFor } from '@binanalyzer/families';
 import { buildGroundTruth, type GtBuildOptions } from './gt-from-romraider.js';
 import { parseGroundTruth } from './groundtruth.js';
 import { scoreDetections, type EvalScores } from './metrics.js';
+import { meetsExactGate } from './exact-gates.js';
 import {
   generateSynthetic,
   type SyntheticSpec,
@@ -150,7 +151,7 @@ export function gateFor(fixture: string): Gate | undefined {
   // 'synth-curve' also matches startsWith('synth') — must be checked first.
   if (fixture.startsWith('synth-curve')) return CURVE_GATE;
   if (fixture.startsWith('synth')) return SYNTH_GATE;
-  if (fixture.startsWith('ms41')) return MS41_GATE;
+  if (fixture.startsWith('ms41') || fixture.startsWith('reference-ms41-')) return MS41_GATE;
   return undefined;
 }
 
@@ -366,7 +367,7 @@ export const MS41_CHECKSUM_CASES: readonly Ms41ChecksumCase[] = [
   { key: 's52-partial', bin: 'partial/MS41.3 S52 Stock partial.bin', bootOk: null, okBlocks: 13, totalBlocks: 16, staleIds: ['cal-4', 'cal-6', 'cal-14'] },
 ];
 
-export function meetsGate(s: EvalScores, g: Gate): boolean {
+export function meetsGate(s: Omit<EvalScores, 'exactStartRecall' | 'exactLayoutRecall' | 'axisPairRecall'>, g: Gate): boolean {
   return (
     s.locationRecall >= g.locationRecall &&
     s.structureRecall >= g.structureRecall &&
@@ -492,15 +493,15 @@ function runHoldout(): number {
   ];
   let passed = true;
   const fmt = (v: number) => v.toFixed(2);
-  console.log('holdout          loc    struct axis   fp/100KB truth det');
+  console.log('holdout          loc    struct axis   exact  layout pair   fp/100KB truth det');
   for (const r of rows) {
     console.log(
-      `${r.fixture.padEnd(15)} ${fmt(r.locationRecall)}   ${fmt(r.structureRecall)}   ${fmt(r.axisRecall)}   ${fmt(r.falsePositiveDensity).padEnd(8)} ${String(r.truthCount).padEnd(5)} ${r.detectedCount}`
+      `${r.fixture.padEnd(15)} ${fmt(r.locationRecall)}   ${fmt(r.structureRecall)}   ${fmt(r.axisRecall)}   ${fmt(r.exactStartRecall)}   ${fmt(r.exactLayoutRecall)}   ${fmt(r.axisPairRecall)}   ${fmt(r.falsePositiveDensity).padEnd(8)} ${String(r.truthCount).padEnd(5)} ${r.detectedCount}`
     );
     const gate = gateFor(r.fixture)!;
-    if (!meetsGate(r, gate)) passed = false;
+    if (!meetsGate(r, gate) || !meetsExactGate(r, r.fixture)) passed = false;
   }
-  console.log(passed ? 'HOLDOUT PASS' : 'HOLDOUT FAIL (per-family gates)');
+  console.log(passed ? 'HOLDOUT PASS' : 'HOLDOUT FAIL (quality gates, including exact regressions)');
   return passed ? 0 : 1;
 }
 
@@ -615,13 +616,13 @@ function runEval(repoRoot: string, fixturesRoot: string): number {
     const scores = scoreDetections(result.potentialMaps, gt.value.maps, dataBytes);
     rows.push({ fixture: gt.value.fixture, ...scores });
     const gate = gateFor(gt.value.fixture);
-    if (gate && !meetsGate(scores, gate)) passed = false;
+    if ((gate && !meetsGate(scores, gate)) || !meetsExactGate(scores, gt.value.fixture)) passed = false;
   }
   const fmt = (v: number) => v.toFixed(2);
-  console.log('fixture         loc    struct axis   fp/100KB truth det');
+  console.log('fixture         loc    struct axis   exact  layout pair   fp/100KB truth det');
   for (const r of rows) {
     console.log(
-      `${r.fixture.padEnd(15)} ${fmt(r.locationRecall)}   ${fmt(r.structureRecall)}   ${fmt(r.axisRecall)}   ${fmt(r.falsePositiveDensity).padEnd(8)} ${String(r.truthCount).padEnd(5)} ${r.detectedCount}`
+      `${r.fixture.padEnd(15)} ${fmt(r.locationRecall)}   ${fmt(r.structureRecall)}   ${fmt(r.axisRecall)}   ${fmt(r.exactStartRecall)}   ${fmt(r.exactLayoutRecall)}   ${fmt(r.axisPairRecall)}   ${fmt(r.falsePositiveDensity).padEnd(8)} ${String(r.truthCount).padEnd(5)} ${r.detectedCount}`
     );
   }
   writeFileSync(join(repoRoot, 'eval-report.json'), JSON.stringify({ fixtures: rows, passed }, null, 2));
@@ -659,7 +660,7 @@ function checkAgainstClass(
     return undefined;
   }
   const s = scoreDetections(maps, built.value.truth.maps, dataBytes);
-  const ok = meetsGate(s, gate);
+  const ok = meetsGate(s, gate) && meetsExactGate(s, `${label}-${cls}`);
   // fpD and the 1D-emission count are DIAGNOSTIC, never gated (fpD is soft on
   // real bins — they contain unlabelled true maps, so the trend matters, not
   // the value). They are reported because this command replaced the gitignored
@@ -670,6 +671,7 @@ function checkAgainstClass(
     `${ok ? 'PASS' : 'FAIL'} ${label.padEnd(14)} ${cls === 'curve' ? 'curve' : 'grid '} ` +
       `${f3(s.locationRecall)}/${f3(s.structureRecall)}/${f3(s.axisRecall)}` +
       `  gate ${f3(gate.locationRecall)}/${f3(gate.structureRecall)}/${f3(gate.axisRecall)}` +
+      `  exact ${f3(s.exactStartRecall)} layout ${f3(s.exactLayoutRecall)} axes ${f3(s.axisPairRecall)}` +
       `  (truth ${s.truthCount}, det ${s.detectedCount}, 1d ${oneD}, fpD ${s.falsePositiveDensity.toFixed(2)})`
   );
   return ok;

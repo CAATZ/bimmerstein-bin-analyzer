@@ -12,11 +12,12 @@ import {
 } from '../src/family/ms41/frame.js';
 
 describe('MS41 frame law', () => {
-  it('maps CPU to file: banks with bit 16 set have A14 inverted', () => {
-    expect(cpuToFile(0x024670)).toBe(0x024670); // bank 2, direct (dispatcher body measured here)
+  it('maps flash CPU addresses to file offsets with A14 inverted in every bank', () => {
+    expect(cpuToFile(0x024670)).toBe(0x020670);
+    expect(cpuToFile(0x027b1c)).toBe(0x023b1c);
     expect(cpuToFile(0x034ba6)).toBe(0x030ba6); // bank 3, XOR 0x4000 (cal-reader body measured here)
     expect(cpuToFile(0x034ab8)).toBe(0x030ab8);
-    expect(cpuToFile(0x00c000)).toBe(0x00c000); // bank 0, direct
+    expect(cpuToFile(0x001000)).toBe(0x005000);
     expect(cpuToFile(0x014000)).toBe(0x010000); // bank 1, XOR 0x4000
   });
 

@@ -5,6 +5,7 @@ import type { ChecksumReport } from '@binanalyzer/families';
 import type { MapPack } from '@binanalyzer/formats';
 import type { SaveOutcome } from '../lib/savereport.js';
 import type { PackRow } from '../lib/packapply.js';
+import { DEFAULT_MAP_FILTER, type MapFilter } from '../lib/mapfilter.js';
 
 /**
  * Single source of truth (spec §7). Views subscribe;
@@ -58,6 +59,7 @@ export const DEFAULT_VIEW_PARAMS: ViewParams = {
 };
 
 export const bin: Writable<BinImage | null> = writable(null);
+export const mapFilter: Writable<MapFilter> = writable({ ...DEFAULT_MAP_FILTER });
 /**
  * The editable copy of the loaded bin. EVERY view reads this, never
  * `bin.bytes` — showing the original after an edit would render pre-edit data
@@ -114,6 +116,8 @@ export const axisLibrary: Writable<AxisLibEntry[]> = writable([]);
 export const regions: Writable<Region[]> = writable([]);
 export const scanStatus: Writable<ScanState> = writable({ state: 'idle' });
 export const viewParams: Writable<ViewParams> = writable({ ...DEFAULT_VIEW_PARAMS });
+/** Display preference only; map definitions and cell ranges keep their original coordinates. */
+export const transposeMaps: Writable<boolean> = writable(false);
 export const selection: Writable<Selection | null> = writable(null);
 /** Monotonic scroll request — views jump so `offset` is visible (instant, spec §7). */
 export const scrollRequest: Writable<{ offset: number; seq: number } | null> = writable(null);

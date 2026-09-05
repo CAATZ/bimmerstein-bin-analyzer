@@ -210,6 +210,17 @@ describe('generatePartialSynthetic — curvePlants (Phase 3 synth-pcurve family)
 describe('generateCurveSynthetic', () => {
   const spec = { seed: 301, sizeBytes: 0x18000, curveCount: 24 };
 
+  it('places each synthetic reader at the flash address selected by its CPU call target', () => {
+    const { bytes } = generateCurveSynthetic(spec);
+    const calls = scanReaderCalls(bytes, DEFAULT_SCAN_CONFIG.family.ms41.maxR12Dist);
+    const targets = [...new Set(calls.map(c => c.targetCpu))];
+    expect(targets).toHaveLength(4);
+    for (const cpu of targets) {
+      expect([0xa8, 0xa9]).toContain(bytes[cpu ^ 0x4000]);
+      expect(bytes[(cpu ^ 0x4000) + 1]).toBe(0x24);
+    }
+  });
+
   it('is seed-deterministic (same seed -> identical bytes and truth) and differs across seeds', () => {
     const a = generateCurveSynthetic(spec);
     const b = generateCurveSynthetic(spec);
