@@ -1,0 +1,4206 @@
+{
+  "fixture": "reference-ms41-id41-catalog-partial-curve",
+  "binSha256": "291c5d140151e00949014d651cedba35a06f466477afab1ef8a93947cc8c6c45",
+  "maps": [
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x35a",
+      "address": 858,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x35a",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 749,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x398",
+      "address": 920,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x398",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 684,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x3d4",
+      "address": 980,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x3d4",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 793,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x410",
+      "address": 1040,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x410",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 800,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x43a",
+      "address": 1082,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x43a",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 768,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x440",
+      "address": 1088,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x440",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 758,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x532",
+      "address": 1330,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x532",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1225,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x538",
+      "address": 1336,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x538",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1229,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x54a",
+      "address": 1354,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x54a",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1229,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x55c",
+      "address": 1372,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x55c",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1240,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x56e",
+      "address": 1390,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x56e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1229,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x578",
+      "address": 1400,
+      "rows": 16,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x578",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1257,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x58a",
+      "address": 1418,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x58a",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1274,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x592",
+      "address": 1426,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x592",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1229,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x59c",
+      "address": 1436,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x59c",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1229,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x5a6",
+      "address": 1446,
+      "rows": 16,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x5a6",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1282,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x83e",
+      "address": 2110,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x83e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1605,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x846",
+      "address": 2118,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x846",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1848,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x878",
+      "address": 2168,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x878",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1871,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x912",
+      "address": 2322,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x912",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1909,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0xb7a",
+      "address": 2938,
+      "rows": 2,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0xb7a",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1774,
+        "count": 2,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0xd4e",
+      "address": 3406,
+      "rows": 16,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0xd4e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1942,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0xffc",
+      "address": 4092,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0xffc",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1741,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x12ce",
+      "address": 4814,
+      "rows": 16,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x12ce",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1942,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x12e0",
+      "address": 4832,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x12e0",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1643,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x12f2",
+      "address": 4850,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x12f2",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1643,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1304",
+      "address": 4868,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1304",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1643,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1316",
+      "address": 4886,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1316",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1643,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1328",
+      "address": 4904,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1328",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1823,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1332",
+      "address": 4914,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1332",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 1823,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1574",
+      "address": 5492,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1574",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5107,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x15ba",
+      "address": 5562,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x15ba",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5319,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x15c2",
+      "address": 5570,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x15c2",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5075,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1618",
+      "address": 5656,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1618",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5426,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x176e",
+      "address": 5998,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x176e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5265,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1776",
+      "address": 6006,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1776",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5265,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x177e",
+      "address": 6014,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x177e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5100,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x17de",
+      "address": 6110,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x17de",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5238,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x17e8",
+      "address": 6120,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x17e8",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5238,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x18ce",
+      "address": 6350,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x18ce",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5304,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x18d8",
+      "address": 6360,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x18d8",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5310,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x18de",
+      "address": 6366,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x18de",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5310,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x18e4",
+      "address": 6372,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x18e4",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5310,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x18fe",
+      "address": 6398,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x18fe",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5223,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1904",
+      "address": 6404,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": true,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1904",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5047,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x190c",
+      "address": 6412,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x190c",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5342,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1912",
+      "address": 6418,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": true,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1912",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5047,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1952",
+      "address": 6482,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1952",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5364,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1958",
+      "address": 6488,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1958",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5369,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1962",
+      "address": 6498,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1962",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5342,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1968",
+      "address": 6504,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1968",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5213,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x196e",
+      "address": 6510,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x196e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5377,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1974",
+      "address": 6516,
+      "rows": 5,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1974",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5094,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x197c",
+      "address": 6524,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": true,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x197c",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5381,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x198e",
+      "address": 6542,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": true,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x198e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5381,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x19a0",
+      "address": 6560,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": true,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x19a0",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5381,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x19b2",
+      "address": 6578,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": true,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x19b2",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5381,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x19c4",
+      "address": 6596,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x19c4",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5054,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x19d6",
+      "address": 6614,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x19d6",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5054,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x19e8",
+      "address": 6632,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x19e8",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5085,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x19f2",
+      "address": 6642,
+      "rows": 7,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x19f2",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5369,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x19fc",
+      "address": 6652,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x19fc",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5068,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1a04",
+      "address": 6660,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1a04",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5395,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1a0e",
+      "address": 6670,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1a0e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5421,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1a28",
+      "address": 6696,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1a28",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5337,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1a4e",
+      "address": 6734,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1a4e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5364,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1a54",
+      "address": 6740,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1a54",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 5395,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1ad4",
+      "address": 6868,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1ad4",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 6783,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1b36",
+      "address": 6966,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1b36",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 6783,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1b88",
+      "address": 7048,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1b88",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 6783,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1b92",
+      "address": 7058,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1b92",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 6783,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1ba4",
+      "address": 7076,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1ba4",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 6830,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1baa",
+      "address": 7082,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1baa",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 6776,
+        "count": 3,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1bb0",
+      "address": 7088,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1bb0",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 6783,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1cee",
+      "address": 7406,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1cee",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7229,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1cf6",
+      "address": 7414,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1cf6",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1cfe",
+      "address": 7422,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1cfe",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7271,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d04",
+      "address": 7428,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d04",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d12",
+      "address": 7442,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d12",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7252,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d24",
+      "address": 7460,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d24",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d32",
+      "address": 7474,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d32",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d40",
+      "address": 7488,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d40",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7401,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d48",
+      "address": 7496,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d48",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7401,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d50",
+      "address": 7504,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d50",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7229,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d58",
+      "address": 7512,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d58",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7297,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d5e",
+      "address": 7518,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d5e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d66",
+      "address": 7526,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d66",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d6e",
+      "address": 7534,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d6e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7252,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d80",
+      "address": 7552,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d80",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7281,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d8a",
+      "address": 7562,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d8a",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d98",
+      "address": 7576,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d98",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7304,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1d9e",
+      "address": 7582,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1d9e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1da6",
+      "address": 7590,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1da6",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1dae",
+      "address": 7598,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1dae",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1db6",
+      "address": 7606,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1db6",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1dbe",
+      "address": 7614,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1dbe",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1dfa",
+      "address": 7674,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1dfa",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7243,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1e38",
+      "address": 7736,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1e38",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1e40",
+      "address": 7744,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1e40",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7220,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1e96",
+      "address": 7830,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1e96",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7324,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1ea8",
+      "address": 7848,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1ea8",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7264,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1eb0",
+      "address": 7856,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1eb0",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7324,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1ec2",
+      "address": 7874,
+      "rows": 12,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1ec2",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7342,
+        "count": 12,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1ed0",
+      "address": 7888,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1ed0",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7276,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1ed6",
+      "address": 7894,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1ed6",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7229,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1ede",
+      "address": 7902,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1ede",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7297,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1ee4",
+      "address": 7908,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1ee4",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1f20",
+      "address": 7968,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1f20",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7368,
+        "count": 6,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1f28",
+      "address": 7976,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1f28",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7297,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1f42",
+      "address": 8002,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1f42",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7297,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1f48",
+      "address": 8008,
+      "rows": 12,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1f48",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7342,
+        "count": 12,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1f56",
+      "address": 8022,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1f56",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7236,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1f5e",
+      "address": 8030,
+      "rows": 2,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1f5e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7261,
+        "count": 2,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1f64",
+      "address": 8036,
+      "rows": 2,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1f64",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 7261,
+        "count": 2,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x1f90",
+      "address": 8080,
+      "rows": 10,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x1f90",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8058,
+        "count": 10,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x20f2",
+      "address": 8434,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x20f2",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8324,
+        "count": 6,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x2100",
+      "address": 8448,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x2100",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8361,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x2232",
+      "address": 8754,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x2232",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8286,
+        "count": 6,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x2240",
+      "address": 8768,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x2240",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8286,
+        "count": 6,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x224e",
+      "address": 8782,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x224e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8395,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x2256",
+      "address": 8790,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x2256",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8372,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x2268",
+      "address": 8808,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x2268",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8372,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x22de",
+      "address": 8926,
+      "rows": 4,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x22de",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8421,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x230c",
+      "address": 8972,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x230c",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8365,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x231a",
+      "address": 8986,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x231a",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8426,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x2322",
+      "address": 8994,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x2322",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8426,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x23a4",
+      "address": 9124,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x23a4",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9086,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x23d2",
+      "address": 9170,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x23d2",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9086,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x2424",
+      "address": 9252,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x2424",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9105,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x242e",
+      "address": 9262,
+      "rows": 16,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": true,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x242e",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9069,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x2908",
+      "address": 10504,
+      "rows": 16,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x2908",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9069,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x291a",
+      "address": 10522,
+      "rows": 16,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x291a",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9069,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x292c",
+      "address": 10540,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x292c",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9119,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x2932",
+      "address": 10546,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x2932",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9119,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x2938",
+      "address": 10552,
+      "rows": 16,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x2938",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9069,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x295a",
+      "address": 10586,
+      "rows": 16,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x295a",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9069,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x29ba",
+      "address": 10682,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x29ba",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10626,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x29cc",
+      "address": 10700,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x29cc",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10626,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x29de",
+      "address": 10718,
+      "rows": 8,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x29de",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10626,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-partial-curve-0x2a64",
+      "address": 10852,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-partial-curve-0x2a64",
+      "yAxis": {
+        "kind": "referenced",
+        "address": 10643,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    }
+  ]
+}

@@ -29,6 +29,19 @@ function plantTable(bytes: Uint8Array, sa: number, withHeader: boolean): void {
 const start = (sa: number, w: 1 | 2 = 1): FamilyStart => ({ sa, fo: saToFo(sa), w });
 const u8 = { width: 1, signed: false, endianness: 'big' } as const;
 
+it('does not turn a code-read curve header into a grid covering adjacent curves', () => {
+  const bytes = new Uint8Array(0x18000);
+  plantTable(bytes, 0x300, true);
+  plantTable(bytes, 0x400, true);
+  const curve = { address: saToFo(0x300), rows: 4, cols: 1, format: u8,
+    tier: 4, kind: '1d' as const, score: 0.9 };
+  const found = scanRelaxedHeaderTables(bytes, [], DEFAULT_SCAN_CONFIG, [curve]);
+  expect(found.some(m => m.address === curve.address)).toBe(false);
+  expect(found.some(m => m.address === saToFo(0x400))).toBe(true);
+  expect(scanRelaxedHeaderTables(bytes, [], DEFAULT_SCAN_CONFIG, [{ ...curve, tier: 6 }])
+    .some(m => m.address === curve.address)).toBe(true);
+});
+
 describe('detectMs41Tables — header path', () => {
   it('emits exact dims and axis addresses from a valid header', () => {
     const bytes = new Uint8Array(0x18000);

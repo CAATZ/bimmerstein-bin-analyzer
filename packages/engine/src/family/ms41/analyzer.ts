@@ -7,7 +7,7 @@ import { MS41_CAL_SA_MAX, MS41_CAL_SA_MIN, MS41_MIN_BIN_LEN, inCalWindow, saSpan
 import { readU16SA, validateAxisPtr } from './header.js';
 import { scanPlateauCalAxes, type FamilyPoolAxis } from './plateau.js';
 import { selfLocateCurveReaders, selfLocateReaders, type ReaderEntry } from './readers.js';
-import { detectMs41Curves, detectMs41CurveFallbacks } from './curves.js';
+import { CURVE_FALLBACK_TIER, detectMs41Curves, detectMs41CurveFallbacks } from './curves.js';
 import { detectMs41Params } from './params.js';
 
 /**
@@ -187,7 +187,8 @@ const SCAN_SA_MIN = 12;
 export function scanRelaxedHeaderTables(
   bytes: Uint8Array,
   starts: FamilyStart[],
-  config: ScanConfig
+  config: ScanConfig,
+  curves: FamilyDetection[] = []
 ): FamilyDetection[] {
   const { minCols, maxCols, minRows, maxRows } = config.table;
   const relaxedOpts = { minCount: config.family.ms41.scanAxisMinCount, relaxed: true };
@@ -203,6 +204,8 @@ export function scanRelaxedHeaderTables(
     return lo < startSAs.length ? startSAs[lo] : undefined;
   };
   const out: FamilyDetection[] = [];
+  const curveSpans = curves.filter(c => c.kind === '1d' && c.tier <= CURVE_FALLBACK_TIER)
+    .map(c => [c.address, c.address + c.rows * c.cols * c.format.width] as const);
   for (let sa = SCAN_SA_MIN; sa <= MS41_CAL_SA_MAX - 4; sa++) {
     const xp = readU16SA(bytes, sa - 4);
     const yp = readU16SA(bytes, sa - 2);
@@ -223,6 +226,8 @@ export function scanRelaxedHeaderTables(
       if (!saSpanContiguous(sa, byteLen)) continue;
       if (fo + byteLen > bytes.length) continue;
       if (gap !== undefined && byteLen > gap) continue;
+      // A validated curve-reader call rules out an inferred grid across its data.
+      if (curveSpans.some(([start, end]) => fo < end && fo + byteLen > start)) continue;
       const sc = frameScore(bytes, fo, rows, cols, axisFmt(w));
       const exact = gap !== undefined && byteLen === gap;
       if (!best || (exact && !best.exact) || (exact === best.exact && sc > best.score)) {
@@ -318,7 +323,7 @@ export const ms41Analyzer: FamilyAnalyzer = {
       readers.length >= config.family.ms41.paramMinReaders ? detectMs41Params(bytes, config) : [];
     return [
       ...detectMs41Tables(bytes, starts, pool, config),
-      ...scanRelaxedHeaderTables(bytes, starts, config),
+      ...scanRelaxedHeaderTables(bytes, starts, config, curves),
       ...curves,
       ...params,
     ];

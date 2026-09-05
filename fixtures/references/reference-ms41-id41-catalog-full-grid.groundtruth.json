@@ -1,0 +1,4430 @@
+{
+  "fixture": "reference-ms41-id41-catalog-full-grid",
+  "binSha256": "c61674c5812f5fe0a4a6f86e96311e9a8e540a905f9e7f681fdd045254249521",
+  "maps": [
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x328",
+      "address": 82728,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x328",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 82612,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 82634,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x366",
+      "address": 82790,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x366",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 82595,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 82604,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x3a2",
+      "address": 82850,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x3a2",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 82595,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 82604,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x3de",
+      "address": 82910,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x3de",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 82652,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 82604,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x418",
+      "address": 82968,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x418",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 82629,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 82642,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x44c",
+      "address": 83020,
+      "rows": 8,
+      "cols": 6,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x44c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 82697,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 82704,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x5ba",
+      "address": 83386,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x5ba",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83235,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83242,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x7dc",
+      "address": 83932,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x7dc",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83676,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83635,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x7f0",
+      "address": 83952,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x7f0",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83550,
+        "count": 6,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83525,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x818",
+      "address": 83992,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x818",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83550,
+        "count": 6,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83525,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x852",
+      "address": 84050,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x852",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83777,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83784,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x884",
+      "address": 84100,
+      "rows": 9,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x884",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83810,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83819,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x8d0",
+      "address": 84176,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": true,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x8d0",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83708,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83685,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x91c",
+      "address": 84252,
+      "rows": 7,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x91c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83519,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83532,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x944",
+      "address": 84292,
+      "rows": 7,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x944",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83519,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83540,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x96c",
+      "address": 84332,
+      "rows": 7,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x96c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83519,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83540,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x994",
+      "address": 84372,
+      "rows": 7,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x994",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83519,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83532,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x9bc",
+      "address": 84412,
+      "rows": 7,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x9bc",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83519,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83532,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x9e4",
+      "address": 84452,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x9e4",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83626,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83640,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x9f8",
+      "address": 84472,
+      "rows": 16,
+      "cols": 12,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x9f8",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83836,
+        "count": 12,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83862,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0xb80",
+      "address": 84864,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0xb80",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83608,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83645,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0xbcc",
+      "address": 84940,
+      "rows": 16,
+      "cols": 12,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0xbcc",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83836,
+        "count": 12,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83862,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0xd62",
+      "address": 85346,
+      "rows": 16,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0xd62",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83836,
+        "count": 12,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83862,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0xe26",
+      "address": 85542,
+      "rows": 16,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0xe26",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83836,
+        "count": 12,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83862,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0xeea",
+      "address": 85738,
+      "rows": 8,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0xeea",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83752,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83759,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0xf1e",
+      "address": 85790,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0xf1e",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83800,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83805,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0xf32",
+      "address": 85810,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0xf32",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83582,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83572,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0xf76",
+      "address": 85878,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0xf76",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83599,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83652,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0xfba",
+      "address": 85946,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0xfba",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83895,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83904,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1004",
+      "address": 86020,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1004",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83895,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83904,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1048",
+      "address": 86088,
+      "rows": 8,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1048",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83913,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83920,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x107c",
+      "address": 86140,
+      "rows": 8,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x107c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83913,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83920,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x10b0",
+      "address": 86192,
+      "rows": 9,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x10b0",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83810,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83819,
+        "count": 9,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x10fc",
+      "address": 86268,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x10fc",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83726,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83697,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1140",
+      "address": 86336,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1140",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83582,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83572,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1184",
+      "address": 86404,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1184",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83726,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83697,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x11c8",
+      "address": 86472,
+      "rows": 16,
+      "cols": 12,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x11c8",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83836,
+        "count": 12,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83862,
+        "count": 16,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x128c",
+      "address": 86668,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x128c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 83615,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 83666,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x153a",
+      "address": 87354,
+      "rows": 11,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x153a",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87072,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87036,
+        "count": 11,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1580",
+      "address": 87424,
+      "rows": 11,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1580",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87078,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87048,
+        "count": 11,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x15ca",
+      "address": 87498,
+      "rows": 11,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x15ca",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87084,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87060,
+        "count": 11,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1606",
+      "address": 87558,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1606",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87090,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87095,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1620",
+      "address": 87584,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1620",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87100,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87107,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1648",
+      "address": 87624,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1648",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87128,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87138,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x165c",
+      "address": 87644,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x165c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87121,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87114,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1684",
+      "address": 87684,
+      "rows": 4,
+      "cols": 6,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1684",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87114,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87148,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x16b8",
+      "address": 87736,
+      "rows": 4,
+      "cols": 6,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x16b8",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87114,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87153,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x16ec",
+      "address": 87788,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x16ec",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87168,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87158,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1788",
+      "address": 87944,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1788",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87192,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87197,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x179c",
+      "address": 87964,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x179c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87202,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87211,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x17f4",
+      "address": 88052,
+      "rows": 8,
+      "cols": 3,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x17f4",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87220,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87027,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1810",
+      "address": 88080,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1810",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87202,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87211,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1854",
+      "address": 88148,
+      "rows": 4,
+      "cols": 6,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1854",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87114,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87310,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1888",
+      "address": 88200,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1888",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87000,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 86983,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x18ac",
+      "address": 88236,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x18ac",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87322,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87315,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x18ec",
+      "address": 88300,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x18ec",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87257,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87230,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x191c",
+      "address": 88348,
+      "rows": 6,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x191c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87274,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87267,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1938",
+      "address": 88376,
+      "rows": 6,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1938",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87279,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87267,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1a16",
+      "address": 88598,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1a16",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87331,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87284,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1a34",
+      "address": 88628,
+      "rows": 4,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1a34",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 87114,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 87336,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1aba",
+      "address": 88762,
+      "rows": 3,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1aba",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 88703,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88696,
+        "count": 3,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1ae8",
+      "address": 88808,
+      "rows": 6,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1ae8",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 88703,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88714,
+        "count": 6,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1b1c",
+      "address": 88860,
+      "rows": 4,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1b1c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 88727,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88736,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1b42",
+      "address": 88898,
+      "rows": 2,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1b42",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 88703,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88745,
+        "count": 2,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1b56",
+      "address": 88918,
+      "rows": 3,
+      "cols": 8,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1b56",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 88703,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88696,
+        "count": 3,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1dc8",
+      "address": 89544,
+      "rows": 8,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1dc8",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 89126,
+        "count": 6,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89163,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1e06",
+      "address": 89606,
+      "rows": 8,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1e06",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 89210,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89163,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1e48",
+      "address": 89672,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1e48",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 89238,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89233,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1e5c",
+      "address": 89692,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1e5c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 89119,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89140,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1e70",
+      "address": 89712,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1e70",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 89119,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89140,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1e84",
+      "address": 89732,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1e84",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 89238,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89233,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1eee",
+      "address": 89838,
+      "rows": 8,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1eee",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 89126,
+        "count": 6,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89163,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1f30",
+      "address": 89904,
+      "rows": 4,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1f30",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 89302,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89312,
+        "count": 4,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1fa8",
+      "address": 90024,
+      "rows": 10,
+      "cols": 3,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1fa8",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 89973,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89978,
+        "count": 10,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x1fe8",
+      "address": 90088,
+      "rows": 10,
+      "cols": 3,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x1fe8",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 89973,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89978,
+        "count": 10,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2108",
+      "address": 90376,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2108",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90195,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90220,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x214c",
+      "address": 90444,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x214c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90195,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90220,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2190",
+      "address": 90512,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2190",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90195,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90220,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x21d4",
+      "address": 90580,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x21d4",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90195,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90220,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2218",
+      "address": 90648,
+      "rows": 6,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2218",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90336,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90322,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x227c",
+      "address": 90748,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x227c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90301,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90308,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x22a4",
+      "address": 90788,
+      "rows": 5,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x22a4",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90258,
+        "count": 5,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90237,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x22c2",
+      "address": 90818,
+      "rows": 5,
+      "cols": 5,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x22c2",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90270,
+        "count": 5,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90237,
+        "count": 5,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x22e6",
+      "address": 90854,
+      "rows": 6,
+      "cols": 6,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x22e6",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 90329,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90322,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x23b0",
+      "address": 91056,
+      "rows": 8,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x23b0",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91015,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 91006,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x23de",
+      "address": 91102,
+      "rows": 8,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x23de",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91020,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 91006,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2402",
+      "address": 91138,
+      "rows": 8,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2402",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91020,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 91006,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2442",
+      "address": 91202,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2442",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2486",
+      "address": 91270,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2486",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x24ca",
+      "address": 91338,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x24ca",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x250e",
+      "address": 91406,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x250e",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2552",
+      "address": 91474,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2552",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2596",
+      "address": 91542,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2596",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x25da",
+      "address": 91610,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x25da",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x261e",
+      "address": 91678,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x261e",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2662",
+      "address": 91746,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2662",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x26a6",
+      "address": 91814,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x26a6",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x26ea",
+      "address": 91882,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x26ea",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x272e",
+      "address": 91950,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x272e",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2772",
+      "address": 92018,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2772",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x27b6",
+      "address": 92086,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x27b6",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x27fa",
+      "address": 92154,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x27fa",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x283e",
+      "address": 92222,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x283e",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2882",
+      "address": 92290,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2882",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x28c6",
+      "address": 92358,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x28c6",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 91034,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 90989,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x29f2",
+      "address": 92658,
+      "rows": 7,
+      "cols": 8,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x29f2",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 92567,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 92576,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2a6c",
+      "address": 92780,
+      "rows": 7,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2a6c",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 92584,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 92593,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2aa8",
+      "address": 92840,
+      "rows": 7,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2aa8",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 92584,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 92593,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2ae4",
+      "address": 92900,
+      "rows": 7,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2ae4",
+      "xAxis": {
+        "kind": "referenced",
+        "address": 92584,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 92593,
+        "count": 7,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "name": "reference-ms41-id41-catalog-full-grid-0x2b4a",
+      "address": 93002,
+      "rows": 16,
+      "cols": 16,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "orientation": "row-major",
+      "provenance": "imported",
+      "id": "reference-ms41-id41-catalog-full-grid-0x2b4a",
+      "xAxis": {
+        "kind": "literal",
+        "count": 16,
+        "values": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      },
+      "yAxis": {
+        "kind": "literal",
+        "count": 16,
+        "values": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ]
+      }
+    }
+  ]
+}

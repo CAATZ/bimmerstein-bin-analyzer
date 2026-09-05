@@ -376,16 +376,18 @@ export function partialCurveDetections(
   // Emission: one detection per passing candidate. Width pick (the integ
   // harness's deterministic rule): exact end-packing first (block end lands
   // on a trusted edge or the next candidate's start), then the smaller width.
-  // Deliberately EXACT — not the pad-tolerant endMatch used for anchoring:
-  // the picker resolves w1-vs-w2 by literal packing, and a pad-forgiving
-  // variant was never measured (the anchor and the picker answer different
-  // questions).
+  // Allow an alignment byte after byte data. An odd-address word candidate
+  // must not gain packing evidence by rounding its end up to a word boundary.
   const out: FamilyDetection[] = [];
   for (const p of nodes) {
     if (compAnchored.get(find(idx.get(p)!)) !== true) continue;
     const ax = cands.get(p)!;
     const ws = feas.get(p)!;
-    const endAbut = ws.filter((w) => edgeSet.has(p + ax.count * w) || candStarts.has(p + ax.count * w));
+    const endAbut = ws.filter((w) => {
+      const end = p + ax.count * w;
+      return w === 1 ? endMatch(edgeSet, end) || endMatch(candStarts, end)
+        : edgeSet.has(end) || candStarts.has(end);
+    });
     const w = (endAbut.length > 0 ? endAbut : ws)[0]!; // arrays ascend: smaller width wins ties
     out.push({
       address: p,

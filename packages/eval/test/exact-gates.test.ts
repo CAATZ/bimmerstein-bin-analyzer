@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
 import { EXACT_GATES, meetsExactGate } from '../src/exact-gates.js';
+import { gateFor, MS41_GATE } from '../src/cli.js';
 
 it('rejects any loss in exact starts, layouts or axis pairs despite perfect overlap scores', () => {
   const key = 'ms41-s52-ss1v2';
@@ -14,5 +15,29 @@ it('rejects any loss in exact starts, layouts or axis pairs despite perfect over
   for (const id of ['41', '60']) for (const frame of ['full', 'partial']) {
     expect(EXACT_GATES[`reference-ms41-id${id}-${frame}`]?.exactStartRecall).toBeGreaterThan(0.9);
   }
-  expect(Object.keys(EXACT_GATES)).toHaveLength(42);
+  expect(Object.keys(EXACT_GATES)).toHaveLength(48);
+});
+
+it('pins all six complete ID41 catalog classes without changing the older subset gates', () => {
+  const expected = {
+    'full-grid': [1, 109 / 110, 108 / 110],
+    'full-curve': [1, 133 / 140, 132 / 140],
+    'full-param': [418 / 420, 400 / 420, 0],
+    'partial-grid': [109 / 110, 107 / 110, 106 / 110],
+    'partial-curve': [139 / 140, 130 / 140, 129 / 140],
+    'partial-param': [0, 0, 0], // No program code is present in the partial.
+  };
+  for (const [suffix, values] of Object.entries(expected)) {
+    expect(EXACT_GATES[`reference-ms41-id41-catalog-${suffix}`]).toEqual({
+      exactStartRecall: values[0], exactLayoutRecall: values[1], axisPairRecall: values[2],
+    });
+  }
+});
+
+it('scores scalar classes using exact floors without requiring nonexistent axes', () => {
+  const key = 'reference-ms41-id41-catalog-full-param';
+  expect(gateFor(key)).toBeUndefined();
+  expect(meetsExactGate({ exactStartRecall: 1, exactLayoutRecall: 0, axisPairRecall: 0 }, key)).toBe(false);
+  expect(gateFor('reference-ms41-id41-full')).toBe(MS41_GATE);
+  expect(gateFor('reference-ms41-id41-catalog-full-grid')).toBe(MS41_GATE);
 });

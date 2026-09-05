@@ -48,6 +48,27 @@ function gridMap(address: number, rows: number, cols: number, xData: number, yDa
 }
 
 describe('partialCurveDetections — component tests', () => {
+  it('does not promote an odd-address word interpretation from a one-byte alignment pad', () => {
+    const b = new Uint8Array(0x400);
+    putAxis(b, 0x100, 4);
+    const p = putCurve(b, 0x201, 0x100, 4);
+    const edge = putAxis(b, 0x20c, 6, 40, 17);
+    const out = partialCurveDetections(b, [], [pax(edge, 6)], cfg);
+    expect(out.find(m => m.address === p)?.format.width).toBe(1);
+  });
+  it('uses an alignment pad when choosing width, preserving the intervening curve', () => {
+    const b = new Uint8Array(0x400);
+    putAxis(b, 0x100, 7);
+    putAxis(b, 0x110, 4);
+    putAxis(b, 0x120, 4);
+    const p = putCurve(b, 0x200, 0x100, 7);
+    b[0x209] = 0xff;
+    putCurve(b, 0x20a, 0x110, 4);
+    putCurve(b, 0x210, 0x120, 4);
+    const edge = putAxis(b, 0x216, 6, 40, 17);
+    const out = partialCurveDetections(b, [], [pax(edge, 6)], cfg);
+    expect(out.find(m => m.address === p)?.format.width).toBe(1);
+  });
   it('(a) happy path: trusted grid + pooled axis + curve block abutting a known edge → one detection with exact count', () => {
     const b = new Uint8Array(0x400);
     // legit grid at 0x300 (4x4): header at 0x2FC -> axes 0x200/0x210, large data bytes

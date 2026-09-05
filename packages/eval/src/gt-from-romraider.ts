@@ -25,7 +25,7 @@ const FO_WINDOW = 0x6000;
  * carry only what the eval harness consumes — address, dims, format, axis
  * bindings — and must never republish the definition author's work: map and
  * axis NAMES, the CATEGORY taxonomy, free-text NOTES, or the reverse-engineered
- * SCALING (whose `units` strings carry the author's own annotations).
+ * SCALING (whose `units` strings carry the author's own annotations), or states.
  *
  * `MapDef` requires `name` and `scaling`, so those are neutralized rather than
  * dropped: `name` becomes the structural id, `scaling` becomes identity (raw
@@ -40,7 +40,7 @@ function structuralOnly(map: MapDef): MapDef {
     const { name: _name, scaling: _scaling, ...rest } = a;
     return rest;
   };
-  const { category: _category, notes: _notes, xAxis, yAxis, ...rest } = map;
+  const { category: _category, notes: _notes, states: _states, xAxis, yAxis, ...rest } = map;
   return {
     ...rest,
     name: map.id,
@@ -65,6 +65,46 @@ export interface GtBuildOptions {
    * classes are mutually exclusive truth sets — never mixed in one GroundTruth.
    */
   class?: '2d' | 'curve';
+}
+
+/** Complete, explicitly selected reference objects, including uniform values and scalars. */
+export function buildCatalogGroundTruth(
+  selected: MapDef[], bin: BinImage, opts: GtBuildOptions
+): Result<GroundTruth> {
+  const maps: MapDef[] = [];
+  const seen = new Set<number>();
+  const mappedAddress = (sa: number, size: number): number | null => {
+    if (!Number.isInteger(sa) || sa < 0 || size < 1) return null;
+    if (!opts.applyFo) return sa;
+    if (sa + size > FO_WINDOW || (sa < 0x4000 && sa + size > 0x4000)) return null;
+    return fo(sa);
+  };
+  for (const source of selected) {
+    const m = isCurveShaped(source) ? toCanonicalCurve(source) : source;
+    const address = mappedAddress(m.address, m.rows * m.cols * m.format.width);
+    if (address === null) return { ok: false, error: `invalid catalog span at ${m.address}` };
+    if (seen.has(address)) return { ok: false, error: `duplicate catalog start at ${m.address}` };
+    const axes: { xAxis?: AxisDef; yAxis?: AxisDef } = {};
+    for (const role of ['xAxis', 'yAxis'] as const) {
+      const axis = m[role];
+      if (!axis) continue;
+      if (axis.kind !== 'referenced') { axes[role] = axis; continue; }
+      if (axis.address === undefined || axis.format === undefined) {
+        return { ok: false, error: `incomplete catalog axis at ${m.address}` };
+      }
+      const axisAddress = mappedAddress(axis.address, axis.count * axis.format.width);
+      if (axisAddress === null) return { ok: false, error: `invalid catalog axis span at ${m.address}` };
+      axes[role] = { ...axis, address: axisAddress };
+    }
+    const mapped = { ...m, ...axes, address, id: `${opts.idPrefix}-0x${m.address.toString(16)}` };
+    const valid = validateMapDef(mapped, bin.size);
+    if (!valid.ok) return { ok: false, error: `${mapped.id}: ${valid.error}` };
+    maps.push(structuralOnly(mapped));
+    seen.add(address);
+  }
+  if (maps.length === 0) return { ok: false, error: 'empty catalog' };
+  maps.sort((a, b) => a.address - b.address);
+  return { ok: true, value: { fixture: opts.fixture, binSha256: bin.sha256, maps } };
 }
 
 export function buildGroundTruth(

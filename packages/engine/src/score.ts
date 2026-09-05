@@ -335,6 +335,17 @@ export function rankAndEmit(
       spans.add(span);
     }
   }
+  // Keep code-read scalars visible beneath generic shapes. Structural maps and
+  // their referenced axes still own their bytes, as do previously emitted params.
+  const paramSpans = new SpanIndex();
+  for (const { span, def } of kept) {
+    paramSpans.add(span);
+    for (const axis of [def.xAxis, def.yAxis]) {
+      if (axis?.kind === 'referenced' && axis.address !== undefined && axis.format !== undefined) {
+        paramSpans.add([axis.address, axis.address + axis.count * axis.format.width]);
+      }
+    }
+  }
   for (const { c, confidence, anchor, poolAnchor } of scored) {
     const span = byteSpan(c.table);
     if (spans.conflicts(span, overlapMax)) continue;
@@ -374,10 +385,8 @@ export function rankAndEmit(
     spans.add(span);
   }
   // PARAM TIER (spec 2026-07-23 Switch Phase B): code-referenced 1×1
-  // parameters are the WEAKEST claim in the pipeline — emitted LAST, after
-  // every other tier, so any kept span suppresses an overlapping param (the
-  // spike's cand−detOnly add-discipline through the real overlap semantics:
-  // a 1–2-byte span inside any kept map has overlapFrac 1 > overlapMax).
+  // parameters are emitted LAST without displacing any existing table.
+  // Structural maps suppress overlapping scalar reads; generic guesses do not.
   // Emitting last also makes every existing row byte-identical BY
   // CONSTRUCTION (append-only). Deterministic order: address asc, width asc.
   // NOTE: this loop suppresses against spans added by EARLIER tiers AND by
@@ -397,12 +406,11 @@ export function rankAndEmit(
       // map is evidence that map is misframed, and this tier's audience is
       // bins with no definition file. Append-only is unaffected — params are
       // emitted last, so an exempt param adds a row without moving one.
-      // Plain params keep full suppression (the add-discipline).
-      if (f.states === undefined && spans.conflicts(span, overlapMax)) continue;
+      if (f.states === undefined && paramSpans.conflicts(span, overlapMax)) continue;
       const endian = f.format.endianness === 'big' ? 'be' : 'le';
       const def: MapDef = {
         id: `auto-0x${f.address.toString(16)}-1x1w${f.format.width}${endian}`,
-        name: `Param 0x${f.address.toString(16).toUpperCase()} ${f.format.width === 1 ? 'u8' : 'u16'}`,
+        name: `Param 0x${f.address.toString(16).toUpperCase()} ${f.format.signed ? 'i' : 'u'}${f.format.width * 8}`,
         category: 'Code-referenced parameter',
         address: f.address,
         rows: f.rows,
@@ -416,7 +424,7 @@ export function rankAndEmit(
       };
       if (f.states !== undefined) def.states = f.states;
       kept.push({ span, def });
-      spans.add(span);
+      paramSpans.add(span);
     }
   }
   return kept.map((k) => k.def);
