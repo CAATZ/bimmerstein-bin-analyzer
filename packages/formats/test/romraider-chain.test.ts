@@ -47,6 +47,51 @@ describe('inheritance chain resolution', () => {
     expect(ok(xml, 'FAMBASE').maps).toHaveLength(0); // base has structure but no addresses
   });
 
+  it('removes omitted tables before selecting a duplicate-xmlid variant, without affecting its base', () => {
+    const xml = `<roms>
+      <rom><romid><xmlid>BASE</xmlid></romid>
+        <table type="1D" name="Keep" storagetype="uint8" storageaddress="10"/>
+        <table type="1D" name="Old" storagetype="uint8" storageaddress="20"/>
+        <table type="1D" name="Other old" storagetype="uint8" storageaddress="30"/>
+      </rom>
+      <rom base="BASE"><romid><xmlid>LEAF</xmlid></romid>
+        <table name="Old" omit="true"/>
+        <table name="Other old" omit="true"/>
+        <table type="1D" name="Local omitted" storagetype="uint8" storageaddress="40" omit="true"/>
+        <table name="Missing" omit="true"/>
+      </rom>
+      <rom><romid><xmlid>LEAF</xmlid></romid>
+        <table type="1D" name="Replacement" storagetype="int16" endian="little" storageaddress="20"/>
+        <table type="1D" name="Active" storagetype="uint8" storageaddress="50" omit="false"/>
+      </rom>
+    </roms>`;
+    const imported = ok(xml, 'LEAF');
+    expect(imported.maps.map((m) => m.name)).toEqual(['Replacement', 'Active']);
+    expect(imported.warnings).toHaveLength(1);
+    expect(imported.warnings[0]).toContain('share xmlid');
+    expect(ok(xml, 'BASE').maps.map((m) => m.name)).toEqual(['Keep', 'Old', 'Other old']);
+  });
+
+  it('allows a descendant to redefine an omitted name without inheriting its obsolete shape or axes', () => {
+    const xml = `<roms>
+      <rom><romid><xmlid>BASE</xmlid></romid>
+        <table type="2D" name="T" storagetype="uint16" sizey="3" storageaddress="100">
+          <table type="Y Axis" storagetype="uint8" storageaddress="80"/>
+        </table>
+      </rom>
+      <rom base="BASE"><romid><xmlid>MID</xmlid></romid><table name="T" omit="true"/></rom>
+      <rom base="MID"><romid><xmlid>LEAF</xmlid></romid>
+        <table type="1D" name="T" storagetype="int8" storageaddress="200"/>
+      </rom>
+    </roms>`;
+    expect(ok(xml, 'MID')).toMatchObject({ maps: [], warnings: [] });
+    const { maps, warnings } = ok(xml, 'LEAF');
+    expect(maps).toHaveLength(1);
+    expect(maps[0]).toMatchObject({ name: 'T', address: 0x200, rows: 1, cols: 1, format: { width: 1, signed: true } });
+    expect(maps[0]!.yAxis).toBeUndefined();
+    expect(warnings).toEqual([]);
+  });
+
   it('warns and truncates on a missing base rom instead of failing', () => {
     const { maps, warnings } = ok(`<roms><rom base="GHOST"><romid><xmlid>L</xmlid></romid><table type="2D" name="T" storagetype="uint8" sizey="2" storageaddress="10"/></rom></roms>`, 'L');
     expect(maps).toHaveLength(1);
