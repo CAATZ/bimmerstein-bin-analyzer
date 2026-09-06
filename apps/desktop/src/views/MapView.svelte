@@ -303,7 +303,9 @@
       <table>
         <thead>
           <tr>
-            <th class="corner">{yAxis?.name ?? ''} \ {xAxis?.name ?? ''}</th>
+            <th class="corner" title={`${yAxis?.name ?? ''} \\ ${xAxis?.name ?? ''}`}>
+              <span>{yAxis?.name ?? ''} \ {xAxis?.name ?? ''}</span>
+            </th>
             {#each xLabels as label, i (i)}
               <th
                 class="axishdr"
@@ -463,5 +465,11 @@
   .corner {
     color: var(--fg-dim);
     font-weight: normal;
+  }
+  .corner span {
+    display: block;
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 </style>
