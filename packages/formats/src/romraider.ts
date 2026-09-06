@@ -364,6 +364,10 @@ function resolveRomTables(chain: XmlElement[]): XmlElement[] {
       if (t.name !== 'table') continue;
       const name = t.attrs['name'];
       if (name === undefined) continue;
+      if (t.attrs['omit'] === 'true') {
+        tables.delete(name);
+        continue;
+      }
       const existing = tables.get(name);
       tables.set(name, existing === undefined ? t : mergeElements(existing, t));
     }
