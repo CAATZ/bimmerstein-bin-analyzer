@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { get } from 'svelte/store';
 import type { MapDef } from '@binanalyzer/core';
+import { createBinImage, writeValue } from '@binanalyzer/core';
 import { curveSeries, isCurveShaped } from '../src/lib/curvedata.js';
+import { bytesForDisplay } from '../src/lib/diffcells.js';
+import * as actions from '../src/store/actions.js';
+import { editJournal, workingBytes } from '../src/store/stores.js';
 
 const fmt = { width: 1, signed: false, endianness: 'big' } as const;
 const mk = (over: Partial<MapDef>): MapDef => ({
@@ -34,6 +39,35 @@ describe('curveSeries', () => {
     const m = mk({ yAxis: { kind: 'referenced', address: 0x1000, count: 4, format: fmt } });
     const s = curveSeries(bytes, m);
     expect(s.xIsIndex).toBe(true);
+  });
+
+  it.each(['row-major', 'col-major'] as const)('keeps curve values, axes and original display consistent through edit/undo in %s storage', (orientation) => {
+    for (const horizontal of [false, true]) {
+      actions.resetStores();
+      const format = { width: 2, signed: true, endianness: 'little' } as const;
+      const bytes = new Uint8Array(64);
+      [-200, 300, 500, 700].forEach((v, i) => writeValue(bytes, 16 + i * 2, format, v));
+      [10, 20, 30, 40].forEach((v, i) => writeValue(bytes, 4 + i * 2, format, v));
+      const axis = { kind: 'referenced', address: 4, count: 4, format } as const;
+      const m = mk({ format, orientation, rows: horizontal ? 1 : 4, cols: horizontal ? 4 : 1,
+        ...(horizontal ? { xAxis: axis } : { yAxis: axis }) });
+      actions.setBin(createBinImage(bytes, 'curve.bin'));
+      const series = (original = false) => curveSeries(bytesForDisplay(get(workingBytes)!, original, get(editJournal)), m);
+      const initial = series();
+      expect(actions.editCell(m, horizontal ? 0 : 1, horizontal ? 1 : 0, -20).ok).toBe(true);
+      expect(series().y).toEqual([-110, -20, 240, 340]);
+      expect([...get(editJournal).keys()].sort((a, b) => a - b)).toEqual([18, 19]);
+      expect(actions.editAxisValue(m, horizontal ? 'x' : 'y', 1, 25).ok).toBe(true);
+      expect(series().x).toEqual([10, 25, 30, 40]);
+      expect(series(true)).toEqual(initial);
+      expect(actions.undo()).toBe(true);
+      expect(series().x).toEqual(initial.x);
+      expect(actions.undo()).toBe(true);
+      expect(series()).toEqual(initial);
+      expect(actions.redo()).toBe(true);
+      expect(series().y[1]).toBe(-20);
+    }
+    actions.resetStores();
   });
 });
 

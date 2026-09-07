@@ -103,6 +103,34 @@ reference coverage, not firmware consumption or physical tuning behavior.
 Scalar classes use exact-start and exact-layout gates; the older overlap gate's
 axis requirement applies to grids and curves, which have axes to recover.
 
+The `reference-ms41-{ss1v2,id60,id12}-expanded-*` references cover the broader
+definition audit for three additional firmware images. Each class has full-read
+and calibration-only metadata:
+
+| Firmware | Grids | Curves/arrays | Scalars | Addressed source entries |
+|---|---:|---:|---:|---:|
+| MS41.3 SS1v2 | 100 | 137 | 187 | 426 |
+| MS41.1 ID60 | 71 | 94 | 449 | 618 |
+| MS41.2 ID12 | 73 | 108 | 163 | 347 |
+
+The 1,391 source entries resolve to 1,382 distinct valid benchmark objects:
+six aliases and three legacy axis views with ambiguous axis roles are accounted
+for separately; those views cannot be canonicalized into valid benchmark curves.
+Selection follows the definition audit, independently of detection. These are
+definition coverage counts, not proof that every firmware map has been found.
+The source definition SHA-256 is
+`b74a726920f7179950d2323e55982ed3dbada7dca18f22d27ab4e60470a9ac45`;
+its adjudication ledger SHA-256 is
+`0d7b3efd473204cfd64a0850654e1f2d417efc4c069f72507d61519726f91a10`.
+The reference remains untested on hardware.
+
+The SS1v2 partial for this expanded set is extracted from the matching full ROM;
+the older, independently supplied partial differs at 20 bytes and remains in
+the earlier acceptance cases. The expanded ID60 full image is a different
+hash-bound capture from the older grid subset. All three expanded full/partial
+pairs have identical calibration bytes after address conversion. Partial scalar
+classes retain their zero recovery floors because their files contain no code.
+
 1. Drop `yourbin.bin` into `fixtures/<family>/`.
 2. Build `groundtruth.json` with
    `pnpm eval gt-from-romraider <def.xml> <bin> --fixture <name> --id-prefix <prefix> --rom <xmlid> --fo`

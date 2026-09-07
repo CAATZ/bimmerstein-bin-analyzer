@@ -15,7 +15,7 @@ it('rejects any loss in exact starts, layouts or axis pairs despite perfect over
   for (const id of ['41', '60']) for (const frame of ['full', 'partial']) {
     expect(EXACT_GATES[`reference-ms41-id${id}-${frame}`]?.exactStartRecall).toBeGreaterThan(0.9);
   }
-  expect(Object.keys(EXACT_GATES)).toHaveLength(48);
+  expect(Object.keys(EXACT_GATES)).toHaveLength(66);
 });
 
 it('pins all six complete ID41 catalog classes without changing the older subset gates', () => {
@@ -40,4 +40,25 @@ it('scores scalar classes using exact floors without requiring nonexistent axes'
   expect(meetsExactGate({ exactStartRecall: 1, exactLayoutRecall: 0, axisPairRecall: 0 }, key)).toBe(false);
   expect(gateFor('reference-ms41-id41-full')).toBe(MS41_GATE);
   expect(gateFor('reference-ms41-id41-catalog-full-grid')).toBe(MS41_GATE);
+});
+
+it('protects all three expanded firmware references in full and partial frames', () => {
+  for (const rom of ['ss1v2', 'id60', 'id12']) {
+    for (const frame of ['full', 'partial']) {
+      for (const shape of ['grid', 'curve', 'param']) {
+        const key = `reference-ms41-${rom}-expanded-${frame}-${shape}`;
+        const pin = EXACT_GATES[key];
+        expect(pin, key).toBeDefined();
+        expect(meetsExactGate({ exactStartRecall: NaN, exactLayoutRecall: 1, axisPairRecall: 1 }, key)).toBe(false);
+        if (pin === undefined) continue;
+        expect(meetsExactGate(pin, key)).toBe(true);
+        if (shape === 'param' && frame === 'partial') {
+          expect(pin).toEqual({ exactStartRecall: 0, exactLayoutRecall: 0, axisPairRecall: 0 });
+        } else {
+          expect(pin.exactStartRecall).toBeGreaterThan(0.8);
+          expect(meetsExactGate({ ...pin, exactLayoutRecall: pin.exactLayoutRecall - 0.001 }, key)).toBe(false);
+        }
+      }
+    }
+  }
 });
