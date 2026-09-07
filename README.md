@@ -21,6 +21,11 @@ maps by name, address or dimensions, filter by shape or detection method, and
 inspect an explanation of how each potential map was detected. Swapping the
 display preserves stored bytes and exported definitions.
 
+Current source also supports direct value and referenced-axis editing beneath
+the 1D curve chart, with the same undo/redo and original-value display as the grid.
+Detection rejects generic table guesses that overlap structurally identified
+axes. These changes are not included in the v0.2.4 download.
+
 Currently targets Windows. macOS/Linux builds are untested (Tauri supports
 them, but nothing here has been verified on those platforms yet).
 

@@ -37,6 +37,20 @@ describe('rankAndEmit', () => {
     const out = rankAndEmit(new Uint8Array(0), [mk(1000, 0.1)], [], DEFAULT_SCAN_CONFIG);
     expect(out).toEqual([]);
   });
+
+  it('keeps structural axis bytes out of generic table guesses without suppressing shared-axis tables', () => {
+    const axis = { address: 4096, count: 32, format: u16be };
+    const owner: FamilyDetection = {
+      address: 1000, rows: 6, cols: 32, format: u16be, score: 0.9, tier: 0, xAxis: axis,
+    };
+    const shared: FamilyDetection = { ...owner, address: 2000 };
+    const guesses = [mk(4096, 0.99), mk(4160, 0.9), mk(5000, 0.9)];
+    const out = rankAndEmit(new Uint8Array(8192), guesses, [], DEFAULT_SCAN_CONFIG, [], [owner, shared]);
+    expect(out.map((m) => m.address)).toEqual([1000, 2000, 4160, 5000]);
+    // Unverified axis guesses do not acquire ownership of other candidates.
+    expect(rankAndEmit(new Uint8Array(8192), guesses, [], DEFAULT_SCAN_CONFIG)
+      .some((m) => m.address === 4096)).toBe(true);
+  });
 });
 
 describe('rankAndEmit anchored ranking', () => {

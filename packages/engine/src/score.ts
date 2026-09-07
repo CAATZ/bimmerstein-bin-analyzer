@@ -335,20 +335,20 @@ export function rankAndEmit(
       spans.add(span);
     }
   }
-  // Keep code-read scalars visible beneath generic shapes. Structural maps and
-  // their referenced axes still own their bytes, as do previously emitted params.
-  const paramSpans = new SpanIndex();
+  // Structural maps and their axes own their bytes before generic guesses and
+  // scalar reads. Generic shapes do not suppress code-read scalars.
+  const protectedSpans = new SpanIndex();
   for (const { span, def } of kept) {
-    paramSpans.add(span);
+    protectedSpans.add(span);
     for (const axis of [def.xAxis, def.yAxis]) {
       if (axis?.kind === 'referenced' && axis.address !== undefined && axis.format !== undefined) {
-        paramSpans.add([axis.address, axis.address + axis.count * axis.format.width]);
+        protectedSpans.add([axis.address, axis.address + axis.count * axis.format.width]);
       }
     }
   }
   for (const { c, confidence, anchor, poolAnchor } of scored) {
     const span = byteSpan(c.table);
-    if (spans.conflicts(span, overlapMax)) continue;
+    if (spans.conflicts(span, overlapMax) || protectedSpans.conflicts(span, overlapMax)) continue;
     const { address, rows, cols, format } = c.table;
     const endian = format.endianness === 'big' ? 'be' : 'le';
     const def: MapDef = {
@@ -406,7 +406,7 @@ export function rankAndEmit(
       // map is evidence that map is misframed, and this tier's audience is
       // bins with no definition file. Append-only is unaffected — params are
       // emitted last, so an exempt param adds a row without moving one.
-      if (f.states === undefined && paramSpans.conflicts(span, overlapMax)) continue;
+      if (f.states === undefined && protectedSpans.conflicts(span, overlapMax)) continue;
       const endian = f.format.endianness === 'big' ? 'be' : 'le';
       const def: MapDef = {
         id: `auto-0x${f.address.toString(16)}-1x1w${f.format.width}${endian}`,
@@ -424,7 +424,7 @@ export function rankAndEmit(
       };
       if (f.states !== undefined) def.states = f.states;
       kept.push({ span, def });
-      paramSpans.add(span);
+      protectedSpans.add(span);
     }
   }
   return kept.map((k) => k.def);

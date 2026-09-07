@@ -1,11 +1,13 @@
 <!-- apps/desktop/src/views/CurveView.svelte -->
 <script lang="ts">
-  import { maps, potentialMaps, selection, workingBytes } from '../store/stores.js';
+  import { editJournal, maps, potentialMaps, selection, showOriginal, workingBytes } from '../store/stores.js';
   import { curveSeries } from '../lib/curvedata.js';
+  import { bytesForDisplay } from '../lib/diffcells.js';
   import { formatPhysical } from '@binanalyzer/core';
   import type { MapDef } from '@binanalyzer/core';
   import * as actions from '../store/actions.js';
   import { entryAxisFromCurve } from '../lib/axislib.js';
+  import MapView from './MapView.svelte';
 
   const map = $derived.by((): MapDef | undefined => {
     const sel = $selection;
@@ -14,9 +16,11 @@
   });
   const series = $derived.by(() => {
     const wb = $workingBytes;
+    const original = $showOriginal;
+    const journal = $editJournal;
     const m = map;
     if (!wb || !m) return undefined;
-    return curveSeries(wb, m);
+    return curveSeries(bytesForDisplay(wb, original, journal), m);
   });
 
   const W = 640;
@@ -76,22 +80,7 @@
       <text x={6} y={PAD} class="tick">{fmtY(Math.max(...series.y), map.scaling.digits)}</text>
       <text x={6} y={H - PAD} class="tick">{fmtY(Math.min(...series.y), map.scaling.digits)}</text>
     </svg>
-    <table class="vals">
-      <thead>
-        <tr>
-          <th>{series.xIsIndex ? '#' : (series.axis?.name ?? 'axis')}</th>
-          <th>value{map.scaling.units ? ` (${map.scaling.units})` : ''}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each series.y as yv, i (i)}
-          <tr>
-            <td>{fmtX(series.x[i]!)}</td>
-            <td>{fmtY(yv, map.scaling.digits)}</td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
+    <div class="editor"><MapView /></div>
   {:else}
     <div class="empty">Select a 1D curve to view it.</div>
   {/if}
@@ -103,6 +92,8 @@
     inset: 0;
     overflow: auto;
     padding: 12px;
+    display: flex;
+    flex-direction: column;
   }
   .head {
     margin-bottom: 6px;
@@ -118,6 +109,8 @@
   .chart {
     width: 100%;
     max-width: 760px;
+    height: 220px;
+    flex-shrink: 0;
     background: var(--bg-panel);
     border: 1px solid #333842;
     border-radius: 4px;
@@ -126,22 +119,10 @@
     fill: var(--fg-dim);
     font-size: 10px;
   }
-  .vals {
+  .editor {
+    position: relative;
+    flex: 1;
+    min-height: 280px;
     margin-top: 10px;
-    border-collapse: collapse;
-    font-family: Consolas, monospace;
-    font-size: 12px;
-  }
-  .vals th,
-  .vals td {
-    border: 1px solid #333842;
-    padding: 3px 8px;
-    text-align: right;
-    white-space: nowrap;
-  }
-  .vals thead th {
-    position: sticky;
-    top: 0;
-    background: var(--bg-raise);
   }
 </style>

@@ -60,15 +60,16 @@ describe('scan() two-pass partial-curve emission', () => {
     it(`${name} matches pinned detections and exact table frames with zero curve-shaped maps`, { timeout: 60_000 }, () => {
       const pinned = {
         'synth-partial-201': {
-          count: 62,
-          digest: '76d80f7b92c109278359fe5990382ab89f312e545077dee681704ee3681132a1',
+          count: 47,
+          digest: '3812ab57b2373d60aa36b047aed9667fa069f0437baea485db16bd7a0bb48cf6',
         },
         'synth-partial-203': {
-          count: 61,
-          digest: '243e44732b4b677795a2c810c5fe0d82c65bf581b411e5d15682441b3a779d5d',
+          count: 45,
+          digest: '6ce2fad4e735d1fc0996c85447a757b69090cb60f8cbaf647404abbde91d73fe',
         },
       }[name];
       const maps = scan(fixtureBytes(name), cfg).potentialMaps;
+      // Axis ownership removes 15/16 generic guesses; every planted frame remains.
       expect(canonDigest(maps)).toEqual(pinned);
       expect(maps.filter(isCurveShaped)).toHaveLength(0);
       const truth = JSON.parse(readFileSync(new URL(`../../../fixtures/synthetic/${name}.groundtruth.json`, import.meta.url), 'utf8')) as { maps: MapDef[] };
@@ -186,8 +187,8 @@ describe('scan() two-pass partial-curve emission', () => {
       // Real-overlap-semantics gate: full scan()/rankAndEmit output pinned,
       // not the spike's any-overlap static predictor (skeptic condition).
       const pinned = {
-        'synth-pcurve-401': { count: 80, digest: '5ac1492c9a467f231efd0e8f5551d7f27dcc57305760e71eaa9583a6b2e41e92' },
-        'synth-pcurve-403': { count: 81, digest: 'd842d8d52419012b0ef7bf5cf60af69ab87234668885fdd60014799b2c96b474' },
+        'synth-pcurve-401': { count: 64, digest: 'b792e67e77959596ac9d0aecb4dabeec5d153a6c20214d4eb05607f8ff32ba6d' },
+        'synth-pcurve-403': { count: 63, digest: '1345c8b5d8d3e9fcd8cb09cd897daf791b30201ee6876b212934aa6336bd7b5e' },
       }[name];
       expect(canonDigest(scan(fixtureBytes(name), cfg).potentialMaps)).toEqual(pinned);
     });
