@@ -171,6 +171,25 @@ describe('detectMs41Tables — pool-pair fallback', () => {
     expect(hit.yAxis).toMatchObject({ address: fo - 0x10, count: 4 });
   });
 
+  it('uses a resolved caller only to choose between existing fallback axis pairs', () => {
+    const bytes = new Uint8Array(0x18000);
+    plantTable(bytes, 0x300, false);
+    const fo = saToFo(0x300), axes = [pool(fo - 0x30, 6), pool(fo - 0x20, 4), pool(fo - 6, 6)];
+    const before = detectMs41Tables(bytes, [start(0x300)], axes, DEFAULT_SCAN_CONFIG);
+    const preferred = before.find(m => m.rows === 4 && m.cols === 6 && m.xAxis?.address === fo - 0x30)!;
+    expect(preferred).toBeDefined();
+    const hints = new Map([[fo, preferred]]);
+    const after = detectMs41Tables(bytes, [start(0x300)], axes, DEFAULT_SCAN_CONFIG, [], hints);
+    expect(after).toEqual([preferred]);
+    expect(preferred.tier).toBe(2);
+    // A missing pool interpretation cannot create or remove a candidate.
+    hints.set(fo, { ...preferred, xAxis: { ...preferred.xAxis!, address: fo - 0x40 } });
+    expect(detectMs41Tables(bytes, [start(0x300)], axes, DEFAULT_SCAN_CONFIG, [], hints)).toEqual(before);
+    plantTable(bytes, 0x300, true);
+    expect(detectMs41Tables(bytes, [start(0x300)], axes, DEFAULT_SCAN_CONFIG, [], hints))
+      .toEqual(detectMs41Tables(bytes, [start(0x300)], axes, DEFAULT_SCAN_CONFIG));
+  });
+
   it('enforces extent-hard: byteLen > gap to the next start emits nothing', () => {
     const bytes = new Uint8Array(0x18000);
     plantTable(bytes, 0x300, false);

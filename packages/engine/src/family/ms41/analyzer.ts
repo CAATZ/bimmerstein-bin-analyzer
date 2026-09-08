@@ -74,7 +74,8 @@ export function detectMs41Tables(
   starts: FamilyStart[],
   pool: FamilyPoolAxis[],
   config: ScanConfig,
-  knownObjects: FamilyDetection[] = []
+  knownObjects: FamilyDetection[] = [],
+  fallbackAxes: ReadonlyMap<number, FamilyDetection> = new Map()
 ): FamilyDetection[] {
   const { minCols, maxCols, minRows, maxRows, minTableScore } = config.table;
   const { window, pairSpan } = config.pool;
@@ -168,7 +169,15 @@ export function detectMs41Tables(
       }
     }
   }
-  return out;
+  const shape = (t: FamilyDetection): string => `${t.address}/${t.rows}/${t.cols}/${t.format.width}`;
+  const matches = (t: FamilyDetection): boolean => {
+    const hint = fallbackAxes.get(t.address);
+    return !!hint && shape(t) === shape(hint) && (['xAxis', 'yAxis'] as const).every(role =>
+      t[role]?.address === hint[role]?.address && t[role]?.count === hint[role]?.count && t[role]?.format.width === hint[role]?.format.width);
+  };
+  // Require an already admitted pool candidate; retain its score and tier.
+  const preferred = new Set(out.filter(t => t.tier > 0 && matches(t)).map(t => t.address));
+  return out.filter(t => t.tier === 0 || !preferred.has(t.address) || matches(t));
 }
 
 /**
@@ -300,7 +309,8 @@ export const ms41Analyzer: FamilyAnalyzer = {
     const readers = selfLocateReaders(bytes, calls, config, readerMinArgs, readerHeaderRateMin, widthScanMaxInstr);
     if (readers.length < minReaders) return [];
     const starts = buildMs41Starts(calls, readers);
-    const runtimeGrids = detectMs41RuntimeGrids(bytes, calls, readers, config);
+    const fallbackAxes = new Map<number, FamilyDetection>();
+    const runtimeGrids = detectMs41RuntimeGrids(bytes, calls, readers, config, fallbackAxes);
     const runtimeAddresses = new Set(runtimeGrids.map(g => g.address));
     for (const grid of runtimeGrids) {
       if (!starts.some(s => s.fo === grid.address)) starts.push({ sa: foToSA(grid.address), fo: grid.address, w: grid.format.width as 1 | 2 });
@@ -341,7 +351,7 @@ export const ms41Analyzer: FamilyAnalyzer = {
       readers.length >= config.family.ms41.paramMinReaders ? detectMs41Params(bytes, config, consumers.memory) : [];
     const tables = [
       ...runtimeGrids,
-      ...detectMs41Tables(bytes, starts, pool, config, [...curves, ...params]).filter(t => !runtimeAddresses.has(t.address)),
+      ...detectMs41Tables(bytes, starts, pool, config, [...curves, ...params], fallbackAxes).filter(t => !runtimeAddresses.has(t.address)),
       ...scanRelaxedHeaderTables(bytes, starts, config, curves).filter(t => !runtimeAddresses.has(t.address)),
       ...curves,
     ];

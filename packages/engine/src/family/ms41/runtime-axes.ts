@@ -5,6 +5,7 @@ import { cpuToFile } from './frame.js';
 import { instructionSuccessors, ms41Instructions } from './consumers.js';
 
 const wordAt = (b: Uint8Array, p: number): number => b[p]! | (b[p + 1]! << 8);
+const targetAt = (b: Uint8Array, p: number): number => (b[p + 1]! << 16) | wordAt(b, p + 2);
 const ram = (a: number): boolean => a >= 0xe000 && a < 0xfe00;
 const transfers = new Set([0xda, 0xca, 0xbb, 0xab, 0xfa, 0xea, 0x9c, 0xdb, 0xcb, 0xfb, 0x8a, 0x9a, 0xaa, 0xba]);
 const fetches = new Set([0xa8, 0xa9, 0x98, 0x99, 0xd4, 0xf4]);
@@ -60,6 +61,49 @@ export function ms41AxisPrefixes(bytes: Uint8Array, calls: ReaderCall[], readers
   return { stages, readerState };
 }
 
+/** Only decoded register operations and disjoint direct stores preserve state. */
+export function preservesMs41State(b: Uint8Array, p: number, state: number[]): boolean {
+  const op = b[p]!, operand = b[p + 1]!, form = op & 15;
+  const disjoint = (addr: number, width: number): boolean => addr < 0xfe00 && state.every(a => a < addr || a >= addr + width);
+  if ([0xf6, 0xf7, 0xc5, 0xd5, 0x94, 0xb4].includes(op) || (op < 0x80 && (form === 4 || form === 5))) {
+    return disjoint(wordAt(b, p + 2), op === 0xf7 || op === 0xb4 || (op < 0x80 && form === 5) ? 1 : 2);
+  }
+  if (form === 0xe || form === 0xf) return operand < 0x80 && disjoint(0xfd00 + 2 * operand, 2);
+  if ((form === 0xd) || [0xea, 0xfa, 0x8a, 0x9a, 0xcc, 0xdb, 0xcb].includes(op)) return true;
+  if ([0xf0, 0xf1, 0xe0, 0xe1, 0xc0, 0xd0, 0xa8, 0xa9, 0x98, 0x99, 0xd4, 0xf4].includes(op)) return true;
+  if ([0xe6, 0xe7, 0xf2, 0xf3, 0xc2, 0xd2].includes(op)) return (operand >> 4) === 0xf;
+  if ([0x0b, 0x1b, 0x4b, 0x5b, 0x6b, 0x7b, 0x4c, 0x5c, 0x6c, 0x7c, 0x81, 0x91].includes(op)) return true;
+  if (op < 0x80 && form <= 9) return [0, 1, 8, 9].includes(form) || (operand >> 4) === 0xf;
+  return false;
+}
+
+/** Bounded callee summaries shared by grid and curve interpolation state. */
+export function ms41PreservingCalls(bytes: Uint8Array, instructions: Set<number>, config: ScanConfig) {
+  const { consumerMaxInstructions: limit, consumerMaxDepth: depthLimit } = config.family.ms41;
+  const preservation = new Map<string, boolean>();
+  function preserves(target: number, state: number[], depth = 0): boolean {
+    const key = `${target}/${state.join(',')}/${depth}`;
+    if (preservation.has(key)) return preservation.get(key)!;
+    if (depth > depthLimit) return false;
+    const pending = [cpuToFile(target)], seen = new Set<number>();
+    let returned = false;
+    while (pending.length) {
+      const p = pending.pop()!;
+      if (seen.has(p)) continue;
+      if (!instructions.has(p) || seen.size >= limit) return false;
+      seen.add(p);
+      if (bytes[p] === 0xda) {
+        if (!preserves(targetAt(bytes, p), state, depth + 1)) return false;
+      } else if (!preservesMs41State(bytes, p, state)) return false;
+      if (bytes[p] === 0xdb || bytes[p] === 0xcb) returned = true;
+      else pending.push(...instructionSuccessors(bytes, p));
+    }
+    preservation.set(key, returned);
+    return returned;
+  }
+  return preserves;
+}
+
 /** Curve axes established by descriptor staging on every bounded predecessor path. */
 export function resolveMs41CurveAxes(bytes: Uint8Array, calls: ReaderCall[], readers: Map<number, 1 | 2>, config: ScanConfig): Map<number, AxisPointerTarget> {
   const { consumerMaxInstructions: limit, curveEmitMinCount: minCount } = config.family.ms41;
@@ -73,6 +117,7 @@ export function resolveMs41CurveAxes(bytes: Uint8Array, calls: ReaderCall[], rea
   }
   const callAt = new Map(calls.map(call => [call.siteFile, call]));
   const { stages, readerState } = ms41AxisPrefixes(bytes, calls, readers, config, instructions);
+  const preserves = ms41PreservingCalls(bytes, instructions, config);
 
   const results = new Map<number, AxisPointerTarget>(), unresolved = new Set<number>();
   for (const call of calls) {
@@ -86,11 +131,13 @@ export function resolveMs41CurveAxes(bytes: Uint8Array, calls: ReaderCall[], rea
       if (active.has(pc) || ++count > limit) return undefined;
       const op = bytes[pc]!, priorCall = callAt.get(pc);
       if (op === 0xda) {
-        if (!priorCall || priorCall.sa < 4 || priorCall.sa > 0x5ffe) return undefined;
-        const stage = stages.get(priorCall.targetCpu);
-        if (!stage || ![...state!].every(addr => stage.writes.has(addr))) return undefined;
-        const axis = validateCurveAxisPtr(bytes, readU16SA(bytes, priorCall.sa), config, minCount);
-        return axis?.width === stage.width ? axis : undefined;
+        const target = targetAt(bytes, pc), stage = stages.get(target);
+        if (stage && [...state!].every(addr => stage.writes.has(addr))) {
+          if (!priorCall || priorCall.sa < 4 || priorCall.sa > 0x5ffe) return undefined;
+          const axis = validateCurveAxisPtr(bytes, readU16SA(bytes, priorCall.sa), config, minCount);
+          return axis?.width === stage.width ? axis : undefined;
+        }
+        if (!preserves(target, [...state!])) return undefined;
       }
       // Any unmodelled call or indirect store may replace interpolation state.
       if ([0xca, 0xbb, 0xab, 0x88, 0xc4, 0xe4, 0x84, 0xa4, 0xb8, 0xb9].includes(op)) return undefined;

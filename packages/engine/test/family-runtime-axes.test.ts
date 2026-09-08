@@ -21,6 +21,31 @@ function fixture() {
 const resolve = (b: Uint8Array) => resolveMs41CurveAxes(b, scanReaderCalls(b, cfg.family.ms41.maxR12Dist), new Map([[0x6100, 1]]), cfg);
 
 describe('MS41 runtime curve axis binding', () => {
+  it('retains its staged axis across a second-axis stager and preserving helpers', () => {
+    const b = fixture();
+    // The intervening stager publishes a different index byte.
+    b.set([0xa8, 0x3c, 0x98, 0x23, 0xf7, 0xf4, 0x81, 0xe9, 0xdb, 0], 0x2200);
+    b.set([0xf0, 0x4c, 0x0b, 0x45, 0xf2, 0xf4, 0x0e, 0xfe, 0xdb, 0], 0x2300);
+    b.set([0xe6, 0xfc, 2, 6, 0xda, 0, 0, 0x62, 0xda, 0, 0, 0x63,
+      0xe6, 0xfc, 0, 9, 0xda, 0, 0, 0x61, 0xdb, 0], 0x108);
+    expect(resolve(b).get(0x900)).toMatchObject({ dataSA: 0x802, width: 2, count: 4 });
+  });
+
+  it('rejects helpers that may overwrite state, never return or exceed the call bound', () => {
+    for (const body of [
+      [0x2d, 2, 0xf7, 0xf8, 0x80, 0xe9, 0xdb, 0],
+      [0x88, 0x34, 0xdb, 0],
+      [0x11, 0, 0xdb, 0],
+      [0x0d, 0xff],
+      [0xda, 0, 0, 0x63, 0xdb, 0],
+    ]) {
+      const b = fixture();
+      b.set(body, 0x2300);
+      b.set([0xda, 0, 0, 0x63, 0xe6, 0xfc, 0, 9, 0xda, 0, 0, 0x61, 0xdb, 0], 0x108);
+      expect(resolve(b).has(0x900)).toBe(false);
+    }
+  });
+
   it('binds a staged terminal plateau without accepting an all-equal axis', () => {
     const b = fixture();
     b.set([4, 0, 25, 0, 50, 0, 75, 0, 75, 0], saToFo(0x800));
