@@ -15,12 +15,13 @@ export interface FamilyDetection {
   cols: number;
   format: ValueFormat;
   /**
-   * 0..1 frame-smoothness confidence. May be far below score.minConfidence —
+   * 0..1 confidence from frame smoothness or a complete runtime address contract.
+   * May be far below score.minConfidence —
    * stage 5 uses the family evidence tiers instead of that generic cutoff,
    * preserving code-referenced dead/flat tables and structural fallbacks.
    */
   score: number;
-  /** Emission tier: grid tiers 0–3 (header > tight-fb > loose-fb > scan); the
+  /** Emission tier: grid tiers 0–3 (runtime/header > tight-fb > loose-fb > scan); the
    *  1D CURVE tier ranks below all grids (≥4) so a curve never displaces a grid. */
   tier: number;
   /** '1d' curves carry exactly one axis (see xAxis/yAxis); 'param' = 1×1

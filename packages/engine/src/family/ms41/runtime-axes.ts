@@ -9,18 +9,9 @@ const ram = (a: number): boolean => a >= 0xe000 && a < 0xfe00;
 const transfers = new Set([0xda, 0xca, 0xbb, 0xab, 0xfa, 0xea, 0x9c, 0xdb, 0xcb, 0xfb, 0x8a, 0x9a, 0xaa, 0xba]);
 const fetches = new Set([0xa8, 0xa9, 0x98, 0x99, 0xd4, 0xf4]);
 
-/** Curve axes established by descriptor staging on every bounded predecessor path. */
-export function resolveMs41CurveAxes(bytes: Uint8Array, calls: ReaderCall[], readers: Map<number, 1 | 2>, config: ScanConfig): Map<number, AxisPointerTarget> {
-  const { widthScanMaxInstr: prefixLimit, consumerMaxInstructions: limit, curveEmitMinCount: minCount } = config.family.ms41;
-  const instructions = ms41Instructions(bytes);
-  const predecessors = new Map<number, number[]>();
-  for (const pc of instructions) for (const next of instructionSuccessors(bytes, pc)) {
-    if (!instructions.has(next)) continue;
-    const group = predecessors.get(next) ?? [];
-    group.push(pc);
-    predecessors.set(next, group);
-  }
-  const callAt = new Map(calls.map(call => [call.siteFile, call]));
+/** Descriptor count publications and reader state loads before the first branch. */
+export function ms41AxisPrefixes(bytes: Uint8Array, calls: ReaderCall[], readers: Map<number, 1 | 2>, config: ScanConfig, instructions: Set<number>) {
+  const prefixLimit = config.family.ms41.widthScanMaxInstr;
   const stages = new Map<number, { width: 1 | 2; writes: Set<number> }>();
   const readerState = new Map<number, Set<number>>();
   for (const target of new Set(calls.map(call => call.targetCpu))) {
@@ -66,6 +57,22 @@ export function resolveMs41CurveAxes(bytes: Uint8Array, calls: ReaderCall[], rea
     if (width && writes.size) stages.set(target, { width, writes });
     if (readers.has(target) && reads.size) readerState.set(target, reads);
   }
+  return { stages, readerState };
+}
+
+/** Curve axes established by descriptor staging on every bounded predecessor path. */
+export function resolveMs41CurveAxes(bytes: Uint8Array, calls: ReaderCall[], readers: Map<number, 1 | 2>, config: ScanConfig): Map<number, AxisPointerTarget> {
+  const { consumerMaxInstructions: limit, curveEmitMinCount: minCount } = config.family.ms41;
+  const instructions = ms41Instructions(bytes);
+  const predecessors = new Map<number, number[]>();
+  for (const pc of instructions) for (const next of instructionSuccessors(bytes, pc)) {
+    if (!instructions.has(next)) continue;
+    const group = predecessors.get(next) ?? [];
+    group.push(pc);
+    predecessors.set(next, group);
+  }
+  const callAt = new Map(calls.map(call => [call.siteFile, call]));
+  const { stages, readerState } = ms41AxisPrefixes(bytes, calls, readers, config, instructions);
 
   const results = new Map<number, AxisPointerTarget>(), unresolved = new Set<number>();
   for (const call of calls) {
