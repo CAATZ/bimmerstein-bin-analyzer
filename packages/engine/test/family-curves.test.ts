@@ -41,6 +41,36 @@ function craftHeaderCurve({ count }: { count: number }): {
 }
 
 describe('detectMs41Curves', () => {
+  it('keeps a terminal plateau in a known reader curve and claims it only once', () => {
+    const { bytes, calls, readers, sa } = craftHeaderCurve({ count: 6 });
+    putSA(bytes, 0x150, [6, 0, 100, 0, 200, 0, 44, 1, 144, 1, 244, 1, 244, 1]);
+    readers.set(FALLBACK_TARGET, 2);
+    expect(detectMs41Curves(bytes, calls, readers, DEFAULT_SCAN_CONFIG)).toMatchObject([
+      { address: saToFo(sa), rows: 6, format: { width: 2 }, yAxis: { address: saToFo(0x152), count: 6, format: { width: 2 } } },
+    ]);
+    expect(detectMs41CurveFallbacks(bytes, calls, readers, DEFAULT_SCAN_CONFIG)).toEqual([]);
+    putSA(bytes, 0x150, [6, 5, 5, 5, 5, 5, 5]);
+    expect(detectMs41Curves(bytes, calls, readers, DEFAULT_SCAN_CONFIG)).toEqual([]);
+  });
+
+  it('accepts short plateau axes only at the fallback emission floor', () => {
+    const { bytes, calls, readers, sa } = craftHeaderCurve({ count: 3 });
+    putSA(bytes, 0x150, [3, 1, 2, 2]);
+    expect(detectMs41Curves(bytes, calls, readers, DEFAULT_SCAN_CONFIG)).toEqual([]);
+    expect(detectMs41CurveFallbacks(bytes, calls, readers, DEFAULT_SCAN_CONFIG)).toMatchObject([
+      { address: saToFo(sa), rows: 3, tier: CURVE_FALLBACK_TIER },
+    ]);
+  });
+
+  it('does not let the repeated bytes of a strict word axis hide its fallback curve', () => {
+    const { bytes, calls, readers, sa } = craftHeaderCurve({ count: 2 });
+    putSA(bytes, 0x150, [2, 0, 0, 0, 255, 3]);
+    readers.set(FALLBACK_TARGET, 2);
+    expect(detectMs41CurveFallbacks(bytes, calls, readers, DEFAULT_SCAN_CONFIG)).toMatchObject([
+      { address: saToFo(sa), rows: 2, tier: CURVE_FALLBACK_TIER, yAxis: { address: saToFo(0x152), format: { width: 2 } } },
+    ]);
+  });
+
   it('emits one N×1 tier-CURVE_TIER detection for a header-backed curve-reader arg', () => {
     const bytes = new Uint8Array(0x18000);
     // Axis at SA 0x150: count-prefixed (u8) strictly increasing run of 12.

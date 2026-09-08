@@ -31,6 +31,23 @@ const jmpr = () => [0x0d, 0x00]; // JMPR (len 2, low nibble 0xD)
 const nop = () => [0xcc, 0x00]; // filler, not an ender
 
 describe('scanParamSites / detectMs41Params — S* census component tests', () => {
+  it('retains the full word of a clamp whose other path copies only its low byte', () => {
+    const buf = image();
+    buf.set([0x42, 0xf4, 0x20, 0x03, 0xfd, 2, ...loadW(0x320), 0xdb, 0], CODE);
+    buf.set([...loadB(0x320), ...jmpr()], CODE + 0x40);
+    expect(detectMs41Params(buf, cfg)).toMatchObject([{ address: saToFo(0x320), format: { width: 2 } }]);
+    // An independently read high byte prevents a single word from claiming it.
+    buf.set([...loadB(0x321), ...cmpBImm(3), 0xdb, 0], CODE + 0x80);
+    expect(detectMs41Params(buf, cfg).find(p => p.address === saToFo(0x320))?.format.width).toBe(1);
+  });
+
+  it('keeps byte ownership when a mixed-width clamp also tests the byte independently', () => {
+    const buf = image();
+    buf.set([0x42, 0xf4, 0x20, 0x03, 0xfd, 2, ...loadW(0x320), 0xdb, 0], CODE);
+    buf.set([...cmpBMem(0x320), 0xdb, 0], CODE + 0x40);
+    expect(detectMs41Params(buf, cfg)[0]?.format.width).toBe(1);
+  });
+
   it('recovers a calibration load staged directly into runtime RAM', () => {
     const buf = image();
     buf.set([...loadBZ(0x320), 0xf6, 0xf4, 0x80, 0xe8, 0xfa, 0x00, 0x00, 0x00], CODE);

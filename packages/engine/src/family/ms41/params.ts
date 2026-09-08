@@ -272,7 +272,8 @@ export function scanParamSites(bytes: Uint8Array, kWindow: number): ParamSite[] 
 }
 
 /**
- * One 1×1 emission per consumed SA. Any byte-DATA read gives byte width;
+ * One 1×1 emission per consumed SA. Byte reads retain the smallest claim
+ * unless a word comparison and load establish shared word ownership;
  * sign-extending loads without conflicting zero-extension give signed bytes.
  */
 export function detectMs41Params(bytes: Uint8Array, config: ScanConfig, consumers?: Map<string, ValueEvidence>): FamilyDetection[] {
@@ -295,7 +296,10 @@ export function detectMs41Params(bytes: Uint8Array, config: ScanConfig, consumer
   const out: FamilyDetection[] = [];
   for (const sa of [...sStar].sort((a, b) => a - b)) {
     const ss = bySA.get(sa)!;
-    const w: 1 | 2 = ss.some((s) => BYTE_DATA.has(s.op)) ? 1 : 2;
+    const wordClamp = ss.some(s => s.op === 0x42) && ss.some(s => s.op === 0xf2)
+      && !ss.some(s => BYTE_DATA.has(s.op) && (s.selfTest || s.regTestDist >= 0 || s.op === 0xc2 || s.op === 0xd2))
+      && !bySA.has(sa + 1);
+    const w: 1 | 2 = !wordClamp && ss.some(s => BYTE_DATA.has(s.op)) ? 1 : 2;
     if (!saSpanContiguous(sa, w)) continue; // the SA 0x3fff→0x4000 seam
     const fo = saToFo(sa);
     if (!inCalWindow(fo) || fo + w > bytes.length) continue;

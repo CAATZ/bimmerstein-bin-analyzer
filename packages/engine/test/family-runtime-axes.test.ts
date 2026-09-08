@@ -21,6 +21,14 @@ function fixture() {
 const resolve = (b: Uint8Array) => resolveMs41CurveAxes(b, scanReaderCalls(b, cfg.family.ms41.maxR12Dist), new Map([[0x6100, 1]]), cfg);
 
 describe('MS41 runtime curve axis binding', () => {
+  it('binds a staged terminal plateau without accepting an all-equal axis', () => {
+    const b = fixture();
+    b.set([4, 0, 25, 0, 50, 0, 75, 0, 75, 0], saToFo(0x800));
+    expect(resolve(b).get(0x900)).toMatchObject({ dataSA: 0x802, width: 2, count: 4, kind: 'plateau' });
+    b.set([4, 0, 25, 0, 25, 0, 25, 0, 25, 0], saToFo(0x800));
+    expect(resolve(b).has(0x900)).toBe(false);
+  });
+
   it('uses the staged descriptor rather than a stale adjacent table header', () => {
     const b = fixture();
     b.set([0x20, 0x08], saToFo(0x8fe));
