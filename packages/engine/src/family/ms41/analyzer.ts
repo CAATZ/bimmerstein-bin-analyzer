@@ -11,6 +11,7 @@ import { CURVE_FALLBACK_TIER, detectMs41Curves, detectMs41CurveFallbacks } from 
 import { detectMs41Params } from './params.js';
 import { analyzeMs41Consumers, supportsSignedStorage } from './consumers.js';
 import { resolveMs41CurveAxes } from './runtime-axes.js';
+import { detectMs41RuntimeGrids } from './runtime-grids.js';
 
 /**
  * MS41 code-xref detection core (spec §4.6). Given the filtered start set
@@ -299,6 +300,11 @@ export const ms41Analyzer: FamilyAnalyzer = {
     const readers = selfLocateReaders(bytes, calls, config, readerMinArgs, readerHeaderRateMin, widthScanMaxInstr);
     if (readers.length < minReaders) return [];
     const starts = buildMs41Starts(calls, readers);
+    const runtimeGrids = detectMs41RuntimeGrids(bytes, calls, readers, config);
+    const runtimeAddresses = new Set(runtimeGrids.map(g => g.address));
+    for (const grid of runtimeGrids) {
+      if (!starts.some(s => s.fo === grid.address)) starts.push({ sa: foToSA(grid.address), fo: grid.address, w: grid.format.width as 1 | 2 });
+    }
     // v2.1: the family fallback pool = maximal generic pool axes ∪ plateau
     // axes (dedup by address/count/width). Plateau axes exist ONLY inside the
     // family pass — the generic pool tier never sees them.
@@ -334,8 +340,9 @@ export const ms41Analyzer: FamilyAnalyzer = {
     const params =
       readers.length >= config.family.ms41.paramMinReaders ? detectMs41Params(bytes, config, consumers.memory) : [];
     const tables = [
-      ...detectMs41Tables(bytes, starts, pool, config, [...curves, ...params]),
-      ...scanRelaxedHeaderTables(bytes, starts, config, curves),
+      ...runtimeGrids,
+      ...detectMs41Tables(bytes, starts, pool, config, [...curves, ...params]).filter(t => !runtimeAddresses.has(t.address)),
+      ...scanRelaxedHeaderTables(bytes, starts, config, curves).filter(t => !runtimeAddresses.has(t.address)),
       ...curves,
     ];
     for (const table of tables) {
