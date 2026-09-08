@@ -3,7 +3,7 @@ import type { FamilyDetection } from '../types.js';
 import type { ReaderCall } from './c166.js';
 import type { ValueFormat } from '@binanalyzer/core';
 import { MS41_CAL_SA_MAX, MS41_CAL_SA_MIN, saSpanContiguous, saToFo } from './frame.js';
-import { readU16SA, validateAxisPtr } from './header.js';
+import { readU16SA, validateAxisPtr, validateCurveAxisPtr } from './header.js';
 
 /** Curves rank below every grid tier (0–3) — a curve must never displace a grid. */
 export const CURVE_TIER = 4;
@@ -35,7 +35,7 @@ export function detectMs41Curves(
   for (const [sa, w] of [...seen.entries()].sort((a, b) => a[0] - b[0])) {
     const ptr = readU16SA(bytes, sa - 2);
     if (ptr >= sa) continue;
-    const ax = validateAxisPtr(bytes, ptr, config, { minCount: curveAxisMinCount });
+    const ax = validateCurveAxisPtr(bytes, ptr, config, curveAxisMinCount);
     if (!ax) continue;
     const byteLen = ax.count * w;
     if (!saSpanContiguous(sa, byteLen)) continue;
@@ -89,7 +89,7 @@ export function detectMs41CurveFallbacks(
   // fallback emission — emit() independently re-checks span+bounds.)
   for (const [sa] of seen) {
     const ptr = readU16SA(bytes, sa - 2);
-    if (ptr < sa && validateAxisPtr(bytes, ptr, config, { minCount: curveAxisMinCount })) claimed.add(sa);
+    if (ptr < sa && validateCurveAxisPtr(bytes, ptr, config, curveAxisMinCount)) claimed.add(sa);
   }
   const emit = (
     sa: number, w: 1 | 2, rows: number, tier: number,
@@ -111,7 +111,7 @@ export function detectMs41CurveFallbacks(
     if (claimed.has(sa)) continue;
     const ptr = readU16SA(bytes, sa - 2);
     if (ptr >= sa) continue;
-    const ax = validateAxisPtr(bytes, ptr, config, { minCount: curveEmitMinCount });
+    const ax = validateCurveAxisPtr(bytes, ptr, config, curveEmitMinCount);
     if (!ax) continue;
     emit(sa, w, ax.count, CURVE_FALLBACK_TIER, ax.dataSA, ax.width, 0.7);
   }

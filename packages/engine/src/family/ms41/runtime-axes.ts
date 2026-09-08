@@ -1,6 +1,6 @@
 import type { ScanConfig } from '../../config.js';
 import { C166_OPCODE_LEN, type ReaderCall } from './c166.js';
-import { readU16SA, validateAxisPtr, type AxisPointerTarget } from './header.js';
+import { readU16SA, validateCurveAxisPtr, type AxisPointerTarget } from './header.js';
 import { cpuToFile } from './frame.js';
 import { instructionSuccessors, ms41Instructions } from './consumers.js';
 
@@ -82,7 +82,7 @@ export function resolveMs41CurveAxes(bytes: Uint8Array, calls: ReaderCall[], rea
         if (!priorCall || priorCall.sa < 4 || priorCall.sa > 0x5ffe) return undefined;
         const stage = stages.get(priorCall.targetCpu);
         if (!stage || ![...state!].every(addr => stage.writes.has(addr))) return undefined;
-        const axis = validateAxisPtr(bytes, readU16SA(bytes, priorCall.sa), config, { minCount });
+        const axis = validateCurveAxisPtr(bytes, readU16SA(bytes, priorCall.sa), config, minCount);
         return axis?.width === stage.width ? axis : undefined;
       }
       // Any unmodelled call or indirect store may replace interpolation state.

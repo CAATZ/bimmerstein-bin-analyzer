@@ -106,3 +106,10 @@ export function validateAxisPtr(
   }
   return undefined;
 }
+
+/** Established curve readers admit terminal plateaus after strict width resolution. */
+export function validateCurveAxisPtr(bytes: Uint8Array, ptr: number, config: ScanConfig, minCount: number): AxisPointerTarget | undefined {
+  const axis = validateAxisPtr(bytes, ptr, config, { minCount })
+    ?? validateAxisPtr(bytes, ptr, config, { minCount, relaxed: true });
+  return axis?.kind === 'dead' ? undefined : axis;
+}
