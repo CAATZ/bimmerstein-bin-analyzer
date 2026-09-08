@@ -42,6 +42,34 @@ it('does not turn a code-read curve header into a grid covering adjacent curves'
     .some(m => m.address === curve.address)).toBe(true);
 });
 
+it('keeps proven curves and parameters out of inferred grids while retaining valid headers', () => {
+  const bytes = new Uint8Array(0x18000);
+  plantTable(bytes, 0x300, false);
+  const pool = [
+    { address: saToFo(0x2e0), end: saToFo(0x2e4), count: 4, format: u8 },
+    { address: saToFo(0x2fa), end: saToFo(0x300), count: 6, format: u8 },
+  ];
+  const curve = { address: saToFo(0x310), rows: 4, cols: 1, format: u8,
+    tier: 4, kind: '1d' as const, score: 0.9 };
+  expect(detectMs41Tables(bytes, [start(0x300)], pool, DEFAULT_SCAN_CONFIG).length).toBeGreaterThan(0);
+  expect(detectMs41Tables(bytes, [start(0x300)], pool, DEFAULT_SCAN_CONFIG, [curve])).toEqual([]);
+  expect(detectMs41Tables(bytes, [start(0x300)], pool, DEFAULT_SCAN_CONFIG, [{ ...curve, tier: 6 }]).length).toBeGreaterThan(0);
+  const param = { ...curve, rows: 1, kind: 'param' as const, tier: 9 };
+  expect(detectMs41Tables(bytes, [start(0x300)], pool, DEFAULT_SCAN_CONFIG, [param])).toEqual([]);
+  plantTable(bytes, 0x300, true);
+  expect(detectMs41Tables(bytes, [start(0x300)], pool, DEFAULT_SCAN_CONFIG, [curve])[0]?.tier).toBe(0);
+});
+
+it('uses the established grid-reader width when a flat header scan is ambiguous', () => {
+  const bytes = new Uint8Array(0x18000);
+  plantTable(bytes, 0x300, true);
+  putSA(bytes, 0x300, Array.from({ length: 48 }, () => 255));
+  const found = scanRelaxedHeaderTables(bytes, [start(0x300, 1)], DEFAULT_SCAN_CONFIG);
+  expect(found.find(m => m.address === saToFo(0x300))).toMatchObject({ rows: 4, cols: 6, format: { width: 1 } });
+  const words = scanRelaxedHeaderTables(bytes, [start(0x300, 2)], DEFAULT_SCAN_CONFIG);
+  expect(words.find(m => m.address === saToFo(0x300))?.format.width).toBe(2);
+});
+
 describe('detectMs41Tables — header path', () => {
   it('emits exact dims and axis addresses from a valid header', () => {
     const bytes = new Uint8Array(0x18000);
