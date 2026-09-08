@@ -124,6 +124,12 @@ its adjudication ledger SHA-256 is
 `0d7b3efd473204cfd64a0850654e1f2d417efc4c069f72507d61519726f91a10`.
 The reference remains untested on hardware.
 
+Exact-image regression tests also protect the fifteen recovered cached byte
+parameters and seven runtime grid layouts or axis bindings at their individual
+addresses. These checks verify the full-image hash before scanning, so an
+unrelated detection gain cannot hide a regression at a protected address.
+They skip explicitly when the corresponding local firmware is absent.
+
 The SS1v2 partial for this expanded set is extracted from the matching full ROM;
 the older, independently supplied partial differs at 20 bytes and remains in
 the earlier acceptance cases. The expanded ID60 full image is a different
