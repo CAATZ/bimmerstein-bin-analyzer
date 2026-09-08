@@ -3,6 +3,7 @@ import type { FamilyDetection } from '../types.js';
 import type { ValueFormat } from '@binanalyzer/core';
 import { C166_OPCODE_LEN } from './c166.js';
 import { supportsSignedStorage, type ValueEvidence } from './consumers.js';
+import { resolveMs41CachedBytes } from './cached-params.js';
 import { MS41_CAL_SA_MAX, MS41_CAL_SA_MIN, inCalWindow, saSpanContiguous, saToFo } from './frame.js';
 
 /**
@@ -336,6 +337,12 @@ export function detectMs41Params(bytes: Uint8Array, config: ScanConfig, consumer
       }
     }
     out.push(det);
+  }
+  if (consumers) for (const sa of resolveMs41CachedBytes(bytes, config, consumers)) {
+    const address = saToFo(sa);
+    if (!out.some(p => address >= p.address && address < p.address + p.format.width)) {
+      out.push({ address, rows: 1, cols: 1, format: u8Fmt, score: paramConfidence, tier: PARAM_TIER, kind: 'param' });
+    }
   }
   return out;
 }

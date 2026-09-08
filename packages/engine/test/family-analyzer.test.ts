@@ -344,6 +344,24 @@ describe('ms41Analyzer (activation gate + end-to-end)', () => {
     expect(ms41Analyzer.analyze(new Uint8Array(0x1000), [], DEFAULT_SCAN_CONFIG)).toEqual([]);
   });
 
+  it('admits cached header parameters through the existing family and reader gates', () => {
+    const { bytes } = buildActiveImage(true);
+    putSA(bytes, 0x5300, [2, 0]);
+    putSA(bytes, 4, [38]);
+    bytes.set([0xe6, 0xf4, 0, 0x53, 0xf6, 0xf4, 0x20, 0xe9, 0xdb, 0], 0x2000);
+    bytes.set([0xf2, 0xf4, 0x20, 0xe9, 0xa8, 0x54, 0xf6, 0xf5, 0x40, 0xe9, 0xdb, 0], 0x2100);
+    bytes.set([0xf2, 0xf4, 0x40, 0xe9, 0xf4, 0xa4, 2, 0, 0xf7, 0xfa, 0x60, 0xe9, 0xdb, 0], 0x2200);
+    bytes.set([0xc2, 0xf5, 0x60, 0xe9, 0x68, 0x51, 0xdb, 0], 0x2300);
+    expect(ms41Analyzer.analyze(bytes, [], DEFAULT_SCAN_CONFIG).some(p => p.address === saToFo(4))).toBe(false);
+    // The active fixture has two readers; lower only this local admission control.
+    const config = {...DEFAULT_SCAN_CONFIG, family: {...DEFAULT_SCAN_CONFIG.family,
+      ms41: {...DEFAULT_SCAN_CONFIG.family.ms41, paramMinReaders: 2}}};
+    expect(ms41Analyzer.analyze(bytes, [], config)).toContainEqual({
+      address: saToFo(4), rows: 1, cols: 1, kind: 'param', tier: 9,
+      format: {width: 1, signed: false, endianness: 'big'}, score: config.family.ms41.paramConfidence,
+    });
+  });
+
   it('is inert below the MOV-immediate activation floor', () => {
     const bytes = new Uint8Array(0x18000);
     bytes.set([0xe6, 0xfc, 0x00, 0x03, 0xda, 0x00, 0x00, 0x10], 0x40); // 1 site << 200
