@@ -130,6 +130,14 @@ addresses. These checks verify the full-image hash before scanning, so an
 unrelated detection gain cannot hide a regression at a protected address.
 They skip explicitly when the corresponding local firmware is absent.
 
+Five additional hash-pinned MS41 ID42/ID59 images protect MAF word width and
+placeholder-axis handling. Optional files live at `fixtures/maf/id<rom>-<hash8>.bin`
+with the audited definition at `fixtures/maf/defs/reference.xml`; exact hashes
+are recorded in `packages/eval/test/maf-references.test.ts`. Each check derives
+a calibration-only view from its full image and verifies both 256-point and
+16×16 definition views against the same 512 data bytes. These derived partials
+are not independent captures. Tests skip explicitly when local inputs are absent.
+
 The SS1v2 partial for this expanded set is extracted from the matching full ROM;
 the older, independently supplied partial differs at 20 bytes and remains in
 the earlier acceptance cases. The expanded ID60 full image is a different

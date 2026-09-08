@@ -152,8 +152,12 @@ function headerCandidates(bytes: Uint8Array, config: ScanConfig): Cand[] {
   // Check the expected data end, not the first header-like bytes in the data.
   // An odd byte-table end may carry one C166 word-alignment pad byte.
   const successor = (end: number): number | undefined => {
-    if (headers.has(end + 4)) return end + 4;
-    if (end % 2 === 1 && headers.has(end + 5)) return end + 5;
+    for (const off of end % 2 === 1 ? [end + 4, end + 5] : [end + 4]) {
+      const header = headers.get(off);
+      // Two constant runs can be coincidental pointers inside table data.
+      // They supply dimensions, but cannot establish a neighbor's boundary.
+      if (header && (header.xa.kind !== 'dead' || header.ya.kind !== 'dead')) return off;
+    }
     return undefined;
   };
   const curveAt = (off: number): AxisRun | undefined => {
