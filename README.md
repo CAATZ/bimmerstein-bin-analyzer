@@ -4,20 +4,20 @@
 
 An open-source desktop app for **ECU bin file tuning-table analysis and editing**: load a raw ECU firmware dump, view it as hexdump / 2D / 3D, automatically detect tuning tables ("maps") and their axes, refine and edit them, and export RomRaider XML / TunerPro XDF / CSV / JSON definitions.
 
-**Status: v0.2.7 — preview, under active development.**
+**Status: v0.2.8 — preview, under active development.**
 
-The **v0.2.7 release includes value and axis editing**, undo/redo, original-value
+The **v0.2.8 release includes value and axis editing**, undo/redo, original-value
 display, checksum verification and supported correction, map packs, family
 modules, and project lineage. Save Bin writes a separate output, protects the
 loaded source path, and verifies the file by reading it back. Checksum reports
 distinguish corrected, verified, and unchecked regions; MS41 program checksums
 are reported but never rewritten. The older v0.1.1 download remains analysis-only.
 
-Version 0.2.7 recovers both MS41 table axes from runtime setup, including
-conditional branches and shared reader calls. This corrects five custom-firmware
-map layouts and two additional axis bindings in the tested full reads. Existing
-curve recovery, value and axis editing, undo/redo, and original-value display
-remain available.
+Version 0.2.8 recovers MS41 byte parameters accessed through cached calibration
+pointers. This adds five parameters in each of three tested full reads, while
+preserving every previous detection and all partial-file results in that corpus.
+Existing runtime-axis and curve recovery, value and axis editing, undo/redo,
+and original-value display remain available.
 The **Swap X/Y** display control and column-major axis editing remain available. Search
 maps by name, address or dimensions, filter by shape or detection method, and
 inspect an explanation of how each potential map was detected. Swapping the
