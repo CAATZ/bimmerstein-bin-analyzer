@@ -94,6 +94,55 @@ describe('importRomRaiderXml (standalone rom)', () => {
     expect(warnings.some((w) => w.includes('non-numeric'))).toBe(true);
   });
 
+  it.each(['X', 'Y'] as const)('accepts a scalar Value label on the %s axis without a warning', (role) => {
+    for (const type of ['1D', '2D', '3D']) {
+      const { maps, warnings } = ok(`<rom><romid><xmlid>SCALAR</xmlid></romid>
+        <table type="${type}" name="Counter" storagetype="uint8" sizex="1" sizey="1" storageaddress="100">
+          <table type="Static ${role} Axis" name="Value">
+            <data> Value </data><scaling units="count" expression="x" format="0"/>
+          </table>
+        </table></rom>`);
+      expect(warnings).toEqual([]);
+      expect(maps[0]![role === 'X' ? 'xAxis' : 'yAxis']).toEqual({
+        kind: 'index', count: 1, name: 'Value',
+        scaling: { factor: 1, offset: 0, units: 'count', digits: 0 },
+      });
+    }
+  });
+
+  it.each([
+    ['missing label', '', 1, 1],
+    ['empty label', '<data/>', 1, 1],
+    ['unknown label', '<data>Invalid</data>', 1, 1],
+    ['extra label', '<data>Value</data><data>Value</data>', 1, 1],
+    ['curve axis', '<data>Value</data>', 2, 1],
+    ['singleton axis on a curve', '<data>Value</data>', 1, 2],
+    ['wrong numeric count', '<data>1</data><data>2</data>', 1, 1],
+  ])('keeps the warning for %s', (_case, data, rows, cols) => {
+    const { warnings } = ok(`<rom><romid><xmlid>BAD</xmlid></romid>
+      <table type="2D" name="T" storagetype="uint8" sizey="${rows}" sizex="${cols}" storageaddress="100">
+        <table type="Static Y Axis" name="Value">${data}</table>
+      </table></rom>`);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('using index axis');
+  });
+
+  it('keeps numeric scalar axes and scaling warnings on Value labels', () => {
+    const xml = `<rom><romid><xmlid>S</xmlid></romid>
+      <table type="2D" name="T" storagetype="uint8" sizey="1" storageaddress="100">
+        <table type="Static Y Axis" name="Value"><data>Value</data>
+          <scaling expression="log(x)"/>
+        </table>
+      </table></rom>`;
+    const text = ok(xml);
+    expect(text.warnings).toHaveLength(1);
+    expect(text.warnings[0]).toContain('non-affine');
+    expect(text.maps[0]!.yAxis!.scaling!.rawExpression).toBe('log(x)');
+    const numeric = ok(xml.replace('<data>Value</data>', '<data>7</data>'));
+    expect(numeric.maps[0]!.yAxis).toMatchObject({ kind: 'literal', count: 1, values: [7] });
+    expect(numeric.warnings).toEqual(text.warnings);
+  });
+
   it('accepts the expr alias and preserves non-affine expressions as rawExpression + warning', () => {
     const { maps, warnings } = ok(DEF);
     const weird = maps.find((m) => m.id === 't1-0x7f8')!;

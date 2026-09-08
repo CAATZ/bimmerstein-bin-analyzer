@@ -17,6 +17,9 @@ Version 0.2.10 corrects MS41 curve and grid axis selection using firmware caller
 Curves retain their staged axis across helpers that preserve interpolation state,
 and headerless grids use matching caller evidence to resolve competing axis pairs.
 The MAF word-width fix and both voltage views remain available.
+The next build, v0.2.11, accepts scalar `Value` labels in RomRaider definitions
+without spurious axis warnings. It preserves imported values and metadata,
+and keeps warnings for malformed axes and unsupported labels.
 The **Swap X/Y** display control and column-major axis editing remain available. Search
 maps by name, address or dimensions, filter by shape or detection method, and
 inspect an explanation of how each potential map was detected. Swapping the

@@ -80,7 +80,7 @@ function axisRole(type: string | undefined): AxisRole | undefined {
   return undefined;
 }
 
-function importAxis(el: XmlElement, expectedCount: number, warnings: string[], context: string): AxisDef | undefined {
+function importAxis(el: XmlElement, expectedCount: number, warnings: string[], context: string, scalar: boolean): AxisDef | undefined {
   const name = el.attrs['name'];
   const scalingEl = el.children.find((c) => c.name === 'scaling');
   const finish = (axis: AxisDef): AxisDef => {
@@ -90,6 +90,9 @@ function importAxis(el: XmlElement, expectedCount: number, warnings: string[], c
   };
   if ((el.attrs['type'] ?? '').startsWith('Static')) {
     const data = el.children.filter((c) => c.name === 'data').map((c) => c.text);
+    if (scalar && data.length === 1 && data[0] === 'Value') {
+      return finish({ kind: 'index', count: 1 });
+    }
     const values = data.map((d) => Number.parseFloat(d));
     if (data.length === 0 || values.some((v) => Number.isNaN(v))) {
       warnings.push(`${context}: static axis has non-numeric data — using index axis`);
@@ -223,7 +226,7 @@ function importTable(el: XmlElement, warnings: string[]): TableImport {
     if (child.name !== 'table') continue;
     const role = axisRole(child.attrs['type']);
     if (role === undefined) continue;
-    const axis = importAxis(child, role === 'x' ? cols : rows, warnings, `table "${name}" ${role}-axis`);
+    const axis = importAxis(child, role === 'x' ? cols : rows, warnings, `table "${name}" ${role}-axis`, rows === 1 && cols === 1);
     if (axis === undefined) continue;
     if (role === 'x') map.xAxis = axis;
     else map.yAxis = axis;
