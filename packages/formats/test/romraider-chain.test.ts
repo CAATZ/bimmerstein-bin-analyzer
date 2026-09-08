@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { importRomRaiderXml } from '../src/romraider.js';
+import { exportRomRaiderXml, importRomRaiderXml } from '../src/romraider.js';
 
 const FIXTURE = fileURLToPath(new URL('./fixtures/ms41-style-chain.xml', import.meta.url));
 const REAL_DEF = fileURLToPath(new URL('../../../fixtures/ms41/defs/2023 MS41 ECU Definitions.xml', import.meta.url));
@@ -14,6 +14,60 @@ function ok(xml: string, romId?: string) {
 
 describe('inheritance chain resolution', () => {
   const xml = readFileSync(FIXTURE, 'utf8');
+
+  it('round-trips corrected addresses and fractional gains while preserving an older descendant', () => {
+    const source = `<roms>
+      <rom><romid><xmlid>BASE</xmlid></romid>
+        <table type="2D" name="Gain" storagetype="uint8" sizey="4" storageaddress="100">
+          <scaling units="%" expression="x*(100/255)" format="0"/>
+          <table type="Y Axis" name="Load" storagetype="uint8" storageaddress="80"/>
+        </table>
+        <table type="2D" name="Contribution" storagetype="uint8" sizey="4" storageaddress="110">
+          <scaling units="fraction" expression="x/64" format="0.##"/>
+        </table>
+        <table type="1D" name="Continuation" storagetype="uint8" storageaddress="120"/>
+      </rom>
+      <rom base="BASE"><romid><xmlid>CURRENT</xmlid></romid>
+        <table name="Gain" storageaddress="140">
+          <scaling expression="x*(100/256)" format="0.##"/>
+          <table type="Y Axis" storageaddress="90"/>
+          <description>Cached load weighting.</description>
+        </table>
+        <table name="Contribution"><scaling expression="x/128"/></table>
+      </rom>
+      <rom base="CURRENT"><romid><xmlid>OLDER</xmlid></romid>
+        <table name="Gain" storageaddress="100">
+          <scaling expression="x*(100/255)" format="0"/>
+          <table type="Y Axis" storageaddress="80"/>
+          <description>Older interpretation.</description>
+        </table>
+        <table name="Contribution"><scaling expression="x/64"/></table>
+        <table name="Continuation" omit="true"/>
+        <table type="1D" name="Legacy Counter" storagetype="uint8" storageaddress="120"/>
+      </rom>
+    </roms>`;
+    const current = ok(source, 'CURRENT');
+    const gain = current.maps.find((m) => m.name === 'Gain')!;
+    expect(gain).toMatchObject({ address: 0x140, rows: 4, cols: 1,
+      scaling: { factor: 100 / 256, units: '%', digits: 2 },
+      yAxis: { address: 0x90, name: 'Load', count: 4 }, notes: 'Cached load weighting.',
+    });
+    expect(255 * gain.scaling.factor).toBe(99.609375);
+    expect(current.maps.find((m) => m.name === 'Contribution')!.scaling.factor).toBe(1 / 128);
+    const older = ok(source, 'OLDER');
+    expect(older.maps.find((m) => m.name === 'Gain')).toMatchObject({ address: 0x100,
+      scaling: { factor: 100 / 255, digits: 0 }, yAxis: { address: 0x80 }, notes: 'Older interpretation.',
+    });
+    expect(older.maps.find((m) => m.name === 'Contribution')!.scaling.factor).toBe(1 / 64);
+    expect(older.maps.map((m) => m.name)).toEqual(['Gain', 'Contribution', 'Legacy Counter']);
+    for (const imported of [current, older]) {
+      expect(imported.warnings).toEqual([]);
+      const exported = exportRomRaiderXml(imported.romId, imported.maps);
+      expect(exported.ok).toBe(true);
+      if (!exported.ok) throw new Error(exported.error);
+      expect(ok(exported.value).maps).toEqual(imported.maps);
+    }
+  });
 
   it('merges base structure with derived addresses; axes merge by role (nameless overrides)', () => {
     const { maps } = ok(xml, '12');
