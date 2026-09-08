@@ -6,7 +6,7 @@ it('rejects any loss in exact starts, layouts or axis pairs despite perfect over
   const key = 'ms41-s52-ss1v2';
   const pin = EXACT_GATES[key]!;
   expect(pin.exactStartRecall).toBe(1);
-  expect(pin.exactLayoutRecall).toBe(67 / 68);
+  expect(pin.exactLayoutRecall).toBe(1);
   expect(meetsExactGate(pin, key)).toBe(true);
   for (const metric of ['exactStartRecall', 'exactLayoutRecall', 'axisPairRecall'] as const) {
     expect(meetsExactGate({ ...pin, [metric]: pin[metric] - 0.01 }, key)).toBe(false);
@@ -16,6 +16,29 @@ it('rejects any loss in exact starts, layouts or axis pairs despite perfect over
     expect(EXACT_GATES[`reference-ms41-id${id}-${frame}`]?.exactStartRecall).toBeGreaterThan(0.9);
   }
   expect(Object.keys(EXACT_GATES)).toHaveLength(66);
+});
+
+it.each([
+  { fixture: 'e36m3-curve', count: 64, starts: 64, layouts: 64, eligible: 64, pairs: 62 },
+  { fixture: 's52-curve', count: 71, starts: 71, layouts: 70, eligible: 71, pairs: 67 },
+  { fixture: 'e36m3-partial-curve', count: 64, starts: 63, layouts: 63, eligible: 64, pairs: 60 },
+  { fixture: 's52-partial-curve', count: 71, starts: 65, layouts: 63, eligible: 71, pairs: 60 },
+  { fixture: 'ms41-s52-ss1v2', count: 68, starts: 68, layouts: 68, eligible: 68, pairs: 66 },
+  { fixture: 'reference-ms41-id12-expanded-full-param', count: 163, starts: 161, layouts: 152, eligible: 0, pairs: 0 },
+  { fixture: 'reference-ms41-id60-expanded-full-curve', count: 94, starts: 91, layouts: 88, eligible: 93, pairs: 86 },
+  { fixture: 'reference-ms41-id60-expanded-full-param', count: 449, starts: 448, layouts: 436, eligible: 0, pairs: 0 },
+  { fixture: 'reference-ms41-ss1v2-expanded-full-curve', count: 137, starts: 126, layouts: 118, eligible: 122, pairs: 117 },
+  { fixture: 'reference-ms41-ss1v2-expanded-full-grid', count: 100, starts: 98, layouts: 98, eligible: 100, pairs: 94 },
+  { fixture: 'reference-ms41-ss1v2-expanded-full-param', count: 187, starts: 181, layouts: 172, eligible: 0, pairs: 0 },
+])('rejects losing one recovered result in $fixture', ({ fixture, count, starts, layouts, eligible, pairs }) => {
+  const scores = { exactStartRecall: starts / count, exactLayoutRecall: layouts / count, axisPairRecall: eligible ? pairs / eligible : 0 };
+  expect(meetsExactGate(scores, fixture)).toBe(true);
+  for (const [metric, denominator] of [
+    ['exactStartRecall', count], ['exactLayoutRecall', count], ['axisPairRecall', eligible],
+  ] as const) {
+    if (denominator === 0) continue;
+    expect(meetsExactGate({ ...scores, [metric]: scores[metric] - 1 / denominator }, fixture), metric).toBe(false);
+  }
 });
 
 it('pins all six complete ID41 catalog classes without changing the older subset gates', () => {
