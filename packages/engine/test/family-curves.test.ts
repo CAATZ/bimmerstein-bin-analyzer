@@ -41,6 +41,20 @@ function craftHeaderCurve({ count }: { count: number }): {
 }
 
 describe('detectMs41Curves', () => {
+  it('emits a headerless curve from its proven runtime axis and reader width', () => {
+    const { bytes, calls, readers, sa } = craftHeaderCurve({ count: 4 });
+    putSA(bytes, sa - 2, [255, 255]);
+    readers.set(FALLBACK_TARGET, 2);
+    const axes = new Map([[sa, { dataSA: 0x151, count: 2, width: 1 as const, kind: 'strict' as const, strictLen: 2 }]]);
+    expect(detectMs41Curves(bytes, calls, readers, DEFAULT_SCAN_CONFIG, axes)).toMatchObject([
+      { address: saToFo(sa), rows: 2, cols: 1, format: { width: 2 }, yAxis: { address: saToFo(0x151), count: 2 } },
+    ]);
+    putSA(bytes, sa - 2, [0x50, 1]);
+    expect(detectMs41Curves(bytes, calls, readers, DEFAULT_SCAN_CONFIG, axes)[0]?.rows).toBe(2);
+    const crossing = new Map([[0x3ffe, axes.get(sa)!]]);
+    expect(detectMs41Curves(bytes, [call(FALLBACK_TARGET, 0x3ffe)], readers, DEFAULT_SCAN_CONFIG, crossing)).toEqual([]);
+  });
+
   it('keeps a terminal plateau in a known reader curve and claims it only once', () => {
     const { bytes, calls, readers, sa } = craftHeaderCurve({ count: 6 });
     putSA(bytes, 0x150, [6, 0, 100, 0, 200, 0, 44, 1, 144, 1, 244, 1, 244, 1]);

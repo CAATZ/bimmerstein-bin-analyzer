@@ -3,7 +3,7 @@ import type { FamilyDetection } from '../types.js';
 import type { ReaderCall } from './c166.js';
 import type { ValueFormat } from '@binanalyzer/core';
 import { MS41_CAL_SA_MAX, MS41_CAL_SA_MIN, saSpanContiguous, saToFo } from './frame.js';
-import { readU16SA, validateAxisPtr, validateCurveAxisPtr } from './header.js';
+import { readU16SA, validateAxisPtr, validateCurveAxisPtr, type AxisPointerTarget } from './header.js';
 
 /** Curves rank below every grid tier (0–3) — a curve must never displace a grid. */
 export const CURVE_TIER = 4;
@@ -14,7 +14,8 @@ const fmtFor = (w: 1 | 2): ValueFormat => (w === 1 ? u8 : u16le);
 /**
  * MS41 1D-curve detection (spec 2026-07-15). Per distinct cal-SA arg to a
  * self-located curve reader, decode the 2-byte backward [axisPtr] header → the
- * axis count IS the curve length; emit an N×1 (rows=count, cols=1) tier-CURVE_TIER
+ * axis count IS the curve length. A proven runtime axis takes precedence over
+ * that header and also admits headerless curves. Emit an N×1 tier-CURVE_TIER
  * detection with a single yAxis. Guards identical to the grid path: contiguous
  * in-cal span, no 0x4000 seam. Smoothness NOT gated (code-referenced = real).
  */
@@ -22,7 +23,8 @@ export function detectMs41Curves(
   bytes: Uint8Array,
   calls: ReaderCall[],
   readers: Map<number, 1 | 2>,
-  config: ScanConfig
+  config: ScanConfig,
+  runtimeAxes?: Map<number, AxisPointerTarget>
 ): FamilyDetection[] {
   const { curveAxisMinCount } = config.family.ms41;
   const seen = new Map<number, 1 | 2>();
@@ -34,8 +36,7 @@ export function detectMs41Curves(
   const out: FamilyDetection[] = [];
   for (const [sa, w] of [...seen.entries()].sort((a, b) => a[0] - b[0])) {
     const ptr = readU16SA(bytes, sa - 2);
-    if (ptr >= sa) continue;
-    const ax = validateCurveAxisPtr(bytes, ptr, config, curveAxisMinCount);
+    const ax = runtimeAxes?.get(sa) ?? (ptr < sa ? validateCurveAxisPtr(bytes, ptr, config, curveAxisMinCount) : undefined);
     if (!ax) continue;
     const byteLen = ax.count * w;
     if (!saSpanContiguous(sa, byteLen)) continue;

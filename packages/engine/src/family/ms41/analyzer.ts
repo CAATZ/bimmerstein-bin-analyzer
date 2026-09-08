@@ -72,7 +72,8 @@ export function detectMs41Tables(
   bytes: Uint8Array,
   starts: FamilyStart[],
   pool: FamilyPoolAxis[],
-  config: ScanConfig
+  config: ScanConfig,
+  knownObjects: FamilyDetection[] = []
 ): FamilyDetection[] {
   const { minCols, maxCols, minRows, maxRows, minTableScore } = config.table;
   const { window, pairSpan } = config.pool;
@@ -142,6 +143,8 @@ export function detectMs41Tables(
         if (!saSpanContiguous(s.sa, byteLen)) continue;
         if (s.fo + byteLen > bytes.length) continue;
         if (gap !== undefined && byteLen > gap) continue;
+        if (knownObjects.some(c => (c.kind === 'param' || (c.kind === '1d' && c.tier <= CURVE_FALLBACK_TIER))
+          && s.fo < c.address + c.rows * c.format.width && s.fo + byteLen > c.address)) continue;
         const score = frameScore(bytes, s.fo, rows, cols, fmt);
         // v2.1: waive the smoothness floor for adjacency-TIGHT pairs — an
         // axis run ending exactly at the table start is the stock
@@ -180,7 +183,8 @@ const SCAN_SA_MIN = 12;
  * plateau/dead-tolerant rules (family.ms41.scanAxisMinCount; dead axes are
  * real — measured: MAF 0x2AD6's stored axis cells are zero on both bins, and
  * its SA is never an r12 immediate, so no dataflow window reaches it). Width:
- * exact gap==byteLen match against the next r12 start wins, else higher
+ * an established reader width wins; otherwise an exact gap==byteLen match
+ * against the next r12 start wins, else higher
  * frameScore, w2 tried first. Extent: capped by the gap to the next r12
  * start, saSpanContiguous, and the buffer. Emissions land BELOW every other
  * family tier and RECLAIM junk byte-tier spans (measured: total detections
@@ -194,6 +198,7 @@ export function scanRelaxedHeaderTables(
 ): FamilyDetection[] {
   const { minCols, maxCols, minRows, maxRows } = config.table;
   const relaxedOpts = { minCount: config.family.ms41.scanAxisMinCount, relaxed: true };
+  const widths = new Map(starts.map(s => [s.sa, s.w]));
   const startSAs = starts.map((s) => s.sa).sort((a, b) => a - b);
   const nextStart = (sa: number): number | undefined => {
     let lo = 0;
@@ -224,6 +229,7 @@ export function scanRelaxedHeaderTables(
     const fo = saToFo(sa);
     let best: { w: 1 | 2; score: number; exact: boolean } | undefined;
     for (const w of [2, 1] as const) {
+      if (widths.has(sa) && widths.get(sa) !== w) continue;
       const byteLen = rows * cols * w;
       if (!saSpanContiguous(sa, byteLen)) continue;
       if (fo + byteLen > bytes.length) continue;
@@ -311,20 +317,15 @@ export const ms41Analyzer: FamilyAnalyzer = {
     const curveReaders = selfLocateCurveReaders(bytes, calls, config);
     let curveArgs = 0;
     for (const c of calls) if (curveReaders.has(c.targetCpu)) curveArgs++;
+    const runtimeAxes = resolveMs41CurveAxes(bytes, calls, curveReaders, config);
     const curves =
       curveArgs >= config.family.ms41.curveActivateMin
         ? [
-            ...detectMs41Curves(bytes, calls, curveReaders, config),
-            ...detectMs41CurveFallbacks(bytes, calls, curveReaders, config),
+            ...detectMs41Curves(bytes, calls, curveReaders, config, runtimeAxes),
+            ...detectMs41CurveFallbacks(bytes, calls, curveReaders, config)
+              .filter(curve => !runtimeAxes.has(foToSA(curve.address))),
           ]
         : [];
-    const runtimeAxes = resolveMs41CurveAxes(bytes, calls, curveReaders, config);
-    for (const curve of curves) {
-      const axis = runtimeAxes.get(foToSA(curve.address));
-      if (axis && curve.tier <= CURVE_FALLBACK_TIER && axis.count === curve.rows && curve.cols === 1) {
-        curve.yAxis = { address: saToFo(axis.dataSA), count: axis.count, format: axisFmt(axis.width) };
-      }
-    }
     // Param tier (Switch Phase B): S* census behind the defense-in-depth
     // readers-trio guard (both real bins locate 3; curve synths locate 2).
     // The pinned zero-emission fixture tests remain the authority.
@@ -333,7 +334,7 @@ export const ms41Analyzer: FamilyAnalyzer = {
     const params =
       readers.length >= config.family.ms41.paramMinReaders ? detectMs41Params(bytes, config, consumers.memory) : [];
     const tables = [
-      ...detectMs41Tables(bytes, starts, pool, config),
+      ...detectMs41Tables(bytes, starts, pool, config, [...curves, ...params]),
       ...scanRelaxedHeaderTables(bytes, starts, config, curves),
       ...curves,
     ];
