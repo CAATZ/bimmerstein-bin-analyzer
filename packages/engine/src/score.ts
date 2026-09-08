@@ -1,4 +1,5 @@
 import type { AxisDef, MapDef } from '@binanalyzer/core';
+import { readAxisValues } from '@binanalyzer/core';
 import type { ScanConfig } from './config.js';
 import type { AssociatedTable } from './associate.js';
 import { findAnchor, buildAxisIndex, type Anchor } from './associate.js';
@@ -427,5 +428,17 @@ export function rankAndEmit(
       protectedSpans.add(span);
     }
   }
-  return kept.map((k) => k.def);
+  return kept.map(({ def }) => {
+    // Curve axes can be intentionally constant in inactive calibrations.
+    if (def.rows === 1 || def.cols === 1) return def;
+    // Constant grid runs can establish dimensions, but supply no coordinates.
+    // Keep their byte ownership above and let views use indices instead.
+    for (const key of ['xAxis', 'yAxis'] as const) {
+      const axis = def[key];
+      if (axis?.kind !== 'referenced' || axis.count < 2) continue;
+      const values = readAxisValues(bytes, axis);
+      if (values.every(v => v === values[0])) delete def[key];
+    }
+    return def;
+  });
 }

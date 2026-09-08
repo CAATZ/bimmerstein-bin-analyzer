@@ -1,11 +1,11 @@
 import { get } from 'svelte/store';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createBinImage } from '@binanalyzer/core';
+import { createBinImage, readGrid } from '@binanalyzer/core';
 import type { MapDef, Project } from '@binanalyzer/core';
-import { importRomRaiderXml, serializeProject } from '@binanalyzer/formats';
+import { exportRomRaiderXml, importRomRaiderXml, serializeProject } from '@binanalyzer/formats';
 import { ms41TuneImage } from './ms41-image.js';
 import * as a from '../src/store/actions.js';
-import { addressFrame, bin, binPath, checksumReport, maps, potentialMaps, toasts } from '../src/store/stores.js';
+import { addressFrame, bin, binPath, checksumReport, editJournal, maps, potentialMaps, toasts, workingBytes } from '../src/store/stores.js';
 import { basename, dirname, joinPath, stemOf, type PlatformHost } from '../src/platform/host.js';
 import {
   exportFlow, importDef, loadBinFromPath, openBinFlow, openProjectFlow, saveProjectFlow,
@@ -379,6 +379,53 @@ const IMPORT_DEF = `<?xml version="1.0"?>
 </roms>`;
 
 describe('pickDefFlow + importDef', () => {
+  it.each([false, true])('keeps MAF curve/grid aliases, static voltage labels and shared word edits (full read: %s)', async (full) => {
+    const host = new FakeHost();
+    const bytes = new Uint8Array(full ? 0x40000 : 0x6000);
+    a.setBin(createBinImage(bytes, 'dump.bin'));
+    host.confirmAnswers = [true];
+    const labels = (values: number[]) => values.map(v => `<data>${v}</data>`).join('');
+    const x = Array.from({ length: 16 }, (_, i) => i / 50);
+    const y = Array.from({ length: 16 }, (_, i) => i * 0.32);
+    const curveLabels = Array.from({ length: 256 }, (_, i) => i / 50);
+    const xml = `<roms><rom><romid><xmlid>MAF</xmlid></romid>
+      <table type="2D" name="MAF curve" storageaddress="800" storagetype="uint16" endian="little" sizey="256">
+        <scaling expression="x/64" units="kg/h"/><table type="Static Y Axis" name="Volts">${labels(curveLabels)}</table>
+      </table>
+      <table type="3D" name="MAF grid" storageaddress="800" storagetype="uint16" endian="little" sizex="16" sizey="16">
+        <scaling expression="x/64" units="kg/h"/><table type="Static X Axis" name="Volts">${labels(x)}</table>
+        <table type="Static Y Axis" name="Volts">${labels(y)}</table>
+      </table></rom></roms>`;
+    await importDef(host, xml, 'MAF');
+    const imported = get(maps);
+    expect(imported).toHaveLength(2);
+    const [curve, grid] = imported as [MapDef, MapDef];
+    expect(curve.id).not.toBe(grid.id);
+    expect([curve.rows, curve.cols, grid.rows, grid.cols]).toEqual([256, 1, 16, 16]);
+    expect(curve.address).toBe(full ? 0x14800 : 0x800);
+    expect(grid.address).toBe(curve.address);
+    expect(grid.xAxis).toMatchObject({ kind: 'literal', values: x });
+    expect(grid.yAxis).toMatchObject({ kind: 'literal', values: y });
+    expect(curve.yAxis).toMatchObject({ kind: 'literal', values: curveLabels });
+    expect(a.editCell(grid, 15, 15, 16)).toMatchObject({ ok: true });
+    expect(readGrid(get(workingBytes)!, curve)[255]![0]).toBe(1024);
+    expect([...get(editJournal).keys()]).toEqual([curve.address + 511]);
+    expect(a.undo()).toBe(true);
+    expect(readGrid(get(workingBytes)!, grid)[15]![15]).toBe(0);
+    expect(a.redo()).toBe(true);
+    expect(a.editCell(curve, 17, 0, 32)).toMatchObject({ ok: true });
+    expect(readGrid(get(workingBytes)!, grid)[1]![1]).toBe(2048);
+    const exported = exportRomRaiderXml('MAF', imported);
+    expect(exported.ok).toBe(true);
+    if (!exported.ok) throw new Error(exported.error);
+    const back = importRomRaiderXml(exported.value);
+    expect(back.ok).toBe(true);
+    if (!back.ok) throw new Error(back.error);
+    expect(back.value.maps.map(m => [m.address, m.rows, m.cols, m.xAxis?.values, m.yAxis?.values]))
+      .toEqual(imported.map(m => [m.address, m.rows, m.cols, m.xAxis?.values, m.yAxis?.values]));
+    expect(get(bin)!.bytes).toEqual(bytes);
+  });
+
   beforeEach(() => {
     a.resetStores();
     a.setBin(createBinImage(BYTES, 'dump.bin'));

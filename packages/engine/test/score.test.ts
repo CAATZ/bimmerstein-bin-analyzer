@@ -18,6 +18,33 @@ const mk = (address: number, score: number, axisFit = 0): AssociatedTable => ({
 });
 
 describe('rankAndEmit', () => {
+  it('preserves constant axes on code-referenced curves, which can be inactive calibrations', () => {
+    const format = { width: 1, signed: false, endianness: 'little' } as const;
+    const curve: FamilyDetection = { address: 0x40, rows: 2, cols: 1, format,
+      score: 0.6, tier: 6, kind: '1d', yAxis: { address: 0x3e, count: 2, format } };
+    const [found] = rankAndEmit(new Uint8Array(0x100), [], [], DEFAULT_SCAN_CONFIG, [], [curve]);
+    expect(found?.yAxis).toMatchObject({ kind: 'referenced', address: 0x3e, count: 2 });
+  });
+
+  it.each(['family', 'structural'] as const)('omits constant detected axes but retains varying and single-cell axes (%s)', (detector) => {
+    const bytes = new Uint8Array(0x100);
+    const format = { width: 1, signed: false, endianness: 'big' } as const;
+    const axis = (address: number): PrefixedAxis => ({ address, count: 4, format, end: address + 4, maximal: true });
+    const table = { address: 0x40, rows: 4, cols: 4, format, xAxis: axis(0x10), yAxis: axis(0x20) };
+    const cfg = { ...DEFAULT_SCAN_CONFIG, pool: { ...DEFAULT_SCAN_CONFIG.pool, activateMinCount: 1 } };
+    const emit = () => rankAndEmit(bytes, [], [], cfg, [axis(0x10)],
+      detector === 'family' ? [{ ...table, score: 0.9, tier: 3 }] : [], detector === 'structural' ? [table] : []);
+    expect(emit()[0]).toMatchObject({ address: 0x40, rows: 4, cols: 4, detector });
+    expect(emit()[0]!.xAxis).toBeUndefined();
+    expect(emit()[0]!.yAxis).toBeUndefined();
+    bytes.fill(37, 0x10, 0x14);
+    bytes.set([0, 1, 2, 2], 0x20);
+    expect(emit()[0]!.xAxis).toBeUndefined();
+    expect(emit()[0]!.yAxis?.address).toBe(0x20);
+    table.xAxis.count = 1;
+    expect(emit()[0]!.xAxis?.address).toBe(0x10);
+  });
+
   it('emits valid auto MapDefs sorted by confidence', () => {
     const out = rankAndEmit(new Uint8Array(0), [mk(1000, 0.6), mk(4000, 0.9, 0.8)], [], DEFAULT_SCAN_CONFIG);
     expect(out[0]!.address).toBe(4000);
@@ -59,6 +86,7 @@ describe('rankAndEmit anchored ranking', () => {
   // Shear ratio 1666/40 ≈ 41.6 ≥ shearGateMin 20 → gate passes for the true 3×4 framing.
   const bytes = new Uint8Array(512);
   const cells: number[] = [];
+  bytes.set([0, 10, 0, 20, 0, 30, 0, 40, 0, 50, 0, 60, 0, 70], 114);
   for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) cells.push(5000 + r * 40 + c * 100);
   cells.forEach((v, i) => {
     bytes[128 + 2 * i] = v >> 8;
@@ -304,6 +332,7 @@ describe('rankAndEmit two-sided edge membership', () => {
   });
   // pool: count-8 (shared cols), count-6 (T rows), count-4 (S rows)
   const pool = [pax(300, 8), pax(310, 6), pax(318, 4)];
+  for (const axis of pool) bytes.set(Array.from({ length: axis.count }, (_, i) => i), axis.address);
   const cand = (address: number, rows: number, cols: number, score: number): AssociatedTable => ({
     table: { address, rows, cols, format: u8, score }, axisFit: 0,
   });
@@ -367,7 +396,9 @@ describe('rankAndEmit — family tier', () => {
   });
 
   it('emits family detections even below score.minConfidence, with their axes', () => {
-    const maps = rankAndEmit(new Uint8Array(0x100), [], [], DEFAULT_SCAN_CONFIG, [], [famDet()]);
+    const bytes = new Uint8Array(0x100);
+    bytes.set([1, 2, 3, 4], 0x10); bytes.set([1, 2, 3, 4], 0x20);
+    const maps = rankAndEmit(bytes, [], [], DEFAULT_SCAN_CONFIG, [], [famDet()]);
     expect(maps).toHaveLength(1);
     expect(maps[0]).toMatchObject({
       id: 'auto-0x40-4x4w1be',
@@ -383,6 +414,7 @@ describe('rankAndEmit — family tier', () => {
 
   it('family detections claim their span before byte candidates', () => {
     const bytes = new Uint8Array(0x100);
+    bytes.set([1, 2, 3, 4], 0x10);
     for (let i = 0; i < 16; i++) bytes[0x40 + i] = 100 + i; // smooth block for the byte candidate
     const byteCand = {
       table: { address: 0x40, rows: 4, cols: 4, format: u8, score: 0.9 },
@@ -424,6 +456,7 @@ describe('rankAndEmit — family tier', () => {
 
   it('emits a 1-axis MapDef for a 1d FamilyDetection (only yAxis, no xAxis)', () => {
     const bytes = new Uint8Array(0x400);
+    bytes.set(Array.from({ length: 12 }, (_, i) => i), 0x40);
     const u8 = { width: 1, signed: false, endianness: 'big' } as const;
     const det: FamilyDetection = { address: 0x100, rows: 12, cols: 1, format: u8,
       score: 0.9, tier: 4, kind: '1d',
@@ -436,11 +469,13 @@ describe('rankAndEmit — family tier', () => {
   });
 
   it('2d FamilyDetections still emit both axes (regression)', () => {
+    const bytes = new Uint8Array(0x100);
+    bytes.set([1, 2, 3, 4], 0x10); bytes.set([1, 2, 3, 4], 0x20);
     const det = { address: 0x40, rows: 4, cols: 4, format: u8, score: 0.05, tier: 0,
       kind: '2d' as const,
       xAxis: { address: 0x10, count: 4, format: u8 },
       yAxis: { address: 0x20, count: 4, format: u8 } };
-    const maps = rankAndEmit(new Uint8Array(0x100), [], [], DEFAULT_SCAN_CONFIG, [], [det]);
+    const maps = rankAndEmit(bytes, [], [], DEFAULT_SCAN_CONFIG, [], [det]);
     expect(maps).toHaveLength(1);
     expect(maps[0]!.xAxis?.address).toBe(0x10);
     expect(maps[0]!.yAxis?.address).toBe(0x20);
@@ -462,6 +497,7 @@ describe('rankAndEmit — curve-detections tier (Phase 3)', () => {
   // one generic candidate overlapping the curve span [0x200, 0x206)
   const generic: AssociatedTable = { table: { address: 0x200, rows: 2, cols: 4, format: u8, score: 0.9 }, axisFit: 0.9 };
   // one curve detection: kind '1d', tier 7, rows 6, cols 1, yAxis only
+  bytes.set([1, 2, 3, 4, 5, 6], 0x150);
   const curve: FamilyDetection = {
     address: 0x200, rows: 6, cols: 1, format: u8, score: 0.5, tier: 7, kind: '1d',
     yAxis: { address: 0x150, count: 6, format: u8 },

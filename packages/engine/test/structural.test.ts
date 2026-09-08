@@ -59,6 +59,19 @@ describe('poolStructuralActive', () => {
 });
 
 describe('poolStructuralTables — header path', () => {
+  it('does not let two constant axis runs inside word data establish a byte-table boundary', () => {
+    const b = new Uint8Array(0x4000);
+    const at = 0x2000;
+    const { xData, yData } = plantTable(b, 0x100, 16, 16, at);
+    b.fill(0, xData, xData + 16); b.fill(0, yData, yData + 16);
+    for (let i = 0; i < 256; i++) w16(b, at + i * 2, 1000 + i * 40);
+    b[0x180] = 3; b[0x280] = 9;
+    // Cell values can point at unrelated counts followed by zero-filled bytes.
+    w16(b, at + 256, 0x180); w16(b, at + 258, 0x280);
+    const table = poolStructuralTables(b, [], cfg, true).find(t => t.address === at);
+    expect(table).toMatchObject({ rows: 16, cols: 16, format: { width: 2, endianness: 'little' } });
+  });
+
   it('uses an adjacent axis prefix to resolve an ambiguous byte/word axis', () => {
     const b = new Uint8Array(0x2000);
     b.set([4, 0, 16, 18, 24, 35, 48, 52, 80, 69], 0x100);
