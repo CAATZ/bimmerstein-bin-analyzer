@@ -3,6 +3,7 @@ import { DEFAULT_SCAN_CONFIG as cfg } from '../src/config.js';
 import { scanReaderCalls } from '../src/family/ms41/c166.js';
 import { saToFo } from '../src/family/ms41/frame.js';
 import { detectMs41RuntimeGrids } from '../src/family/ms41/runtime-grids.js';
+import type { FamilyDetection } from '../src/family/types.js';
 
 const mov = (sa: number) => [0xe6, 0xfc, sa & 255, sa >> 8];
 const call = (cpu: number) => [0xda, cpu >> 16, cpu & 255, (cpu >> 8) & 255];
@@ -22,6 +23,18 @@ const detect = (b: Uint8Array, width: 1 | 2 = 1) => detectMs41RuntimeGrids(b, sc
 const shapes = (b: Uint8Array) => detect(b).map(m => [m.address, m.rows, m.cols, m.xAxis?.address, m.yAxis?.address]);
 
 describe('MS41 runtime grid recovery', () => {
+  it('keeps a resolved caller as fallback evidence without promoting an unresolved table', () => {
+    const b = fixture(), hints = new Map<number, FamilyDetection>();
+    b.set([0xdb, 0, ...mov(0x900), ...call(0x6100), 0xdb, 0], 0x2fe);
+    const run = () => detectMs41RuntimeGrids(b, scanReaderCalls(b, cfg.family.ms41.maxR12Dist), [{ target: 0x6100, width: 1 }], cfg, hints);
+    expect(run()).toEqual([]);
+    expect(hints.get(saToFo(0x900))).toMatchObject({ rows: 4, cols: 3, xAxis: { address: saToFo(0x821) } });
+    // Fully resolved callers with different axes must not supply a preference.
+    b.set([0xdb, 0, ...mov(0x600), ...call(0x6000), ...mov(0x604), ...call(0x6040), ...mov(0x900), ...call(0x6100), 0xdb, 0], 0x2fe);
+    expect(run()).toEqual([]);
+    expect(hints.size).toBe(0);
+  });
+
   it('recovers both staged axes and cell width without adjacent headers', () => {
     for (const width of [1, 2] as const) {
       const b = fixture(width);

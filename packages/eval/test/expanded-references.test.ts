@@ -45,7 +45,7 @@ for (const rom of ['ss1v2', 'id60', 'id12']) {
       expect(parsed.value.binSha256).toBe(sha);
       return parsed.value.maps;
     });
-    const addresses = [4, 5, 6, 7, 8, ...(rom === 'ss1v2' ? [0x11a8, 0x3466, 0x34a8, 0x34ea, 0x352c, 0x3440, 0x42c8] : [])];
+    const addresses = [4, 5, 6, 7, 8, ...(rom === 'ss1v2' ? [0x11a8, 0x3466, 0x34a8, 0x34ea, 0x352c, 0x3440, 0x42c8, 0x368a, 0x4048] : [])];
     const detected = scan(bytes, DEFAULT_SCAN_CONFIG).potentialMaps;
     for (const sa of addresses) {
       const expected = truth.find(m => m.address === fo(sa));
