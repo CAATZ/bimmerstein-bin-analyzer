@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { importRomRaiderXml } from '../src/romraider.js';
+import { exportRomRaiderXml, importRomRaiderXml } from '../src/romraider.js';
 
 const DEF = `<?xml version="1.0"?>
 <roms>
@@ -92,6 +92,36 @@ describe('importRomRaiderXml (standalone rom)', () => {
     const labeled = maps.find((m) => m.id === 't1-0x7f0')!;
     expect(labeled.yAxis).toMatchObject({ kind: 'index', count: 1 });
     expect(warnings.some((w) => w.includes('non-numeric'))).toBe(true);
+  });
+
+  it.each(['X', 'Y'] as const)('requires complete finite numbers on static %s axes', (role) => {
+    for (const label of ['1st gear', '12 rpm', '1,5', '1.2.3', '1e', '0x10', 'Infinity', '-Infinity', '1e309', '', ' ']) {
+      const { maps, warnings } = ok(`<rom><romid><xmlid>LABEL</xmlid></romid>
+        <table type="2D" name="Curve" storagetype="uint8" sizex="${role === 'X' ? 2 : 1}" sizey="${role === 'Y' ? 2 : 1}" storageaddress="100">
+          <table type="Static ${role} Axis" name="Position"><data>0</data><data>${label}</data>
+            <scaling expression="x*2" units="test" format="0.0"/>
+          </table>
+        </table></rom>`);
+      expect(maps[0]![role === 'X' ? 'xAxis' : 'yAxis'], label).toEqual({
+        kind: 'index', count: 2, name: 'Position',
+        scaling: { factor: 2, offset: 0, units: 'test', digits: 1 },
+      });
+      expect(warnings, label).toHaveLength(1);
+      expect(warnings[0], label).toContain('using index axis');
+    }
+  });
+
+  it('preserves complete signed decimal and exponent axis values', () => {
+    const labels = ['-2', '+3', '.5', '-.25', '4.', '1.25e2', '-2E-2', ' 0 '];
+    const { maps, warnings } = ok(`<rom><romid><xmlid>NUMBERS</xmlid></romid>
+      <table type="2D" name="Curve" storagetype="uint8" sizex="8" storageaddress="100">
+        <table type="Static X Axis">${labels.map(v => `<data>${v}</data>`).join('')}</table>
+      </table></rom>`);
+    expect(maps[0]!.xAxis).toEqual({ kind: 'literal', count: 8, values: [-2, 3, .5, -.25, 4, 125, -.02, 0] });
+    expect(warnings).toEqual([]);
+    const exported = exportRomRaiderXml('NUMBERS', maps);
+    expect(exported.ok).toBe(true);
+    if (exported.ok) expect(ok(exported.value).maps).toEqual(maps);
   });
 
   it.each(['X', 'Y'] as const)('accepts a scalar Value label on the %s axis without a warning', (role) => {

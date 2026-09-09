@@ -1,6 +1,6 @@
 [package]
 name = "desktop"
-version = "0.2.16"
+version = "0.2.17"
 description = "BimmerStein Bin Analyzer - ECU bin tuning-table analyzer"
 authors = ["BimmerStein Bin Analyzer contributors"]
 license = "GPL-3.0-or-later"
