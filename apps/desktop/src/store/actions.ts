@@ -23,6 +23,7 @@ import type { PackRow } from '../lib/packapply.js';
 import { detachedAxis, libraryAxis, stampAxis } from '../lib/axislib.js';
 import { axisEditability, isMonotonic } from '../lib/axisedit.js';
 import { DEFAULT_MAP_FILTER, filterMaps, type MapFilter } from '../lib/mapfilter.js';
+import { mapWithLayout, type TableLayout } from '../lib/layoutreview.js';
 import { clearUndo, pushUndo, redo as redoInternal, undo as undoInternal, undoTransaction } from './undo.js';
 
 /**
@@ -805,6 +806,26 @@ export function updateMapMeta(id: string, patch: MapMetaPatch): Result<MapDef> {
   pushUndo('edit map properties');
   maps.update((ms) => ms.map((m) => (m.id === id ? next : m)));
   return { ok: true, value: next };
+}
+
+/** Change a confirmed grid's definition without touching its underlying bytes. */
+export function setMapLayout(id: string, layout: TableLayout): Result<MapDef> {
+  const image = get(bin);
+  if (!image) return { ok: false, error: 'no bin loaded' };
+  const current = get(maps).find(m => m.id === id);
+  if (!current) return { ok: false, error: `no confirmed map with id ${id}` };
+  const result = mapWithLayout(current, layout, image.size);
+  if (!result.ok) return result;
+  const next = result.value;
+  if ((['address', 'rows', 'cols', 'orientation'] as const).every(key => current[key] === next[key]) &&
+      (['width', 'signed', 'endianness', 'float'] as const).every(key => current.format[key] === next.format[key])) {
+    return { ok: true, value: current };
+  }
+  pushUndo('change table layout');
+  maps.update(ms => ms.map(m => m.id === id ? next : m).sort(byAddress));
+  if (get(selection)?.mapId === id) selectMap(next);
+  cellRange.set(null);
+  return result;
 }
 
 /**

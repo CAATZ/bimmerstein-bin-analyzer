@@ -8,6 +8,7 @@
   import { axisLibrary, maps, workingBytes } from '../store/stores.js';
   import { axisIdentityChanged, axisIdentityKey, detachedAxis, slotCount, stampAxis } from '../lib/axislib.js';
   import AxisPickerDialog from './AxisPickerDialog.svelte';
+  import LayoutReview from './LayoutReview.svelte';
 
   interface Props {
     map: MapDef;
@@ -38,6 +39,7 @@
 
   let picking: 'x' | 'y' | null = $state(null);
   let reviewing = $state(false);
+  let reviewingLayout = $state(false);
   let pairs: PoolAnchor[] = $state([]);
   let chosenPair = $state('');
   const candidatePair = $derived(chosenPair === '' ? undefined : pairs[Number(chosenPair)]);
@@ -220,7 +222,7 @@
 
 <div class="overlay" role="dialog" aria-label="Map properties">
   <div class="dialog">
-    <h3>Map properties — 0x{map.address.toString(16).toUpperCase()} · {map.rows}×{map.cols}</h3>
+    <h3>Map properties — 0x{live.address.toString(16).toUpperCase()} · {live.rows}×{live.cols}</h3>
     <label>Name <input bind:value={name} /></label>
     <label>Category <input bind:value={category} placeholder="(none)" /></label>
     <fieldset>
@@ -276,6 +278,10 @@
       </fieldset>
     {/each}
     {#if live.rows > 1 && live.cols > 1 && live.states === undefined}
+      <button onclick={() => { reviewing = false; reviewingLayout = true; }}>Review table layout…</button>
+      {#if reviewingLayout && $workingBytes}
+        <LayoutReview map={live} bytes={$workingBytes} onclose={() => (reviewingLayout = false)} />
+      {/if}
       <button onclick={reviewAxes}>Review detected axes…</button>
       {#if reviewing}
         <fieldset>
