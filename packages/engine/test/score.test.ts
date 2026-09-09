@@ -221,6 +221,42 @@ describe('rankAndEmit pool tier', () => {
   // activateMinCount 2 for unit-scale pools; production default stays 16
   const cfg = { ...DEFAULT_SCAN_CONFIG, pool: { ...DEFAULT_SCAN_CONFIG.pool, activateMinCount: 2 } };
 
+  it.each([1, 2] as const)('preserves row resets over a smoother transposed width-%i frame', (width) => {
+    const b = new Uint8Array(1024).fill(200);
+    const format = { width, signed: false, endianness: 'little' } as const;
+    const rows = 7, cols = 11, address = 400;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const value = width === 1 ? 1 + Math.min(r, rows - 1 - r) : 2000 + r * 90 + c * 30;
+      const at = address + (r * cols + c) * width;
+      b[at] = value & 255;
+      if (width === 2) b[at + 1] = value >> 8;
+    }
+    const axes = [pax(300, cols), pax(320, rows)];
+    for (const axis of axes) b.set(Array.from({ length: axis.count }, (_, i) => 20 + i * 5), axis.address);
+    const truth: AssociatedTable = { table: { address, rows, cols, format, score: 0.75 }, axisFit: 0 };
+    const transposed: AssociatedTable = { table: { address, rows: cols, cols: rows, format, score: 0.83 }, axisFit: 0 };
+    for (const table of [truth.table, transposed.table]) {
+      expect(startEdgeOk(b, table, cfg.pool.edgeMin)).toBe(true);
+      expect(endEdgeOk(b, table, cfg.pool.endEdgeMin)).toBe(true);
+    }
+    for (const candidates of [[truth, transposed], [transposed, truth]]) {
+      const out = rankAndEmit(b, candidates, [], cfg, axes);
+      expect(out).toHaveLength(1);
+      expect(out[0]).toMatchObject({ address, rows, cols, format,
+        xAxis: { address: 300, count: cols }, yAxis: { address: 320, count: rows } });
+    }
+  });
+
+  it('recognizes row resets that reverse direction without changing step magnitude', () => {
+    const b = new Uint8Array(512).fill(200);
+    for (let r = 0; r < 7; r++) for (let c = 0; c < 6; c++) b[400 + r * 6 + c] = 40 + r * 4 + c;
+    const axes = [pax(300, 6), pax(310, 7)];
+    for (const axis of axes) b.set(Array.from({ length: axis.count }, (_, i) => 20 + i * 5), axis.address);
+    const out = rankAndEmit(b, [cand(400, 6, 7, 0.95), cand(400, 7, 6, 0.75)], [], cfg, axes);
+    expect(out[0]).toMatchObject({ address: 400, rows: 7, cols: 6,
+      xAxis: { address: 300 }, yAxis: { address: 310 } });
+  });
+
   it('a pool-anchored edge-passing candidate beats a smoother overlapping sub-block and emits the pool axes', () => {
     const truth = cand(400, 6, 8, 0.7);
     const sub = cand(408, 5, 8, 0.95); // starts inside the map → no start edge

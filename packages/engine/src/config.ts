@@ -54,6 +54,8 @@ export interface ScanConfig {
      * boundary once the mean absolute column-wise delta between consecutive
      * rows exceeds `colSmoothFactor * (blockRange + 1)`. Lower = stricter
      * (shorter, more conservative blocks); higher = more permissive growth.
+     * Minimum-size seeds may instead establish a steady slope over three rows;
+     * this same relative tolerance bounds the change between successive slopes.
      */
     colSmoothFactor: number;
     /**
@@ -488,7 +490,7 @@ export const DEFAULT_SCAN_CONFIG: ScanConfig = {
     growthAbsFloor: 1,
     growthRangeMultiplier: 2,
     minTableScore: 0.5,
-    minVariationFraction: 0.2,
+    minVariationFraction: 0.3,
     emissionEdgeMin: 2,
   },
   associate: { maxAxisDistance: 512, adjacencyBonus: 1.2, anchorMaxGap: 0 },
