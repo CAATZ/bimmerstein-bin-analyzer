@@ -22,6 +22,36 @@ function plantMap(bytes: Uint8Array, offset: number, rows: number, cols: number)
 }
 
 describe('scanTables', () => {
+  it.each([1, 2] as const)('rejects a small width-%i filler block inflated by one changed cell', (width) => {
+    const bytes = new Uint8Array(16 * width);
+    for (let i = 0; i < 16; i++) bytes[i * width + width - 1] = i === 5 ? 90 : 50;
+    const cfg = { ...DEFAULT_SCAN_CONFIG, table: { ...DEFAULT_SCAN_CONFIG.table,
+      widths: [width], minRows: 4, maxRows: 4, minCols: 4, maxCols: 4 } };
+    const regions: Region[] = [{ start: 0, end: bytes.length, kind: 'data' }];
+    expect(scanTables(bytes, regions, cfg)).toEqual([]);
+  });
+
+  it.each(['little', 'big'] as const)('seeds a gradual word-table slope without shifting its %s-endian start', (endianness) => {
+    const bytes = new Uint8Array(256).fill(0xff);
+    const address = 33, rows = 9, cols = 6;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const value = 2000 + r * 50 + c * 10 + ((r + c) % 3);
+      const at = address + (r * cols + c) * 2;
+      bytes[at] = endianness === 'little' ? value & 255 : value >> 8;
+      bytes[at + 1] = endianness === 'little' ? value >> 8 : value & 255;
+    }
+    const found = scanTables(bytes, [{ start: 0, end: bytes.length, kind: 'data' }], DEFAULT_SCAN_CONFIG);
+    expect(found).toContainEqual(expect.objectContaining({ address, rows, cols,
+      format: { width: 2, signed: false, endianness } }));
+  });
+
+  it('does not use a third row outside the data region to establish a seed slope', () => {
+    const bytes = new Uint8Array(64).fill(255);
+    putU16be(bytes, 16, Array.from({ length: 12 }, (_, i) => 2000 + Math.floor(i / 4) * 60 + (i % 4) * 10));
+    const found = scanTables(bytes, [{ start: 16, end: 32, kind: 'data' }], DEFAULT_SCAN_CONFIG);
+    expect(found.some(t => t.address === 16 && t.cols === 4 && t.format.width === 2)).toBe(false);
+  });
+
   it('does not grow through an outlier that enlarges the accepted table range', () => {
     const bytes = new Uint8Array(64).fill(200);
     for (let r = 0; r < 6; r++) bytes.fill(50 + r, 16 + r * 4, 20 + r * 4);

@@ -179,7 +179,22 @@ export function scanTables(bytes: Uint8Array, regions: Region[], config: ScanCon
             const range = rows > minRows && candidateRange > growthRangeMultiplier * (max - min)
               ? max - min : candidateRange;
             const diff = newColTv / cols;
-            if (diff > colSmoothFactor * (range + 1) && diff > growthAbsFloor) break;
+            if (diff > colSmoothFactor * (range + 1) && diff > growthAbsFloor) {
+              if (rows > minRows) break;
+              // A short seed has too little range to judge a steady slope.
+              // Require consistent changes across three rows before accepting
+              // it; isolated jumps and a missing third row still stop growth.
+              const probe = start + Math.max(0, rows - 2) * cols;
+              if (probe + 3 * cols > n) break;
+              let bend = 0, trend = 0;
+              for (let c = 0; c < cols; c++) {
+                const first = vals[probe + cols + c]! - vals[probe + c]!;
+                const second = vals[probe + 2 * cols + c]! - vals[probe + cols + c]!;
+                bend += Math.abs(second - first);
+                trend += Math.abs(first) + Math.abs(second);
+              }
+              if (bend / cols > colSmoothFactor * (trend / (2 * cols) + 1)) break;
+            }
             // Accept the row: fold its contributions into the running sums.
             min = candMin;
             max = candMax;

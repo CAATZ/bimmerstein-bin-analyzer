@@ -1,5 +1,5 @@
 import type { AxisDef, MapDef } from '@binanalyzer/core';
-import { readAxisValues } from '@binanalyzer/core';
+import { readAxisValues, readValue } from '@binanalyzer/core';
 import type { ScanConfig } from './config.js';
 import type { AssociatedTable } from './associate.js';
 import { findAnchor, buildAxisIndex, type Anchor } from './associate.js';
@@ -123,6 +123,40 @@ export function endEdgeOk(bytes: Uint8Array, t: TableCandidate, edgeMin: number)
 }
 
 /**
+ * Row resets should explain changes in the flattened cell sequence. Compare
+ * variation before/after separating row-reset deltas from within-row deltas;
+ * a wrong column count mixes the two. Signed deltas catch ramps whose reset
+ * reverses direction; magnitudes also catch quantized rows rising then falling.
+ * A continuous ramp or uniform block supplies no row-alignment evidence.
+ */
+function rowAlignmentStrength(bytes: Uint8Array, t: TableCandidate): number {
+  const { address, rows, cols, format } = t;
+  if (address < 0 || rows < 2 || cols < 2 || address + rows * cols * format.width > bytes.length) return 1;
+  let resets = 0, interior = 0, absResets = 0, absInterior = 0, squares = 0;
+  let previous = readValue(bytes, address, format);
+  for (let i = 1; i < rows * cols; i++) {
+    const value = readValue(bytes, address + i * format.width, format);
+    const delta = value - previous;
+    previous = value;
+    squares += delta * delta;
+    if (i % cols === 0) {
+      resets += delta;
+      absResets += Math.abs(delta);
+    } else {
+      interior += delta;
+      absInterior += Math.abs(delta);
+    }
+  }
+  const resetCount = rows - 1, interiorCount = rows * (cols - 1);
+  const separation = (resetSum: number, interiorSum: number): number => {
+    const total = Math.max(0, squares - (resetSum + interiorSum) ** 2 / (resetCount + interiorCount));
+    const residual = Math.max(0, squares - resetSum ** 2 / resetCount - interiorSum ** 2 / interiorCount);
+    return total / (residual + 1e-9);
+  };
+  return Math.max(1, separation(resets, interior), separation(absResets, absInterior));
+}
+
+/**
  * 256-byte-bucket index over kept byte spans. `conflicts` is semantically
  * identical to scanning every kept span with overlapFrac (any overlapping
  * pair shares at least one byte, hence at least one bucket) — only the
@@ -176,6 +210,7 @@ export function rankAndEmit(
       poolAnchor: undefined as PoolAnchor | undefined,
       poolTier: false,
       boundary: 0,
+      rowAlignment: 1,
       shear: false,
     }))
     .filter((s) => s.confidence >= minConfidence);
@@ -194,12 +229,13 @@ export function rankAndEmit(
         s.poolTier = s.c.table.cluster
           ? true // separator-backed cluster candidate: the periodic separator IS the boundary evidence
           : start >= config.pool.edgeMin && end >= config.pool.endEdgeMin;
+        if (s.poolTier) s.rowAlignment = rowAlignmentStrength(bytes, s.c.table);
       }
     }
   }
   // Rank tiers: pool-anchored+edge (pool-rich bins only) > zero-gap anchored >
-  // unanchored. Pool tier prefers the stronger pair of boundaries: normalized
-  // smoothness alone can reward a shifted frame that includes an outlier.
+  // unanchored. Pool tier prefers aligned row resets, then stronger external
+  // boundaries: vertical smoothness alone can favor a shorter column stride.
   // The anchored tier keeps its shear→byte-span order,
   // and the unanchored tier keeps the pre-existing confidence order.
   const tierOf = (s: (typeof scored)[number]): number =>
@@ -208,6 +244,7 @@ export function rankAndEmit(
     const ta = tierOf(a);
     const tb = tierOf(b);
     if (tb !== ta) return tb - ta;
+    if (ta === 2 && a.rowAlignment !== b.rowAlignment) return b.rowAlignment - a.rowAlignment;
     if (ta === 2 && a.boundary !== b.boundary) return b.boundary - a.boundary;
     if (ta === 1) {
       const d =
