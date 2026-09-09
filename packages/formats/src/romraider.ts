@@ -93,8 +93,8 @@ function importAxis(el: XmlElement, expectedCount: number, warnings: string[], c
     if (scalar && data.length === 1 && data[0] === 'Value') {
       return finish({ kind: 'index', count: 1 });
     }
-    const values = data.map((d) => Number.parseFloat(d));
-    if (data.length === 0 || values.some((v) => Number.isNaN(v))) {
+    const values = data.map((d) => /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(d) ? Number(d) : Number.NaN);
+    if (data.length === 0 || values.some((v) => !Number.isFinite(v))) {
       warnings.push(`${context}: static axis has non-numeric data — using index axis`);
       return finish({ kind: 'index', count: expectedCount });
     }
