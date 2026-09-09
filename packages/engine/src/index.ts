@@ -94,7 +94,8 @@ export function scan(
   check('associate', 0.85);
   const associated = associate(allTables, axes, config);
   check('score', 0.95);
-  const maps0 = rankAndEmit(bytes, associated, axes, config, prefixed, familyDetections, poolTables);
+  const allowTrendBoundaries = familyDetections.length === 0 && !structActive;
+  const maps0 = rankAndEmit(bytes, associated, axes, config, prefixed, familyDetections, poolTables, [], allowTrendBoundaries);
   // Partial 1D-curve channel (Phase 3, spike docs/notes/ms41-p3-partial-curves-spike.md):
   // gate-active direct-SA partials ONLY (poolStructuralActive structurally
   // excludes full reads via STRUCT_MAX_BIN_LEN; the gate was computed once
@@ -118,7 +119,7 @@ export function scan(
     if (curves.length > 0) {
       return {
         regions,
-        potentialMaps: rankAndEmit(bytes, associated, axes, config, prefixed, familyDetections, poolTables, curves),
+        potentialMaps: rankAndEmit(bytes, associated, axes, config, prefixed, familyDetections, poolTables, curves, allowTrendBoundaries),
       };
     }
   }

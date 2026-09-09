@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { AxisDef, MapDef, Project, ValueFormat } from '@binanalyzer/core';
 import { createBinImage } from '@binanalyzer/core';
 import * as a from '../src/store/actions.js';
-import { axisLibrary, maps, potentialMaps } from '../src/store/stores.js';
+import { axisLibrary, editJournal, maps, potentialMaps, workingBytes } from '../src/store/stores.js';
 import { stampAxis } from '../src/lib/axislib.js';
 
 function testBin() {
@@ -25,6 +25,24 @@ beforeEach(() => {
 });
 
 describe('setMapAxis', () => {
+  it('applies a reviewed pair atomically, preserves bytes, and undoes both slots together', () => {
+    const original = confirmed('m1');
+    maps.set([original]);
+    const bytes = get(workingBytes)!.slice();
+    const pair = { xAxis: rpmAxis, yAxis: { ...rpmAxis, address: 0x80, count: 2 } };
+    expect(a.setMapAxes('m1', pair).ok).toBe(true);
+    expect(get(maps)[0]).toEqual({ ...original, ...pair });
+    expect(get(workingBytes)).toEqual(bytes);
+    expect(get(editJournal).size).toBe(0);
+    const snapshot = a.projectSnapshot();
+    expect(snapshot.ok && snapshot.value.maps[0]).toEqual({ ...original, ...pair });
+    expect(a.setMapAxes('m1', { xAxis: { ...rpmAxis, address: 0x40 }, yAxis: { ...pair.yAxis, count: 3 } }).ok).toBe(false);
+    expect(get(maps)[0]).toEqual({ ...original, ...pair });
+    a.undo();
+    expect(get(maps)).toEqual([original]);
+    a.redo();
+    expect(get(maps)[0]).toEqual({ ...original, ...pair });
+  });
   it('stamps and removes a slot axis with validation', () => {
     maps.set([confirmed('m1')]);
     const r = a.setMapAxis('m1', 'x', { ...rpmAxis, name: 'RPM', libId: 'e1' });

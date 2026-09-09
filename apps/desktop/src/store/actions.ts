@@ -813,14 +813,22 @@ export function updateMapMeta(id: string, patch: MapMetaPatch): Result<MapDef> {
  * Confirmed maps only — potentials are immutable; attach promotes first.
  */
 export function setMapAxis(id: string, slot: 'x' | 'y', axis: AxisDef | undefined): Result<MapDef> {
+  return setMapAxes(id, { [slot === 'x' ? 'xAxis' : 'yAxis']: axis });
+}
+
+/** Validate and apply one or both axis slots in a single undo step. */
+export function setMapAxes(id: string, axes: Partial<Record<'xAxis' | 'yAxis', AxisDef | undefined>>): Result<MapDef> {
   const image = get(bin);
   if (!image) return { ok: false, error: 'no bin loaded' };
   const current = get(maps).find((m) => m.id === id);
   if (!current) return { ok: false, error: `no confirmed map with id ${id}` };
-  const key = slot === 'x' ? 'xAxis' : 'yAxis';
   const next: MapDef = { ...current };
-  if (axis === undefined) delete next[key];
-  else next[key] = { ...axis };
+  for (const key of ['xAxis', 'yAxis'] as const) {
+    if (!(key in axes)) continue;
+    const axis = axes[key];
+    if (axis === undefined) delete next[key];
+    else next[key] = { ...axis };
+  }
   const valid = validateMapDef(next, image.size);
   if (!valid.ok) return valid;
   pushUndo('change axis');

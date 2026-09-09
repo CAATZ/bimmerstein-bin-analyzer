@@ -221,6 +221,31 @@ describe('rankAndEmit pool tier', () => {
   // activateMinCount 2 for unit-scale pools; production default stays 16
   const cfg = { ...DEFAULT_SCAN_CONFIG, pool: { ...DEFAULT_SCAN_CONFIG.pool, activateMinCount: 2 } };
 
+  it.each([u8, u16be, { ...u16be, endianness: 'little' } as const])('uses row-trend residuals at weak boundaries while rejecting interior frames (%o)', (format) => {
+    const b = new Uint8Array(1024);
+    const scale = format.width === 1 ? 1 : 20;
+    const at = (r: number, c: number) => 400 + (r * 4 + c) * format.width;
+    const view = new DataView(b.buffer);
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 4; c++) {
+      const value = (40 + r * 6 + c * 2) * scale;
+      if (format.width === 1) view.setUint8(at(r, c), value);
+      else view.setUint16(at(r, c), value, format.endianness === 'little');
+    }
+    const axes = [pax(300, 4), pax(310, 5), pax(320, 3)];
+    for (const axis of axes) b.set(Array.from({ length: axis.count }, (_, i) => 20 + i * 5), axis.address);
+    const truth: AssociatedTable = { table: { address: 400, rows: 5, cols: 4, format, score: 0.7 }, axisFit: 0 };
+    const sub: AssociatedTable = { table: { ...truth.table, address: at(1, 0), rows: 3, score: 0.98 }, axisFit: 0 };
+    const shifted: AssociatedTable = { table: { ...truth.table, address: 401, score: 0.96 }, axisFit: 0 };
+    expect(startEdgeOk(b, truth.table, cfg.pool.edgeMin)).toBe(false);
+    for (const candidates of [[sub, shifted, truth], [truth, shifted, sub]]) {
+      expect(rankAndEmit(b, candidates, [], cfg, axes)[0]).toMatchObject({ address: 400, rows: 5, cols: 4, format });
+    }
+    // A structural channel consumes the first ranking pass. Keep its input
+    // stable rather than reinterpreting that layout with generic trend evidence.
+    const family: FamilyDetection = { address: 800, rows: 2, cols: 2, format, score: 0.9, tier: 0 };
+    expect(rankAndEmit(b, [sub, truth], [], cfg, axes, [family])[1]?.address).toBe(sub.table.address);
+  });
+
   it.each([1, 2] as const)('preserves row resets over a smoother transposed width-%i frame', (width) => {
     const b = new Uint8Array(1024).fill(200);
     const format = { width, signed: false, endianness: 'little' } as const;

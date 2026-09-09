@@ -122,6 +122,29 @@ export function endEdgeOk(bytes: Uint8Array, t: TableCandidate, edgeMin: number)
   return strength !== undefined && strength >= edgeMin;
 }
 
+/** Boundary prediction errors relative to variation around each column's row trend. */
+function trendEdges(bytes: Uint8Array, t: TableCandidate, residualFloor: number): [number, number] {
+  const { address, rows, cols, format } = t;
+  const stride = cols * format.width;
+  // At least two row differences are needed to measure residual variation.
+  if (rows < 3 || cols < 2 || address < 0 || address + rows * stride > bytes.length) return [0, 0];
+  let noise = 0, before = 0, after = 0;
+  for (let c = 0; c < cols; c++) {
+    const at = (r: number): number => readValue(bytes, address + r * stride + c * format.width, format);
+    const mean = (at(rows - 1) - at(0)) / (rows - 1);
+    for (let r = 1; r < rows; r++) noise += Math.abs(at(r) - at(r - 1) - mean);
+    if (address >= stride) before += Math.abs(at(0) - at(-1) - mean);
+    if (address + (rows + 1) * stride <= bytes.length) after += Math.abs(at(rows) - at(rows - 1) - mean);
+  }
+  // One raw integer step is the quantization floor; exact ramps must not turn
+  // sub-cell residuals into arbitrarily strong boundary evidence.
+  const denominator = Math.max(residualFloor, noise / ((rows - 1) * cols));
+  return [
+    address < stride ? Infinity : before / cols / denominator,
+    address + (rows + 1) * stride > bytes.length ? Infinity : after / cols / denominator,
+  ];
+}
+
 /**
  * Row resets should explain changes in the flattened cell sequence. Compare
  * variation before/after separating row-reset deltas from within-row deltas;
@@ -194,11 +217,15 @@ export function rankAndEmit(
   prefixedAxes: PrefixedAxis[] = [],
   familyDetections: FamilyDetection[] = [],
   poolTables: PoolStructTable[] = [],
-  curveDetections: FamilyDetection[] = []
+  curveDetections: FamilyDetection[] = [],
+  allowTrendBoundaries = true
 ): MapDef[] {
   const { wSmooth, wAxis, wDim, overlapMax, minConfidence } = config.score;
   const poolActive = isPoolActive(prefixedAxes, config);
   const pidx = poolActive ? buildPoolIndex(prefixedAxes) : undefined;
+  // Structural curve inference consumes the first ranking pass. Keep that
+  // input stable; supplementary trend evidence belongs to generic-only scans.
+  const genericPool = allowTrendBoundaries && familyDetections.length === 0 && poolTables.length === 0 && curveDetections.length === 0;
   const scored = candidates
     .map((c) => ({
       c,
@@ -229,6 +256,10 @@ export function rankAndEmit(
         s.poolTier = s.c.table.cluster
           ? true // separator-backed cluster candidate: the periodic separator IS the boundary evidence
           : start >= config.pool.edgeMin && end >= config.pool.endEdgeMin;
+        if (!s.poolTier && genericPool) {
+          const [trendStart, trendEnd] = trendEdges(bytes, s.c.table, config.pool.trendResidualFloor);
+          s.poolTier = trendStart >= config.pool.edgeMin && trendEnd >= config.pool.endEdgeMin;
+        }
         if (s.poolTier) s.rowAlignment = rowAlignmentStrength(bytes, s.c.table);
       }
     }
