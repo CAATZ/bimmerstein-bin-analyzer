@@ -150,3 +150,17 @@ classes retain their zero recovery floors because their files contain no code.
    `pnpm eval gt-from-romraider <def.xml> <bin> --fixture <name> --id-prefix <prefix> --rom <xmlid> --fo`
    (for MS41; see the Rules section above).
 3. `pnpm eval` — the harness picks up any directory containing both files.
+
+## Exact layout acceptance
+
+`ms41/acceptance/` contains structural records for five exact ID41/ID59 images.
+Place each local BIN beside its matching record, using the same stem. Run
+`pnpm eval accept` to verify all 23 data layouts and axis pairs, independently
+of any definition XML. These cases cover two distinct ID41 partial calibrations
+(six grids and three curves each), one ID41 full-image curve, and two curves
+in each of two ID59 full images. Widths and starts were checked against the
+matching calibration reference and firmware reader paths.
+
+Every present BIN must match its recorded SHA-256. Missing BINs are reported as
+skips; missing or invalid truth and any address, width, or axis drift fail.
+Records contain structural metadata only; firmware remains untracked.

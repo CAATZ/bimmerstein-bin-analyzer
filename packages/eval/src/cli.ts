@@ -8,6 +8,7 @@
  *   accept               enforce the real-bin gates the fixture table cannot:
  *                        MS41_CURVE_GATE on full reads (1D-curve truth class)
  *                        and MS41_PARTIAL_GATE on 24KB partials (both classes).
+ *                        Also pins verified ID41/ID59 layouts and axes.
  *                        Binds only where the gitignored local fixtures exist;
  *                        skips and exits 0 otherwise (CI-safe)
  *   gt-from-romraider    build groundtruth.json from a RomRaider def XML + bin:
@@ -17,7 +18,7 @@
 import { readdirSync, readFileSync, writeFileSync, statSync, existsSync, realpathSync } from 'node:fs';
 import { join, basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createBinImage, type MapDef } from '@binanalyzer/core';
+import { createBinImage, validateMapDef, type MapDef } from '@binanalyzer/core';
 import { DEFAULT_SCAN_CONFIG, scan } from '@binanalyzer/engine';
 import { checksumsFor } from '@binanalyzer/families';
 import { buildGroundTruth, type GtBuildOptions } from './gt-from-romraider.js';
@@ -690,13 +691,14 @@ function scanForAcceptance(bytes: Uint8Array): { maps: MapDef[]; dataBytes: numb
  * Real-bin acceptance (`pnpm eval accept`) — the gates that bind only where
  * the gitignored firmware exists.
  *
- * Covers two surfaces that `runEval` cannot:
+ * Covers surfaces that `runEval` cannot:
  *  - FULL READS, 1D-curve class (MS41_CURVE_GATE). The `ms41-*` fixture rows
  *    already score against the committed 2-axis GRID truth via MS41_GATE, so
  *    only the curve class is missing there.
- *  - PARTIALS, both grid and curve classes (MS41_PARTIAL_GATE). No partial
- *    carries a committed groundtruth.json, so `runEval` never scores one at
- *    all and NEITHER class is otherwise guarded.
+ *  - PARTIALS, both grid and curve classes (MS41_PARTIAL_GATE), using the
+ *    local definition for these original acceptance images.
+ *  - Exact ID41/ID59 layouts and axes verified against firmware callers.
+ *    These structural records need no local definition XML.
  *
  * WHY A SEPARATE COMMAND, not `gateFor` entries: curve truth and grid truth
  * are mutually exclusive classes, so folding curve scores into the existing
@@ -836,6 +838,35 @@ export function runAcceptance(repoRoot: string): number {
     // "boot verification DISABLED" is the most consequential thing this module
     // can say about the s52 images, and the gate used to swallow it.
     for (const n of r.notes) console.log(`     note: ${n}`);
+  }
+
+  for (const key of [
+    'id41-c5b9f52b-partial', 'id41-9a56947c-partial', 'id41-fefaa8c7-full',
+    'id59-0940cf88-full', 'id59-d38e5a62-full',
+  ]) {
+    const base = join(repoRoot, 'fixtures', 'ms41', 'acceptance', key);
+    if (!existsSync(`${base}.bin`)) {
+      skipped.push(`${key} (exact layouts — no local bin)`);
+      continue;
+    }
+    try {
+      const bytes = new Uint8Array(readFileSync(`${base}.bin`));
+      const truth = parseGroundTruth(readFileSync(`${base}.groundtruth.json`, 'utf8'));
+      if (!truth.ok) throw new Error(truth.error);
+      if (truth.value.fixture !== key || truth.value.maps.length === 0 ||
+          truth.value.maps.some(m => !validateMapDef(m, bytes.length).ok)) {
+        throw new Error('invalid layout truth');
+      }
+      if (createBinImage(bytes, key).sha256 !== truth.value.binSha256) throw new Error('BIN hash mismatch');
+      const { maps, dataBytes } = scanForAcceptance(bytes);
+      const scores = scoreDetections(maps, truth.value.maps, dataBytes);
+      const ok = scores.exactLayoutRecall === 1 && scores.axisPairRecall === 1;
+      record(ok);
+      console.log(`${ok ? 'PASS' : 'FAIL'} ${key} exact layouts=${scores.exactLayoutRecall} axes=${scores.axisPairRecall} (${truth.value.maps.length} maps)`);
+    } catch (error) {
+      record(false);
+      console.log(`FAIL ${key} exact layouts: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   if (skipped.length > 0) console.log(`accept: skipped: ${skipped.join(', ')}`);

@@ -1,0 +1,336 @@
+{
+  "fixture": "id41-9a56947c-partial",
+  "binSha256": "2cc441fe6e94a65dd0f41bda5c89774eacb4ae2ecebc0e69c88c74f54408d235",
+  "maps": [
+    {
+      "address": 8660,
+      "rows": 8,
+      "cols": 8,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "orientation": "row-major",
+      "id": "id41-9a56947c-partial-21d4",
+      "name": "id41-9a56947c-partial-21d4",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 8275,
+        "count": 8,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8300,
+        "count": 8,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "address": 8728,
+      "rows": 6,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "orientation": "row-major",
+      "id": "id41-9a56947c-partial-2218",
+      "name": "id41-9a56947c-partial-2218",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 8416,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8402,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "address": 8754,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "orientation": "row-major",
+      "id": "id41-9a56947c-partial-2232",
+      "name": "id41-9a56947c-partial-2232",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8286,
+        "count": 6,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "address": 8768,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "orientation": "row-major",
+      "id": "id41-9a56947c-partial-2240",
+      "name": "id41-9a56947c-partial-2240",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8286,
+        "count": 6,
+        "format": {
+          "width": 2,
+          "signed": false,
+          "endianness": "little"
+        }
+      }
+    },
+    {
+      "address": 8782,
+      "rows": 6,
+      "cols": 1,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "orientation": "row-major",
+      "id": "id41-9a56947c-partial-224e",
+      "name": "id41-9a56947c-partial-224e",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 8395,
+        "count": 6,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "address": 10030,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "orientation": "row-major",
+      "id": "id41-9a56947c-partial-272e",
+      "name": "id41-9a56947c-partial-272e",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 9114,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9069,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "address": 10098,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "orientation": "row-major",
+      "id": "id41-9a56947c-partial-2772",
+      "name": "id41-9a56947c-partial-2772",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 9114,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9069,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "address": 10302,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "orientation": "row-major",
+      "id": "id41-9a56947c-partial-283e",
+      "name": "id41-9a56947c-partial-283e",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 9114,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9069,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "address": 10370,
+      "rows": 16,
+      "cols": 4,
+      "format": {
+        "width": 1,
+        "signed": false,
+        "endianness": "big"
+      },
+      "orientation": "row-major",
+      "id": "id41-9a56947c-partial-2882",
+      "name": "id41-9a56947c-partial-2882",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "xAxis": {
+        "kind": "referenced",
+        "address": 9114,
+        "count": 4,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 9069,
+        "count": 16,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    }
+  ]
+}

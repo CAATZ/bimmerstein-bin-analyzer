@@ -1,0 +1,36 @@
+{
+  "fixture": "id41-fefaa8c7-full",
+  "binSha256": "fefaa8c7566c8c2206cd2d0ad5f04289fd8b107677e40d743da9ba1a581c57e3",
+  "maps": [
+    {
+      "address": 89408,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "orientation": "row-major",
+      "id": "id41-fefaa8c7-full-15d40",
+      "name": "id41-fefaa8c7-full-15d40",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 89321,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    }
+  ]
+}

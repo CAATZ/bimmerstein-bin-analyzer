@@ -1,0 +1,66 @@
+{
+  "fixture": "id59-0940cf88-full",
+  "binSha256": "0940cf88d79ac0695fb2f86b8554d64a9c088fe14bab81e385add2caf6ba1774",
+  "maps": [
+    {
+      "address": 88972,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "orientation": "row-major",
+      "id": "id59-0940cf88-full-15b8c",
+      "name": "id59-0940cf88-full-15b8c",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88885,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    },
+    {
+      "address": 88980,
+      "rows": 3,
+      "cols": 1,
+      "format": {
+        "width": 2,
+        "signed": false,
+        "endianness": "little"
+      },
+      "orientation": "row-major",
+      "id": "id59-0940cf88-full-15b94",
+      "name": "id59-0940cf88-full-15b94",
+      "provenance": "imported",
+      "scaling": {
+        "factor": 1,
+        "offset": 0,
+        "units": "",
+        "digits": 0
+      },
+      "yAxis": {
+        "kind": "referenced",
+        "address": 88885,
+        "count": 3,
+        "format": {
+          "width": 1,
+          "signed": false,
+          "endianness": "big"
+        }
+      }
+    }
+  ]
+}
