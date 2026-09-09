@@ -4,7 +4,7 @@
 
 An open-source desktop app for **ECU bin file tuning-table analysis and editing**: load a raw ECU firmware dump, view it as hexdump / 2D / 3D, automatically detect tuning tables ("maps") and their axes, refine and edit them, and export RomRaider XML / TunerPro XDF / CSV / JSON definitions.
 
-**Status: v0.2.12 — preview, under active development.**
+**Status: v0.2.13 — preview, under active development.**
 
 The app includes **value and axis editing**, undo/redo, original-value
 display, checksum verification and supported correction, map packs, family
@@ -23,6 +23,9 @@ and keeps warnings for malformed axes and unsupported labels.
 Version 0.2.12 exports fresh MS41 full-read detections with calibration-relative
 addresses for RomRaider, including referenced axes, so definitions can be imported
 into the matching partial image. Explicit address-frame choices remain respected.
+Version 0.2.13 improves generic table row alignment and preserves exact starts
+for gradual word tables. It also rejects more small filler blocks while retaining
+validated MS41 table layouts and axes.
 The **Swap X/Y** display control and column-major axis editing remain available. Search
 maps by name, address or dimensions, filter by shape or detection method, and
 inspect an explanation of how each potential map was detected. Swapping the
