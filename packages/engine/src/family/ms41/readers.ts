@@ -2,6 +2,8 @@ import type { ScanConfig } from '../../config.js';
 import { classifyReaderWidth, type ReaderCall } from './c166.js';
 import { MS41_CAL_SA_MAX, MS41_CAL_SA_MIN } from './frame.js';
 import { readU16SA, validateAxisPtr } from './header.js';
+import { ms41Instructions } from './consumers.js';
+import { ms41AxisPrefixes } from './runtime-axes.js';
 
 export interface ReaderEntry {
   /** Callee CPU address. */
@@ -98,6 +100,11 @@ export function selfLocateCurveReaders(
     const w = classifyReaderWidth(bytes, target, widthScanMaxInstr);
     if (w === 0) continue;
     out.set(target, w);
+  }
+  if (out.size) {
+    // Descriptor stagers fetch pointers and publish axis counts, not curve cells.
+    const { stages } = ms41AxisPrefixes(bytes, calls, out, config, ms41Instructions(bytes));
+    for (const target of stages.keys()) out.delete(target);
   }
   return out;
 }
