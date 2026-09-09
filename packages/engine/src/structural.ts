@@ -187,21 +187,24 @@ function headerCandidates(bytes: Uint8Array, config: ScanConfig): Cand[] {
   for (const [off, d] of headers) {
     const cols = d.xa.count;
     const rows = d.ya.count;
-    let best: { w: 1 | 2; score: number; exact: boolean } | undefined;
+    let best: { w: 1 | 2; score: number; exact: boolean; gridExact: boolean } | undefined;
     for (const w of config.table.widths) {
       if (w !== 1 && w !== 2) continue;
       const byteLen = rows * cols * w;
       if (off + byteLen > bytes.length) continue;
       const sc = frameScore(bytes, off, rows, cols, fmtOf(w));
-      const exact = successor(off + byteLen) !== undefined || curveSuccessor(off + byteLen);
-      // TOTAL order: exact-packing wins; then higher score; then smaller width.
+      const gridExact = successor(off + byteLen) !== undefined;
+      const exact = gridExact || curveSuccessor(off + byteLen);
+      // A grid's two-axis header outranks curve-only packing, which can swallow
+      // a neighboring grid. Within each packing class, prefer score then width.
       if (
         best === undefined ||
-        (exact && !best.exact) ||
-        (exact === best.exact && sc > best.score) ||
-        (exact === best.exact && sc === best.score && w < best.w)
+        (gridExact && !best.gridExact) ||
+        (gridExact === best.gridExact && exact && !best.exact) ||
+        (gridExact === best.gridExact && exact === best.exact && sc > best.score) ||
+        (gridExact === best.gridExact && exact === best.exact && sc === best.score && w < best.w)
       ) {
-        best = { w, score: sc, exact };
+        best = { w, score: sc, exact, gridExact };
       }
     }
     if (!best) continue;

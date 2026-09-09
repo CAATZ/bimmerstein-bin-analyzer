@@ -81,6 +81,18 @@ describe('selfLocateReaders', () => {
 });
 
 describe('selfLocateCurveReaders', () => {
+  it('excludes a descriptor stager whose preceding values resemble curve headers', () => {
+    const { bytes } = buildImage();
+    putSA(bytes, 0x150, [4, 1, 2, 3, 4]);
+    const sas = [0x600, 0x640, 0x680, 0x6c0, 0x700];
+    for (const sa of sas) putSA(bytes, sa - 2, [0x50, 0x01]);
+    // Load the descriptor pointer, fetch its count, and publish the axis index.
+    bytes.set([0xa8, 0x3c, 0x99, 0x43, 0xf7, 0xf4, 0x40, 0xf1, 0xdb, 0x00], 0x5200);
+    bytes.set([0xa8, 0x24, 0xdb, 0x00], 0x5300);
+    const calls = sas.flatMap(sa => [call(0x1200, sa), call(0x1300, sa)]);
+    expect(selfLocateCurveReaders(bytes, calls, DEFAULT_SCAN_CONFIG)).toEqual(new Map([[0x1300, 2]]));
+  });
+
   it('excludes a grid reader (4-byte header) and includes a header-backed non-grid target, with classified width', () => {
     // Grid target cpu 0x1000: 5 args, each with a full 4-byte [xPtr][yPtr] header at sa-4.
     // KEY MECHANISM: that layout places the yPtr u16 exactly at sa-2, and yPtr (0x200) is a

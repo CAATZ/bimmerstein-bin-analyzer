@@ -99,6 +99,23 @@ describe('poolStructuralTables — header path', () => {
     }
   });
 
+  it.each([1, 2] as const)('prefers a following grid header over curve-only packing at the other width (%i)', (width) => {
+    const b = new Uint8Array(0x3000);
+    const at = 0x800, cells = 24;
+    const { yData } = plantTable(b, 0x100, 4, 6, at);
+    b.fill(50, at, at + cells * 2);
+    const next = at + cells * width + 4;
+    plantTable(b, 0x140, 4, 4, next);
+    const otherEnd = at + cells * (3 - width);
+    for (const curve of [otherEnd, otherEnd + 8]) {
+      w16(b, curve, yData - 1);
+      b.fill(60, curve + 2, curve + 8);
+    }
+    const out = poolStructuralTables(b, [], cfg, true);
+    expect(out.find(t => t.address === at)?.format.width).toBe(width);
+    expect(out.some(t => t.address === next)).toBe(true);
+  });
+
   it('prefers a nearby axis pair over an overlapping header forged by small cell values', () => {
     const b = new Uint8Array(0x3000);
     b.set([2, 1, 2], 0x101); // an unrelated valid axis
