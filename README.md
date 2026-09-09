@@ -4,12 +4,13 @@
 
 An open-source desktop app for **ECU bin file tuning-table analysis and editing**: load a raw ECU firmware dump, view it as hexdump / 2D / 3D, automatically detect tuning tables ("maps") and their axes, refine and edit them, and export RomRaider XML / TunerPro XDF / CSV / JSON definitions.
 
-**Status: v0.2.17 source preview.**
+**Status: v0.2.17 released.**
 
-The latest published installers are v0.2.16. Version 0.2.17 adds stricter
+The latest published installers are v0.2.17. This release adds stricter
 RomRaider numeric-axis parsing: labels containing text and non-finite numbers
 retain an explicit warning and index fallback instead of becoming misleading
 breakpoints. Complete decimal and scientific-notation values remain supported.
+The application, setup and uninstaller now use the blue BimmerStein logo.
 
 The app includes **value and axis editing**, undo/redo, original-value
 display, checksum verification and supported correction, map packs, family
