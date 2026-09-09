@@ -24,6 +24,12 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "windows": {
+      "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico"
+      }
+    },
     "licenseFile": "../../../LICENSE",
     "resources": {
       "../../../LICENSE": "LICENSE",
