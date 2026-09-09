@@ -139,7 +139,9 @@ export interface ScanConfig {
      * it must be >= edgeMin × the candidate's own row-to-row variation. True
      * tables begin at data boundaries; sub-blocks and phase-shifted misframes
      * begin inside smooth data (ratio ≈ 1). Measured trade 8→32: higher favors
-     * axis precision, lower favors location; 16 chosen.
+     * axis precision, lower favors location; 16 chosen. Generic-only scans
+     * also admit a pair of boundaries whose row-trend prediction errors exceed
+     * these same ratios relative to internal residual variation.
      */
     edgeMin: number;
     /**
@@ -151,6 +153,12 @@ export interface ScanConfig {
      * inside smooth data lacks a real bottom boundary. Measured peak at 16.
      */
     endEdgeMin: number;
+    /**
+     * Minimum raw residual used when measuring row-trend boundary evidence.
+     * One raw step is the quantization floor: exact ramps must not produce an
+     * unbounded boundary ratio. Generic-only pool scans use this value.
+     */
+    trendResidualFloor: number;
     /**
      * Adjacency-tight structural placement (pool tier). A tight axis packing
      * [rowAxis][colAxis][table] where the row-axis's last cell ends exactly at
@@ -505,6 +513,7 @@ export const DEFAULT_SCAN_CONFIG: ScanConfig = {
     activateMinCount: 16,
     edgeMin: 16,
     endEdgeMin: 16,
+    trendResidualFloor: 1,
     structUniformMaxRange: 0,
     structConfidence: 0.9,
     structHeaderGateMin: 32,

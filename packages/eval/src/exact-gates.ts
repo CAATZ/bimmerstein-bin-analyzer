@@ -66,10 +66,10 @@ export const EXACT_GATES: Record<string, ExactScores> = {
   'synth-pcurve-404': { exactStartRecall: 1, exactLayoutRecall: 1, axisPairRecall: 1 },
   'synth-pool-101': { exactStartRecall: 0.85, exactLayoutRecall: 0.6, axisPairRecall: 0.5 },
   'synth-pool-102': { exactStartRecall: 0.85, exactLayoutRecall: 0.45, axisPairRecall: 0.4 },
-  'synth-pool-103': { exactStartRecall: 0.6086956521739131, exactLayoutRecall: 0.43478260869565216, axisPairRecall: 0.43478260869565216 },
-  'synth-pool-104': { exactStartRecall: 0.9090909090909091, exactLayoutRecall: 0.5454545454545454, axisPairRecall: 0.36363636363636365 },
+  'synth-pool-103': { exactStartRecall: 22 / 23, exactLayoutRecall: 18 / 23, axisPairRecall: 18 / 23 },
+  'synth-pool-104': { exactStartRecall: 1, exactLayoutRecall: 21 / 22, axisPairRecall: 16 / 22 },
   'synth-pool-105': { exactStartRecall: 0.8636363636363636, exactLayoutRecall: 0.8181818181818182, axisPairRecall: 0.7272727272727273 },
-  'synth-pool-106': { exactStartRecall: 0.64, exactLayoutRecall: 0.32, axisPairRecall: 0.28 },
+  'synth-pool-106': { exactStartRecall: 24 / 25, exactLayoutRecall: 23 / 25, axisPairRecall: 22 / 25 },
 };
 
 export function meetsExactGate(scores: ExactScores, fixture: string): boolean {

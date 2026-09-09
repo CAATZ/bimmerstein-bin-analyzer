@@ -37,8 +37,8 @@ describe('detection pinning (committed synthetic fixtures)', () => {
   });
   it('synth-pool-103 output is stable', { timeout: 60_000 }, () => {
     expect(digestOf('synth-pool-103')).toEqual({
-      count: 171,
-      digest: '26217a784ccb54ba612fe23a3424a10d1bec71feb9d1d4796e5bb22e1b6c0f74',
+      count: 169,
+      digest: '22aa4853a82c46dc7bc0ea0efac41e323c43c60b942b2fef7903f1cb33b898bd',
     });
   });
 });

@@ -144,6 +144,24 @@ export function findPoolAnchor(
   pidx: PoolIndex,
   config: ScanConfig
 ): PoolAnchor | undefined {
+  let best: PoolAnchor | undefined;
+  let bestGap = Infinity;
+  for (const pair of poolAnchors(table, pidx, config)) {
+    const gap = table.address - Math.max(pair.x.end, pair.y.end);
+    if (gap < bestGap) {
+      best = pair;
+      bestGap = gap;
+    }
+  }
+  return best;
+}
+
+/** Eligible shared-axis pairs, including tied and farther alternatives for review. */
+export function* poolAnchors(
+  table: { address: number; rows: number; cols: number },
+  pidx: PoolIndex,
+  config: ScanConfig
+): Generator<PoolAnchor> {
   const { rows, cols, address: tableStart } = table;
   const { window, pairSpan } = config.pool;
   const candidates = (count: number): PrefixedAxis[] => {
@@ -159,21 +177,14 @@ export function findPoolAnchor(
   };
   const xs = candidates(cols);
   const ys = candidates(rows);
-  let best: PoolAnchor | undefined;
-  let bestGap = Infinity;
   for (const x of xs) {
     for (const y of ys) {
       if (x.address === y.address) continue;
       const span = Math.max(x.address, y.address) - Math.min(x.end, y.end);
       if (span > pairSpan) continue;
-      const gap = tableStart - Math.max(x.end, y.end);
-      if (gap < bestGap) {
-        best = { x, y };
-        bestGap = gap;
-      }
+      yield { x, y };
     }
   }
-  return best;
 }
 
 /**

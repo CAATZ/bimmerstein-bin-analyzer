@@ -56,7 +56,7 @@ describe('scanPrefixedAxes', () => {
   });
 });
 
-import { buildPoolIndex, findPoolAnchor, isPoolActive, poolAdjacentTables, type PrefixedAxis } from '../src/pool.js';
+import { buildPoolIndex, findPoolAnchor, poolAnchors, isPoolActive, poolAdjacentTables, type PrefixedAxis } from '../src/pool.js';
 
 describe('poolAdjacentTables', () => {
   const u8 = { width: 1, signed: false, endianness: 'big' } as const;
@@ -117,6 +117,18 @@ describe('findPoolAnchor', () => {
     address, count, format: u8, end: address + count, maximal,
   });
   const table = { address: 1000, rows: 6, cols: 8 };
+
+  it('exposes tied and farther eligible pairs for review without changing the selected pair', () => {
+    const pool = [pax(500, 8), pax(510, 6), pax(680, 6), pax(690, 6), pax(700, 8),
+      pax(750, 6, false), pax(1000, 6), pax(100, 6)];
+    const index = buildPoolIndex(pool);
+    const choices = [...poolAnchors(table, index, DEFAULT_SCAN_CONFIG)];
+    expect(choices.map(p => [p.x.address, p.y.address])).toEqual([[700, 690], [700, 680], [500, 510]]);
+    expect(findPoolAnchor(table, index, DEFAULT_SCAN_CONFIG)).toEqual(choices[0]);
+    expect([...poolAnchors({ ...table, address: 4000 }, index, DEFAULT_SCAN_CONFIG)]).toEqual([]);
+    const square = [...poolAnchors({ ...table, rows: 8 }, buildPoolIndex([pax(700, 8), pax(709, 8)]), DEFAULT_SCAN_CONFIG)];
+    expect(square.map(p => [p.x.address, p.y.address])).toEqual([[709, 700], [700, 709]]);
+  });
 
   it('binds the nearest preceding maximal pair with counts (cols, rows)', () => {
     const pool = [pax(500, 8), pax(510, 6), pax(700, 8), pax(709, 6)];

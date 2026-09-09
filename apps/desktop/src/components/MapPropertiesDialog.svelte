@@ -2,9 +2,11 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
   import type { AxisDef, AxisLibEntry, MapDef, Scaling } from '@binanalyzer/core';
+  import { readAxisValues } from '@binanalyzer/core';
+  import { buildPoolIndex, classifyRegions, DEFAULT_SCAN_CONFIG, poolAnchors, scanPrefixedAxes, type PoolAnchor, type PrefixedAxis } from '@binanalyzer/engine';
   import * as actions from '../store/actions.js';
-  import { axisLibrary, maps } from '../store/stores.js';
-  import { axisIdentityChanged, detachedAxis, slotCount, stampAxis } from '../lib/axislib.js';
+  import { axisLibrary, maps, workingBytes } from '../store/stores.js';
+  import { axisIdentityChanged, axisIdentityKey, detachedAxis, slotCount, stampAxis } from '../lib/axislib.js';
   import AxisPickerDialog from './AxisPickerDialog.svelte';
 
   interface Props {
@@ -35,6 +37,10 @@
   const SLOTS: Array<'x' | 'y'> = ['x', 'y'];
 
   let picking: 'x' | 'y' | null = $state(null);
+  let reviewing = $state(false);
+  let pairs: PoolAnchor[] = $state([]);
+  let chosenPair = $state('');
+  const candidatePair = $derived(chosenPair === '' ? undefined : pairs[Number(chosenPair)]);
   let editingSlot: 'x' | 'y' | null = $state(null);
   let axAddress = $state('');
   let axCount = $state('');
@@ -48,6 +54,39 @@
   let axDigits = $state('0');
 
   const slotAxis = (slot: 'x' | 'y'): AxisDef | undefined => (slot === 'x' ? live.xAxis : live.yAxis);
+
+  const poolAxis = (p: PrefixedAxis): AxisDef => ({ kind: 'referenced', address: p.address, count: p.count, format: p.format });
+  const pairAxisLabel = (p: PrefixedAxis): string =>
+    `0x${p.address.toString(16).toUpperCase()} (${p.format.width * 8}-bit ${p.format.endianness === 'little' ? 'LE' : 'BE'})`;
+  const rawValues = (axis: AxisDef | undefined): string =>
+    axis && $workingBytes ? readAxisValues($workingBytes, axis).join(', ') : '(none)';
+
+  function reviewAxes(): void {
+    if (!$workingBytes) return;
+    const cfg = DEFAULT_SCAN_CONFIG;
+    const pool = scanPrefixedAxes($workingBytes, classifyRegions($workingBytes, cfg), cfg);
+    pairs = [...poolAnchors({ address: live.address, rows: slotCount(live, 'y'), cols: slotCount(live, 'x') }, buildPoolIndex(pool), cfg)]
+      .sort((a, b) => Math.max(b.x.end, b.y.end) - Math.max(a.x.end, a.y.end));
+    chosenPair = '';
+    reviewing = true;
+  }
+
+  function applyPair(): void {
+    if (!candidatePair) return;
+    const preserve = (p: PrefixedAxis, previous: AxisDef | undefined): AxisDef => {
+      const next = poolAxis(p);
+      return previous && axisIdentityKey(previous) === axisIdentityKey(next) ? previous : next;
+    };
+    const r = actions.setMapAxes(live.id, {
+      xAxis: preserve(candidatePair.x, live.xAxis),
+      yAxis: preserve(candidatePair.y, live.yAxis),
+    });
+    if (!r.ok) actions.pushToast('error', r.error);
+    else {
+      reviewing = false;
+      actions.pushToast('info', 'Axis pair applied; undo restores both axes');
+    }
+  }
 
   function describeAxis(ax: AxisDef | undefined): string {
     if (!ax) return '(none)';
@@ -236,6 +275,39 @@
         {/if}
       </fieldset>
     {/each}
+    {#if live.rows > 1 && live.cols > 1 && live.states === undefined}
+      <button onclick={reviewAxes}>Review detected axes…</button>
+      {#if reviewing}
+        <fieldset>
+          <legend>Detected axis pairs ({pairs.length})</legend>
+          <p class="axdesc">Nearby axes can share the same cell counts. Compare their raw breakpoints before applying. X/Y refer to the definition, before the view's Swap X/Y.</p>
+          <p class="axdesc">Current X: {describeAxis(live.xAxis)}</p>
+          <p class="axvalues" aria-label="Current X values">{rawValues(live.xAxis)}</p>
+          <p class="axdesc">Current Y: {describeAxis(live.yAxis)}</p>
+          <p class="axvalues" aria-label="Current Y values">{rawValues(live.yAxis)}</p>
+          {#if pairs.length === 0}
+            <p class="axdesc">No nearby count-prefixed axis pairs fit this table. Use a definition or the axis library.</p>
+          {:else}
+            <label>Detected axis pair
+              <select bind:value={chosenPair}>
+                <option value="">Choose a pair to preview</option>
+                {#each pairs as pair, i}
+                  <option value={String(i)}>X {pairAxisLabel(pair.x)} · Y {pairAxisLabel(pair.y)}</option>
+                {/each}
+              </select>
+            </label>
+            {#if candidatePair}
+              <p class="axdesc">Candidate X ({candidatePair.x.count} cells)</p>
+              <p class="axvalues" aria-label="Candidate X values">{rawValues(poolAxis(candidatePair.x))}</p>
+              <p class="axdesc">Candidate Y ({candidatePair.y.count} cells)</p>
+              <p class="axvalues" aria-label="Candidate Y values">{rawValues(poolAxis(candidatePair.y))}</p>
+            {/if}
+            <p class="axdesc">Apply updates both axes immediately without changing BIN values. Unchanged axes keep their names and scaling.</p>
+            <button disabled={!candidatePair} onclick={applyPair}>Apply axis pair</button>
+          {/if}
+        </fieldset>
+      {/if}
+    {/if}
     <div class="row">
       <button onclick={onclose}>Cancel</button>
       <button onclick={save}>Save</button>
@@ -267,6 +339,9 @@
     border-radius: 8px;
     padding: 16px;
     width: 460px;
+    max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -303,6 +378,8 @@
     font-size: 12px;
     margin: 0;
   }
+  .axvalues { font-size: 12px; margin: 0; overflow-wrap: anywhere; }
+  select { min-width: 0; max-width: 100%; }
   .row.wrap {
     flex-wrap: wrap;
     justify-content: flex-start;

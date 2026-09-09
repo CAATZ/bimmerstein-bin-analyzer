@@ -10,5 +10,6 @@ describe('structural-detector config defaults', () => {
     expect(p.structTileFrameMin).toBe(0.75);
     expect(p.structTileMinRun).toBe(3);
     expect(p.structTilePlateauStrictMin).toBe(4);
+    expect(p.trendResidualFloor).toBe(1);
   });
 });
