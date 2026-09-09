@@ -1,11 +1,13 @@
 import { get } from 'svelte/store';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createBinImage, readGrid } from '@binanalyzer/core';
+import { createBinImage, readAxisValues, readGrid } from '@binanalyzer/core';
 import type { MapDef, Project } from '@binanalyzer/core';
+import { saToFo } from '@binanalyzer/engine';
+import { identifyBin } from '@binanalyzer/families';
 import { exportRomRaiderXml, importRomRaiderXml, serializeProject } from '@binanalyzer/formats';
 import { ms41TuneImage } from './ms41-image.js';
 import * as a from '../src/store/actions.js';
-import { addressFrame, bin, binPath, checksumReport, editJournal, maps, potentialMaps, toasts, workingBytes } from '../src/store/stores.js';
+import { addressFrame, bin, binPath, checksumReport, editJournal, framePromptAnswered, maps, potentialMaps, toasts, workingBytes } from '../src/store/stores.js';
 import { basename, dirname, joinPath, stemOf, type PlatformHost } from '../src/platform/host.js';
 import {
   exportFlow, importDef, loadBinFromPath, openBinFlow, openProjectFlow, saveProjectFlow,
@@ -566,6 +568,126 @@ describe('importDef on a full read (2026-07-14 def-frame spec)', () => {
 });
 
 describe('RomRaider export inverts the frame (fo → SA)', () => {
+  function fullImage(): { full: Uint8Array; partial: Uint8Array } {
+    const partial = ms41TuneImage();
+    partial.set(new TextEncoder().encode('120111100900'), 0xe);
+    const full = new Uint8Array(0x40000);
+    partial.forEach((v, sa) => { full[saToFo(sa)] = v; });
+    expect(identifyBin(full)?.familyId).toBe('ms41');
+    return { full, partial };
+  }
+
+  it.each([0x670, 0x4020])('exports a freshly promoted map at SA %i with both axes and unchanged values', async (sa) => {
+    const { full, partial } = fullImage();
+    const host = new FakeHost();
+    a.setBin(createBinImage(full, 'full.bin'));
+    const detected: MapDef = {
+      ...confirmedMap('fresh', saToFo(sa)), provenance: 'auto', detector: 'family', confidence: 1,
+      format: { width: 2, signed: true, endianness: 'little' },
+      scaling: { factor: 0.25, offset: -4, units: 'test', digits: 2 },
+      xAxis: { kind: 'referenced', address: saToFo(0x4400), count: 4,
+        format: { width: 2, signed: false, endianness: 'little' } },
+      yAxis: { kind: 'referenced', address: saToFo(0x200), count: 2,
+        format: { width: 1, signed: false, endianness: 'little' } },
+    };
+    a.applyScanResult({ potentialMaps: [detected], regions: [] });
+    expect(a.promoteMap(detected.id)).toBe(true);
+    const before = structuredClone(get(maps));
+    host.saveAnswers = ['out.xml'];
+    await exportFlow(host, 'romraider');
+    const exported = importRomRaiderXml(host.files.get('out.xml') as string);
+    expect(exported.ok).toBe(true);
+    if (!exported.ok) return;
+    expect(exported.value.maps[0]!.address).toBe(sa);
+    expect(exported.value.maps[0]!.xAxis!.address).toBe(0x4400);
+    expect(exported.value.maps[0]!.yAxis!.address).toBe(0x200);
+    expect(get(maps)).toEqual(before);
+    expect(get(addressFrame)).toBe('none');
+    expect(get(framePromptAnswered)).toBe(false);
+    expect(host.confirmMessages).toHaveLength(0);
+    expect(get(workingBytes)).toEqual(full);
+    a.setBin(createBinImage(partial, 'partial.bin'));
+    await importDef(host, host.files.get('out.xml') as string, undefined);
+    expect(get(maps)).toHaveLength(1);
+    const back = get(maps)[0]!;
+    expect(back.format).toEqual(detected.format);
+    expect(back.scaling).toEqual(detected.scaling);
+    expect(readGrid(partial, back)).toEqual(readGrid(full, detected));
+    expect(readAxisValues(partial, back.xAxis!)).toEqual(readAxisValues(full, detected.xAxis!));
+    expect(readAxisValues(partial, back.yAxis!)).toEqual(readAxisValues(full, detected.yAxis!));
+  });
+
+  it('keeps explicit declines and restored unframed imported projects in their original frame', async () => {
+    const { full } = fullImage();
+    const image = createBinImage(full, 'full.bin');
+    const host = new FakeHost();
+    a.setBin(image);
+    host.confirmAnswers = [false];
+    await importDef(host, MINI_DEF, undefined);
+    expect(get(framePromptAnswered)).toBe(true);
+    for (const restore of [false, true]) {
+      if (restore) a.applyProject(image, {
+        schemaVersion: 3, bin: { name: image.name, sha256: image.sha256, size: image.size },
+        valueDefaults: { width: 1, signed: false, endianness: 'little' }, maps: get(maps), potentialMaps: [],
+      });
+      host.saveAnswers = ['out.xml'];
+      await exportFlow(host, 'romraider');
+      expect(host.files.get('out.xml')).toContain('storageaddress="670"');
+    }
+    expect(get(framePromptAnswered)).toBe(false);
+    expect(host.confirmMessages).toHaveLength(1);
+  });
+
+  it('keeps an explicit decline even when only promoted maps remain', async () => {
+    const host = new FakeHost();
+    a.setBin(createBinImage(fullImage().full, 'full.bin'));
+    host.confirmAnswers = [false];
+    await importDef(host, MINI_DEF, undefined);
+    maps.set([confirmedMap('raw', 0x14670)]);
+    host.saveAnswers = ['out.xml'];
+    await exportFlow(host, 'romraider');
+    expect(host.files.get('out.xml')).toContain('storageaddress="14670"');
+  });
+
+  it('does not infer MS41 framing from a full-size buffer carrying only an ID string', async () => {
+    const full = new Uint8Array(0x40000);
+    full.set(new TextEncoder().encode('120111100900'), 0x1400e);
+    expect(identifyBin(full)).toBeUndefined();
+    const host = new FakeHost();
+    a.setBin(createBinImage(full, 'other.bin'));
+    maps.set([confirmedMap('raw', 0x14670)]);
+    host.saveAnswers = ['out.xml'];
+    await exportFlow(host, 'romraider');
+    expect(host.files.get('out.xml')).toContain('storageaddress="14670"');
+  });
+
+  it('keeps an identified calibration partial in storage-address space', async () => {
+    const { partial } = fullImage();
+    expect(identifyBin(partial)?.familyId).toBe('ms41');
+    const host = new FakeHost();
+    a.setBin(createBinImage(partial, 'partial.bin'));
+    maps.set([confirmedMap('partial', 0x670)]);
+    host.saveAnswers = ['out.xml'];
+    await exportFlow(host, 'romraider');
+    expect(host.files.get('out.xml')).toContain('storageaddress="670"');
+  });
+
+  it('retains map and axis range guards when the export frame is inferred', async () => {
+    const host = new FakeHost();
+    a.setBin(createBinImage(fullImage().full, 'full.bin'));
+    maps.set([
+      confirmedMap('cal', 0x14670), confirmedMap('code', 0x20), confirmedMap('seam', 0x17ffe),
+      { ...confirmedMap('axis', 0x14700), xAxis: { kind: 'referenced', address: 0x12000, count: 4,
+        format: { width: 1, signed: false, endianness: 'little' } } },
+    ]);
+    host.saveAnswers = ['out.xml'];
+    await exportFlow(host, 'romraider');
+    const back = importRomRaiderXml(host.files.get('out.xml') as string);
+    expect(back.ok).toBe(true);
+    if (back.ok) expect(back.value.maps.map((m) => [m.name, m.address])).toEqual([['M cal', 0x670]]);
+    expect(get(toasts).some((t) => t.text.startsWith('3 map(s) have no cal storageaddress'))).toBe(true);
+  });
+
   it('round-trips: imported-with-frame maps export with the source SAs', async () => {
     const host = new FakeHost();
     a.setBin(createBinImage(new Uint8Array(0x18000), 'full.bin'));

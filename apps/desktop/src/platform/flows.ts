@@ -360,8 +360,13 @@ export async function exportFlow(host: PlatformHost, kind: ExportKind): Promise<
   // is what populates the confidence column.
   const isList = kind === 'csv' || kind === 'json';
   let source = isList ? [...confirmed, ...get(potentialMaps)] : confirmed;
-  if (kind === 'romraider' && get(addressFrame) === 'ms41full') {
-    // Frame active: the store holds file offsets; a RomRaider def carries SAs.
+  // Unframed imported projects may carry a raw-address choice from an earlier session.
+  if (kind === 'romraider' && (
+    get(addressFrame) === 'ms41full' ||
+    (!get(framePromptAnswered) && !confirmed.some((m) => m.provenance === 'imported') &&
+      isMs41FullRead(image.size) && identifyBin(image.bytes)?.familyId === 'ms41')
+  )) {
+    // The store holds file offsets; a RomRaider def carries calibration SAs.
     // Invert exactly (unframeDefMaps is frameDefMaps' inverse); maps outside
     // the mapped cal window (e.g. promoted from code regions) have no SA
     // representation — leave them out loudly, never write a garbage address.
