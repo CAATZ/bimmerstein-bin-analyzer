@@ -10,9 +10,9 @@ export interface BinRead {
 }
 
 /**
- * The ONLY module in this server that touches the filesystem. Bins are read
- * ONCE, read-only, and never reopened — v1's read-only invariant holds by
- * construction. writeText is reachable only through the write guard.
+ * File access for headless bins, definitions and guarded text exports.
+ * There is no firmware-write operation. Connection handshake files are
+ * managed separately by the link module.
  */
 export interface FileIo {
   readBin(path: string): Result<BinRead>;

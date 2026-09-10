@@ -19,7 +19,7 @@ import { isParamShaped, isSwitch, type AxisDef, type MapDef, type Result } from 
  * newline; JSON = the same records as an object array, null for empty cells.
  * Non-affine scalings emit their neutral factor/offset (raw display) — the
  * frozen header has no rawExpression column. float-ness is not representable
- * either (v1 never produces float maps).
+ * either; this format has no float-storage flag.
  */
 export interface MapListRecord {
   name: string;

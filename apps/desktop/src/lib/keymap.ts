@@ -1,12 +1,10 @@
 /**
  * THE keyboard dispatcher (one module, no per-component global keydowns).
- * The v1 map is FROZEN in spec §7:
+ * Global shortcuts:
  *   M/W columns ± · Ctrl+←/→ origin · K selection→map / promote ·
  *   Ctrl+B optimize value range · F/Shift+F next/prev potential ·
  *   T/Shift+T cycle view · P preview · Ctrl+Z/Ctrl+Shift+Z undo/redo
- *   (undo added 2026-08-01 with the undo stack; spec §7 amended in the same task).
  *   '+'/'-' step the selection by one raw LSB · F11 show original values
- *   (v2 Part B1 claimed the keys v1 reserved; spec 2026-08-09-map-value-editing).
  * Pure: KeyInput in, action name out; the App shell maps names to store actions.
  */
 

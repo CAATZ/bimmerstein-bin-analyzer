@@ -488,7 +488,7 @@ export function exportRomRaiderXml(romId: string, maps: MapDef[], options: RomRa
   ];
   for (const map of maps) {
     if (map.orientation !== 'row-major') {
-      return { ok: false, error: `map "${map.name}": col-major export is not supported in v1` };
+      return { ok: false, error: `map "${map.name}": col-major export is not supported` };
     }
     if (isSwitch(map)) {
       const states = map.states ?? []; // narrowing only — isSwitch already guarantees states is defined

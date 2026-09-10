@@ -49,7 +49,7 @@ but a plausible shape does not establish a table's function or correct scaling.
 Detection does not guarantee every map, scalar, switch or runtime-dependent
 structure has been found. A high confidence score is not a tuning approval.
 
-This is an offline Windows application. It does not connect to, read, write or
+File analysis and editing run locally on Windows. The app does not connect to, read, write or
 flash an ECU. There is no Android version. Use your separate flashing tool for
 ECU transfers after independently reviewing the output.
 
@@ -469,13 +469,16 @@ tables in that ECU can be found.
 ### Optional co-pilot connection
 
 **Share session with co-pilot** is off by default. Enabling it permits a
-configured external tool to inspect the session and submit proposals. The
+configured AI client to inspect the session and submit proposals. The
 status bar shows whether it is waiting, connected or reconnecting. Disable
 sharing when the session should no longer be exposed.
 
-Review proposed changes in the app before accepting them. Check their target
-map, addresses and before/after values. Accepting a proposal applies the chosen
-change to the working session; saving to disk remains a separate operation.
+Single map or axis-definition changes can apply directly with undo. Bulk
+definition changes and every value edit require review. Check the target map,
+addresses and before/after values before accepting proposal rows. Accepted value
+edits change the working session; only you can save the BIN. The co-pilot can
+request the app's Save Project dialog, which saves definitions rather than bytes.
+Shared data may be sent to your AI client's provider.
 Connection setup and the command reference are in the repository's
 **apps/mcp/README.md**. No external connection is required for ordinary offline use.
 

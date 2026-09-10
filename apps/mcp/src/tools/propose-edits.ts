@@ -29,7 +29,7 @@ function checkRow(raw: unknown, index: number): { ok: true; target: string } | {
   if (!isInt(r['expectedRaw'])) {
     return {
       ok: false,
-      error: `${at} needs an integer "expectedRaw" — the raw byte you based this edit on. Read the cell first (read_map with values:"raw" or "both"); proposing a byte you have not read is proposing blind.`,
+      error: `${at} needs an integer "expectedRaw" — the raw value you based this edit on. Read the cell first (read_map with values:"raw" or "both"); proposing a value you have not read is proposing blind.`,
     };
   }
   if (r['raw'] !== undefined && typeof r['raw'] !== 'boolean') {
@@ -51,7 +51,7 @@ function checkRow(raw: unknown, index: number): { ok: true; target: string } | {
 export const proposeMapEditsTool: ToolSpec = {
   name: 'propose_map_edits',
   description:
-    'Propose byte-level VALUE changes for the user to review: map cells and referenced-axis breakpoints. EVERY value edit is a proposal, however small — there is no direct-apply path, because these bytes end up in a file that gets flashed to an ECU. The user sees each row as physical and raw before/after and accepts, partially accepts or rejects. Every row needs expectedRaw (the raw byte you read first); a row whose byte moved since you read it is skipped and reported. Returns a requestId immediately; poll get_request. Accepting the batch is ONE undo step for the user. This tool cannot save a file — only the user can do that.',
+    'Propose byte-level VALUE changes for the user to review: map cells and referenced-axis breakpoints. EVERY value edit is a proposal, however small — there is no direct-apply path, because these bytes end up in a file that gets flashed to an ECU. The user sees each row as physical and raw before/after and accepts, partially accepts or rejects. Every row needs expectedRaw (the raw value you read first); a row whose value changed since you read it is skipped and reported. Returns a requestId immediately; poll get_request. Accepting the batch is ONE undo step for the user. This tool cannot save a file — only the user can do that.',
   inputSchema: {
     type: 'object',
     additionalProperties: false,
