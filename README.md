@@ -34,10 +34,10 @@ verification, or export definitions for another editor.
 
 ![BimmerStein Bin Analyzer workspace with synthetic demonstration data](manual/images/workspace.png)
 
-**Current source: 0.2.18. Latest published installers: [v0.2.17](https://github.com/CAATZ/bimmerstein-bin-analyzer/releases/tag/v0.2.17).**
-The 0.2.18 source adds a resizable map sidebar, Close Bin, confirmation before
-replacing an open session, labeled 3D surfaces and a rotatable preview. The new
-manual describes 0.2.18; these controls are not in the older installer.
+**Latest release: [v0.2.18](https://github.com/CAATZ/bimmerstein-bin-analyzer/releases/tag/v0.2.18).**
+This release adds a resizable map sidebar, Close Bin, confirmation before
+replacing an open session, labeled 3D surfaces and a rotatable preview.
+The complete user manual is included below and with the release downloads.
 
 ## What you can do
 
