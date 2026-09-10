@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { ms41TuneImage } from './ms41-image.js';
 import { FakeHost } from './flows.test.js';
 import * as a from '../src/store/actions.js';
-import { bin, toasts, workingBytes } from '../src/store/stores.js';
-import { confirmCloseFlow, loadBinFromPath, openProjectFlow, saveBinFlow, saveProjectFlow } from '../src/platform/flows.js';
+import { bin, maps, toasts, workingBytes } from '../src/store/stores.js';
+import { closeBinFlow, confirmCloseFlow, loadBinFromPath, openProjectFlow, saveBinFlow, saveProjectFlow } from '../src/platform/flows.js';
 
 const A = 'C:\\bins\\a.bin';
 const B = 'C:\\bins\\b.bin';
@@ -33,13 +33,17 @@ describe('discard guard', () => {
     expect(host.confirmMessages).toHaveLength(0);
   });
 
-  it('a clean session never asks', async () => {
+  it('a clean session asks before replacement, and cancel keeps its maps', async () => {
     const host = new FakeHost();
     host.files.set(A, ms41TuneImage());
     host.files.set(B, ms41TuneImage());
     await loadBinFromPath(host, A);
-    await loadBinFromPath(host, B);
-    expect(host.confirmMessages).toHaveLength(0);
+    a.addImportedMaps([byteMap(0x1010)]);
+    expect(await loadBinFromPath(host, B)).toBe(false);
+    expect(get(bin)?.name).toBe('a.bin');
+    expect(get(maps)).toHaveLength(1);
+    expect(host.confirmMessages).toHaveLength(1);
+    expect(host.confirmMessages[0]).toMatch(/Save Project/);
   });
 
   it('a dirty session asks, and declining keeps the current bin AND its edits', async () => {
@@ -61,24 +65,27 @@ describe('discard guard', () => {
     expect(get(bin)?.name).toBe('b.bin');
   });
 
-  it('does NOT ask after saving — the buffer matches the file', async () => {
+  it('still asks to replace after saving, without claiming unsaved byte changes', async () => {
     const host = new FakeHost();
     await dirtySession(host);
     host.saveAnswers = ['C:\\bins\\out.bin'];
     expect(await saveBinFlow(host, { promptAlways: true })).toBe(true);
+    host.confirmAnswers = [true];
     expect(await loadBinFromPath(host, B)).toBe(true);
-    expect(host.confirmMessages).toHaveLength(0);
+    expect(host.confirmMessages).toHaveLength(1);
+    expect(host.confirmMessages[0]).not.toMatch(/unsaved byte changes/);
   });
 
-  it('does NOT ask after undoing back to the saved state', async () => {
+  it('still asks to replace after undoing back to the saved state', async () => {
     const host = new FakeHost();
     await dirtySession(host);
     host.saveAnswers = ['C:\\bins\\out.bin'];
     await saveBinFlow(host, { promptAlways: true });
     a.editCell(byteMap(0x1011), 0, 0, 0x77);
     expect(a.undo()).toBe(true);
+    host.confirmAnswers = [true];
     expect(await loadBinFromPath(host, B)).toBe(true);
-    expect(host.confirmMessages).toHaveLength(0);
+    expect(host.confirmMessages).toHaveLength(1);
   });
 
   it('guards Open Project too', async () => {
@@ -88,6 +95,44 @@ describe('discard guard', () => {
     await openProjectFlow(host);
     expect(host.confirmMessages[0]).toMatch(/unsaved/i);
     expect(get(bin)?.name).toBe('a.bin');
+  });
+});
+
+describe('Close Bin', () => {
+  it('cancel retains edits; accepting clears the session and leaves files untouched', async () => {
+    const host = new FakeHost();
+    await dirtySession(host);
+    const edited = Uint8Array.from(get(workingBytes)!);
+    expect(await closeBinFlow(host)).toBe(false);
+    expect(get(workingBytes)).toEqual(edited);
+    host.confirmAnswers = [true];
+    expect(await closeBinFlow(host)).toBe(true);
+    expect(get(bin)).toBeNull();
+    expect(get(workingBytes)).toBeNull();
+    expect(get(maps)).toEqual([]);
+    expect(host.files.get(A)).toEqual(ms41TuneImage());
+  });
+
+  it('a broken confirmation preserves the open bin', async () => {
+    const host = new FakeHost();
+    await dirtySession(host);
+    host.confirm = async () => { throw new Error('dialog unavailable'); };
+    expect(await closeBinFlow(host)).toBe(false);
+    expect(get(bin)?.name).toBe('a.bin');
+  });
+
+  it('a slow replacement cannot reopen a bin after Close Bin', async () => {
+    const host = new FakeHost();
+    await dirtySession(host);
+    host.confirmAnswers = [true, true];
+    let finishRead!: (bytes: Uint8Array) => void;
+    host.readBinary = () => new Promise((resolve) => { finishRead = resolve; });
+    const opening = loadBinFromPath(host, B);
+    await Promise.resolve();
+    await closeBinFlow(host);
+    finishRead(ms41TuneImage());
+    expect(await opening).toBe(false);
+    expect(get(bin)).toBeNull();
   });
 });
 

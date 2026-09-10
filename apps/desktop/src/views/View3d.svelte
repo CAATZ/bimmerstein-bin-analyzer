@@ -1,10 +1,11 @@
 <!-- apps/desktop/src/views/View3d.svelte -->
 <script lang="ts">
   import { maps, potentialMaps, selection, transposeMaps, viewParams, workingBytes } from '../store/stores.js';
-  import { gridFromMap, gridFromSelection, type SurfaceGrid } from '../lib/griddata.js';
+  import { surfaceFromMap, gridFromSelection, type SurfaceGrid } from '../lib/griddata.js';
   import { SurfaceRenderer } from './surface.js';
 
   let canvas: HTMLCanvasElement;
+  let overlay: HTMLDivElement;
   let w = $state(0);
   let h = $state(0);
   let renderer: SurfaceRenderer | null = null;
@@ -15,13 +16,13 @@
     if (!wb || !sel) return null;
     if (sel.mapId !== undefined) {
       const m = [...$maps, ...$potentialMaps].find((x) => x.id === sel.mapId);
-      if (m) return gridFromMap(wb, m, $transposeMaps);
+      if (m) return surfaceFromMap(wb, m, $transposeMaps);
     }
     return gridFromSelection(wb, sel.start, sel.end, sel.cols ?? $viewParams.columns, $viewParams.format);
   });
 
   $effect(() => {
-    renderer = new SurfaceRenderer(canvas, true);
+    renderer = new SurfaceRenderer(canvas, overlay);
     return () => {
       renderer?.dispose();
       renderer = null;
@@ -36,11 +37,13 @@
 </script>
 
 <div class="wrap3d" bind:clientWidth={w} bind:clientHeight={h}>
-  <canvas bind:this={canvas}></canvas>
+  <canvas bind:this={canvas} aria-label="3D map surface. Drag to rotate; scroll to zoom."></canvas>
+  <div class="surface-overlay" bind:this={overlay}></div>
+  <button class="surface-reset" onclick={() => renderer?.reset()} title="Restore the initial camera angle and zoom">Reset view</button>
   {#if grid === null}
     <div class="hint">Select a range or map (needs ≥ 2 rows × 2 cols at the current framing).</div>
   {:else if grid.rows < 2 || grid.cols < 2}
-    <div class="hint">1D curve / area too small — no 3D surface. Switch to the Map view (F) to see the curve chart.</div>
+    <div class="hint">1D curve / area too small — no 3D surface. Switch to map view to see the curve chart.</div>
   {/if}
 </div>
 
@@ -48,6 +51,7 @@
   .wrap3d {
     position: absolute;
     inset: 0;
+    overflow: hidden;
   }
   canvas {
     position: absolute;

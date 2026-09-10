@@ -1,5 +1,5 @@
-import { formatPhysical, readAxisValues, readGrid, readValue } from '@binanalyzer/core';
-import type { AxisDef, MapDef, ValueFormat } from '@binanalyzer/core';
+import { formatPhysical, readAxisValues, readGrid, readValue, toPhysical } from '@binanalyzer/core';
+import type { AxisDef, MapDef, Scaling, ValueFormat } from '@binanalyzer/core';
 
 /**
  * Selection/map → value grids for the 2D/3D/Map/preview views. ALL byte
@@ -13,6 +13,10 @@ export interface SurfaceGrid {
   values: number[][];
   min: number;
   max: number;
+  xAxis?: { label: string; values: string[] };
+  yAxis?: { label: string; values: string[] };
+  valueLabel?: string;
+  digits?: number;
 }
 
 function withMinMax(rows: number, cols: number, values: number[][]): SurfaceGrid {
@@ -57,6 +61,30 @@ export function gridFromMap(bytes: Uint8Array, map: MapDef, transposed = false):
     return withMinMax(map.cols, map.rows, Array.from({ length: map.cols }, (_, c) => values.map((row) => row[c]!)));
   }
   return withMinMax(map.rows, map.cols, values);
+}
+
+/** Physical values are for plotting only; Map view still consumes the raw grid. */
+export function surfaceFromMap(bytes: Uint8Array, map: MapDef, transposed = false): SurfaceGrid {
+  const swap = transposed && map.rows > 1 && map.cols > 1;
+  const raw = gridFromMap(bytes, map, swap);
+  const grid = withMinMax(raw.rows, raw.cols, raw.values.map((row) => row.map((v) => toPhysical(v, map.scaling))));
+  const label = (name: string, scaling?: Scaling): string => scaling?.rawExpression !== undefined
+    ? `${name} (raw; unsupported conversion)`
+    : `${name} (${scaling?.units || 'raw'})`;
+  const axis = (which: 'x' | 'y', count: number): NonNullable<SurfaceGrid['xAxis']> => {
+    const def = map[sourceAxis(which, swap, map.orientation) === 'x' ? 'xAxis' : 'yAxis'];
+    if (def !== undefined && def.kind !== 'index') {
+      try {
+        const values = readAxisValues(bytes, def);
+        if (values.length === count && values.every(Number.isFinite)) {
+          return { label: label(def.name || which.toUpperCase(), def.scaling), values: axisLabels(bytes, def, count) };
+        }
+      } catch { /* Unreadable axes use the same index fallback as the table. */ }
+    }
+    return { label: `${which.toUpperCase()} (index)`, values: Array.from({ length: count }, (_, i) => String(i)) };
+  };
+  return { ...grid, xAxis: axis('x', grid.cols), yAxis: axis('y', grid.rows),
+    valueLabel: label(map.name || 'Value', map.scaling), digits: map.scaling.rawExpression === undefined ? map.scaling.digits : 0 };
 }
 
 /** Transposition is its own inverse; selections stay in the map's original coordinates. */
