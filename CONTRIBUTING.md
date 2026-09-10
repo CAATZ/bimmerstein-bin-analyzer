@@ -9,7 +9,7 @@ detection quality.
 ## Getting set up
 
 ```sh
-corepack enable          # Node >= 22 LTS, pnpm >= 9
+corepack enable          # Node >= 22; use package.json's pinned pnpm version
 pnpm install
 pnpm test                # all package tests (Vitest)
 pnpm typecheck
@@ -19,22 +19,19 @@ pnpm eval accept         # real-bin 1D-curve gate (skips without local firmware)
 pnpm dev                 # desktop app (first run compiles Rust — minutes)
 ```
 
-`pnpm eval accept` covers the two things the main `pnpm eval` table cannot:
-
-- **Full reads, 1D-curve class.** The `ms41-*` rows score against 2D-grid truth;
-  curve truth is a separate, mutually exclusive class.
-- **24 KB cal partials, both classes.** No partial carries a committed
-  ground truth, so `pnpm eval` never scores one at all — and a partial has no
-  code, so it exercises the pool/structural/partial-curve tiers that a full
-  read never reaches.
-
-It reads firmware from `fixtures/ms41/` (full reads) and
-`fixtures/ms41/partial/`, both gitignored, so it skips and exits 0 for anyone
-without them. If you have them and you touch detection, this is the check that
-catches a regression those tiers would otherwise hide.
+`pnpm eval` scores discovered BIN/ground-truth pairs, including the available
+full and partial reference sets. `pnpm eval holdout` checks separate synthetic
+seeds. `pnpm eval accept` adds dedicated real-image curve, partial and exact-layout
+checks; see [fixtures/README.md](fixtures/README.md) for the inputs each requires.
+Real firmware stays local and missing files are reported as skips. A CI pass
+without those files does not establish coverage of an untested ECU or revision.
 
 Building an installer needs the Rust toolchain and the
 [Tauri 2 prerequisites](https://tauri.app/start/prerequisites/); see the README.
+
+For a new ECU family, start with [Developing ECU families](FAMILY_DEVELOPMENT.md).
+It includes executable checksum and detection examples, the extension contracts,
+registration, evaluation and build instructions.
 
 ## Package boundaries
 
@@ -45,8 +42,9 @@ Dependencies flow one way. A violation is a bug, not a style preference.
 | `packages/core` | Types, codecs, scaling, validation | nothing |
 | `packages/engine` | Detection pipeline — **pure**: no fs, no DOM, no Node APIs | core |
 | `packages/formats` | RomRaider XML, XDF, CSV/JSON, project file — **pure** | core |
+| `packages/families` | Image identity and checksum verification/correction — **pure** | core |
 | `packages/appkit` | Cross-surface adapter helpers — **pure** | core, engine, formats |
-| `packages/eval` | Quality harness, Node CLI | core, engine, formats |
+| `packages/eval` | Quality harness, Node CLI | core, engine, formats, families |
 | `apps/desktop` | Tauri 2 + Svelte 5 UI | everything |
 | `apps/mcp` | Stdio server | everything |
 
@@ -70,7 +68,7 @@ was measured to justify its value. A magic number inline in a detection module
 is a defect.
 
 **Detection changes require `pnpm eval`.** Report the score movement in the
-commit message. Both gates must pass.
+commit message. All applicable quality gates must pass.
 
 **Never relax a gate to make a change fit.** Thresholds are ratchets: they move
 up when quality improves and never down. Special-casing a fixture, loosening an
@@ -86,8 +84,12 @@ Never hand-edit one.
 Ground truth derived from third-party definition files must contain structure
 only — see [fixtures/README.md](fixtures/README.md).
 
-**The app is read-only.** Nothing may modify bin bytes. Editing and checksum
-support are a deliberate future scope, not something to add incrementally.
+**Edits use the existing journal and save path.** The app supports byte editing,
+undo/redo, checksum correction and verified file saves. Preserve the original
+image, record byte changes through the shared editing owners, and let the save
+path perform supported correction and read-back verification. Family functions
+must not mutate their input buffers or perform file I/O. A checksum that cannot
+be safely corrected stays report-only; unknown coverage must remain explicit.
 
 **New runtime dependencies need justification.** The dependency surface is
 small on purpose. Build and test tooling is less restricted.
@@ -98,8 +100,7 @@ Detection code cites its evidence in two forms you will not find in this
 repository:
 
 - `spec §4.3` — sections of an internal design document.
-- `docs/notes/…-spike.md`, `scratch/…` — measurement records and the throwaway
-  scripts that produced them.
+- Measurement notes and temporary experiments that established a decision.
 
 These are development records, kept out of the distributed source. **They are
 provenance, not the explanation**: wherever a constant, threshold or tier
@@ -117,11 +118,15 @@ run against the committed fixtures.
 Run the whole ladder and make sure it is green:
 
 ```sh
-pnpm test && pnpm typecheck && pnpm eval && pnpm eval holdout && pnpm eval accept
+pnpm test
+pnpm typecheck
+pnpm eval
+pnpm eval holdout
+pnpm eval accept
 ```
 
-Then check `git status` — only the files your change intends to touch should
-appear.
+Stop if any command fails. Then check `git status` — only the files your change
+intends to touch should appear.
 
 ## Commit messages
 
