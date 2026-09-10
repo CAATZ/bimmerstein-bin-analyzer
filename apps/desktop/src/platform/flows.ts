@@ -8,11 +8,12 @@ import {
 import { identifyBin } from '@binanalyzer/families';
 import * as actions from '../store/actions.js';
 import { listRomIds } from '../lib/romlist.js';
-import { addressFrame, bin, binPath, editJournal, framePromptAnswered, maps, pendingPack, potentialMaps, saveTarget, workingBytes } from '../store/stores.js';
+import { addressFrame, bin, binPath, framePromptAnswered, maps, pendingPack, potentialMaps, saveTarget, workingBytes } from '../store/stores.js';
 import { classifyPack, packGateError } from '../lib/packapply.js';
 import { frameDefMaps, isMs41FullRead, unframeDefMaps } from '@binanalyzer/appkit';
 import { saveVerdict, verdictHeadline } from '../lib/savereport.js';
 import { basename, dirname, joinPath, samePath, stemOf, type FileFilter, type PlatformHost } from './host.js';
+import { cancelScan } from '../worker/controller.js';
 
 /**
  * File-flow orchestration (spec §7 data flow, §8 error handling). Pure
@@ -31,33 +32,24 @@ function errText(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
 }
 
-/**
- * Ask before throwing away byte edits that are not on disk. Returns TRUE when
- * it is safe to proceed.
- *
- * Three callers, one dirty definition: the two choke points every bin load
- * passes through — loadBinFromPath (toolbar Open Bin AND the OS file drop) and
- * openProjectFlow, so there is exactly one prompt per load, never two — plus
- * confirmCloseFlow. Only the sentence naming the loss differs.
- */
-async function confirmDiscard(host: PlatformHost, action: 'load' | 'close'): Promise<boolean> {
-  if (!actions.isDirty()) return true;
-  const n = get(editJournal).size;
-  const what =
-    action === 'load'
-      ? 'Loading another image discards them.'
-      : 'Closing the app discards them.';
+/** Project metadata needs saving independently of byte edits. */
+async function confirmDiscard(host: PlatformHost, action: 'load' | 'close-bin' | 'close'): Promise<boolean> {
+  const image = get(bin);
+  const dirty = actions.isDirty();
+  if (image === null || (action === 'close' && !dirty)) return true;
+  const what = action === 'load' ? 'Opening another file closes the current bin.'
+    : action === 'close-bin' ? 'Close the current bin and return to an empty workspace?'
+    : 'Closing the app discards the current session.';
+  const changes = dirty ? 'This bin has unsaved byte changes. Save Bin first to keep your edits.\n' : '';
   try {
     return await host.confirm(
-      `This bin has ${n} unsaved byte change(s). ${what}\n` +
-        `Save the bin first if you want to keep them. Discard and continue?`,
-      'Unsaved changes'
+      `${image.name}\n${what}\n${changes}` +
+        'Use Save Project first to keep map definitions, axes and project metadata. Continue?',
+      dirty ? 'Unsaved changes' : action === 'load' ? 'Replace open bin' : 'Close bin'
     );
   } catch {
-    // The two callers take OPPOSITE branches here, and each is the safe one for
-    // its own action. Refusing to load keeps the edits. Refusing to CLOSE would
-    // leave an app that cannot be quit because a dialog broke — worse than an
-    // edit the user can redo, and they can always close again.
+    // Preserve the window-close policy; file operations keep the session if
+    // their confirmation cannot be shown.
     return action === 'close';
   }
 }
@@ -73,6 +65,14 @@ export async function confirmCloseFlow(host: PlatformHost): Promise<boolean> {
   return await confirmDiscard(host, 'close');
 }
 
+export async function closeBinFlow(host: PlatformHost): Promise<boolean> {
+  const image = get(bin);
+  if (!(await confirmDiscard(host, 'close-bin')) || get(bin) !== image) return false;
+  cancelScan();
+  actions.resetStores();
+  return true;
+}
+
 export async function openBinFlow(host: PlatformHost): Promise<boolean> {
   const path = await host.openFile('Open ECU bin', BIN_FILTERS);
   if (path === null) return false;
@@ -80,6 +80,7 @@ export async function openBinFlow(host: PlatformHost): Promise<boolean> {
 }
 
 export async function loadBinFromPath(host: PlatformHost, path: string): Promise<boolean> {
+  const previous = get(bin);
   if (!(await confirmDiscard(host, 'load'))) return false;
   try {
     const bytes = await host.readBinary(path);
@@ -87,6 +88,8 @@ export async function loadBinFromPath(host: PlatformHost, path: string): Promise
       actions.pushToast('error', `${basename(path)} is empty`);
       return false;
     }
+    if (get(bin) !== previous) return false;
+    cancelScan();
     actions.setBin(createBinImage(bytes, basename(path)));
     actions.setBinPath(path); // AFTER setBin — setBin clears it
     actions.runChecksumVerify(); // reads the bin the setBin call just landed
@@ -253,6 +256,7 @@ export async function saveProjectFlow(host: PlatformHost): Promise<boolean> {
 }
 
 export async function openProjectFlow(host: PlatformHost): Promise<void> {
+  const previous = get(bin);
   if (!(await confirmDiscard(host, 'load'))) return;
   const projPath = await host.openFile('Open project', PROJECT_FILTERS);
   if (projPath === null) return;
@@ -305,6 +309,8 @@ export async function openProjectFlow(host: PlatformHost): Promise<void> {
       return;
     }
   }
+  if (get(bin) !== previous) return;
+  cancelScan();
   const { droppedMaps, droppedPotentials, droppedAxisEntries, clearedStamps } = actions.applyProject(image, project);
   actions.setBinPath(binPath);
   actions.runChecksumVerify(); // applyProject cleared the old verdict — recompute for this bin

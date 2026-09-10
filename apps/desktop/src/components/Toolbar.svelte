@@ -4,7 +4,7 @@
   import * as actions from '../store/actions.js';
   import { tauriHost } from '../platform/tauri.js';
   import {
-    exportFlow, exportPackFlow, importDef, openBinFlow, openPackFlow, openProjectFlow, pickDefFlow,
+    closeBinFlow, exportFlow, exportPackFlow, importDef, openBinFlow, openPackFlow, openProjectFlow, pickDefFlow,
     saveProjectFlow, type ExportKind,
   } from '../platform/flows.js';
   import { cancelScan, runScan } from '../worker/controller.js';
@@ -38,6 +38,7 @@
 
 <header class="toolbar">
   <button onclick={() => void onOpenBin()}>Open Bin</button>
+  <button onclick={() => void closeBinFlow(tauriHost)} disabled={$bin === null}>Close Bin</button>
   <button onclick={() => void onImportDef()} disabled={$bin === null}>Import Def</button>
   <button onclick={() => void openProjectFlow(tauriHost)}>Open Project</button>
   <button onclick={() => void saveProjectFlow(tauriHost)} disabled={$bin === null}>Save Project</button>

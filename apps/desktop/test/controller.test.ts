@@ -5,6 +5,8 @@ import * as actions from '../src/store/actions.js';
 import { scanStatus } from '../src/store/stores.js';
 import type { WorkerToClient } from '../src/worker/protocol.js';
 import { cancelScan, runScan } from '../src/worker/controller.js';
+import { closeBinFlow, loadBinFromPath } from '../src/platform/flows.js';
+import type { PlatformHost } from '../src/platform/host.js';
 
 /**
  * Minimal WorkerLike stand-in installed as the GLOBAL `Worker` so controller.ts's
@@ -48,6 +50,22 @@ afterEach(() => {
 });
 
 describe('runScan / cancelScan (worker/controller) — D5 canceled-blip', () => {
+  it.each(['close', 'replace'] as const)('%s cancels the old worker only after confirmation', async (action) => {
+    const confirm = vi.fn().mockResolvedValue(false);
+    const host = { confirm, readBinary: async () => new Uint8Array(8) } as unknown as PlatformHost;
+    const change = () => action === 'close' ? closeBinFlow(host) : loadBinFromPath(host, 'next.bin');
+    runScan();
+    const worker = FakeWorker.instances[0]!;
+    expect(await change()).toBe(false);
+    expect(worker.terminated).toBe(false);
+    confirm.mockResolvedValue(true);
+    expect(await change()).toBe(true);
+    expect(worker.terminated).toBe(true);
+    const request = worker.posted[0] as { id: number };
+    worker.emit({ id: request.id, kind: 'progress', stage: 'regions', fraction: 0.5 });
+    expect(get(scanStatus)).toEqual({ state: 'idle' });
+  });
+
   it('a scan superseding another (e.g. drag-drop mid-scan) never rests on "canceled"', () => {
     runScan();
     expect(get(scanStatus)).toEqual({ state: 'running', stage: 'regions', fraction: 0 });

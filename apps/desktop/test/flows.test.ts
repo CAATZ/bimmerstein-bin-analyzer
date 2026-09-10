@@ -265,6 +265,7 @@ describe('project save + open (spec §3 sha gate)', () => {
     host.files.set('C:\\proj\\p2.binproj.json', JSON.stringify(project));
     host.files.set('C:\\proj\\dump.bin', BYTES);
     host.openAnswers = ['C:\\proj\\p2.binproj.json'];
+    host.confirmAnswers = [true];
     await openProjectFlow(host);
     expect(get(checksumReport)).toBeUndefined();
   });

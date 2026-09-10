@@ -1,82 +1,89 @@
-# BimmerStein Bin Analyzer
+<p align="center">
+  <img src="apps/desktop/src-tauri/icons/bimmerstein-blue.svg" alt="BimmerStein Bin Analyzer logo" width="160">
+</p>
 
-[![CI](https://github.com/CAATZ/bimmerstein-bin-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/CAATZ/bimmerstein-bin-analyzer/actions/workflows/ci.yml)
+<h1 align="center">BimmerStein Bin Analyzer</h1>
 
-An open-source desktop app for **ECU bin file tuning-table analysis and editing**: load a raw ECU firmware dump, view it as hexdump / 2D / 3D, automatically detect tuning tables ("maps") and their axes, refine and edit them, and export RomRaider XML / TunerPro XDF / CSV / JSON definitions.
+<p align="center"><strong>ECU Binary Analysis and Map Editing</strong></p>
+<p align="center">A focused Windows workspace for finding, understanding and editing calibration tables.</p>
 
-**Status: v0.2.17 released.**
+<p align="center">
+  <a href="https://github.com/CAATZ/bimmerstein-bin-analyzer/releases"><strong>Downloads</strong></a>
+  &nbsp;&middot;&nbsp;
+  <a href="manual/USER_MANUAL.md">User Manual</a>
+  &nbsp;&middot;&nbsp;
+  <a href="manual/BimmerStein-Bin-Analyzer-User-Manual.pdf">PDF Manual</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://github.com/CAATZ/bimmerstein-bin-analyzer/issues">Issues &amp; Feedback</a>
+</p>
 
-The latest published installers are v0.2.17. This release adds stricter
-RomRaider numeric-axis parsing: labels containing text and non-finite numbers
-retain an explicit warning and index fallback instead of becoming misleading
-breakpoints. Complete decimal and scientific-notation values remain supported.
-The application, setup and uninstaller now use the blue BimmerStein logo.
+<p align="center"><code>Windows x64</code> &nbsp; <code>BMW Siemens MS41 focused</code> &nbsp; <code>GPL-3.0-or-later</code></p>
 
-The app includes **value and axis editing**, undo/redo, original-value
-display, checksum verification and supported correction, map packs, family
-modules, and project lineage. Save Bin writes a separate output, protects the
-loaded source path, and verifies the file by reading it back. Checksum reports
-distinguish corrected, verified, and unchecked regions; MS41 program checksums
-are reported but never rewritten. The older v0.1.1 download remains analysis-only.
+<p align="center">
+  <a href="https://github.com/CAATZ/bimmerstein-bin-analyzer/actions/workflows/ci.yml"><img src="https://github.com/CAATZ/bimmerstein-bin-analyzer/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+</p>
 
-Version 0.2.10 corrects MS41 curve and grid axis selection using firmware callers.
-Curves retain their staged axis across helpers that preserve interpolation state,
-and headerless grids use matching caller evidence to resolve competing axis pairs.
-The MAF word-width fix and both voltage views remain available.
-Version 0.2.11 accepts scalar `Value` labels in RomRaider definitions
-without spurious axis warnings. It preserves imported values and metadata,
-and keeps warnings for malformed axes and unsupported labels.
-Version 0.2.12 exports fresh MS41 full-read detections with calibration-relative
-addresses for RomRaider, including referenced axes, so definitions can be imported
-into the matching partial image. Explicit address-frame choices remain respected.
-Version 0.2.13 improves generic table row alignment and preserves exact starts
-for gradual word tables. It also rejects more small filler blocks while retaining
-validated MS41 table layouts and axes.
-Version 0.2.14 adds axis-pair review in Map properties, with breakpoint previews
-and one-step undo. It also improves generic table boundary detection using
-row trends, while preserving validated MS41 detection results.
-Version 0.2.15 adds **Review table layout**, which previews alternative addresses,
-dimensions and byte formats in Map properties. Applying a layout updates the
-definition in one undo step while preserving BIN bytes and existing edits.
-Version 0.2.16 corrects table byte widths when neighboring grid headers provide
-stronger boundary evidence. MS41 full reads also distinguish axis descriptors
-from curve data, preventing curves from being detected two bytes early.
-The **Swap X/Y** display control and column-major axis editing remain available. Search
-maps by name, address or dimensions, filter by shape or detection method, and
-inspect an explanation of how each potential map was detected. Swapping the
-display preserves stored bytes and exported definitions.
+---
 
-Currently targets Windows. macOS/Linux builds are untested (Tauri supports
-them, but nothing here has been verified on those platforms yet).
+## Overview
 
-## Try it (Windows)
+Open a saved ECU firmware image, detect potential maps, inspect their axes and
+byte layout, and build a reviewed set of calibration definitions. Edit table
+values, save a separate BIN with supported checksum correction and read-back
+verification, or export definitions for another editor.
 
-Download an installer from [Releases](https://github.com/CAATZ/bimmerstein-bin-analyzer/releases):
-`.msi` (Windows Installer) or `-setup.exe` (NSIS). Both are unsigned — see the
-SmartScreen note below.
+![BimmerStein Bin Analyzer workspace with synthetic demonstration data](manual/images/workspace.png)
 
-Or build from source:
+**Current source: 0.2.18. Latest published installers: [v0.2.17](https://github.com/CAATZ/bimmerstein-bin-analyzer/releases/tag/v0.2.17).**
+The 0.2.18 source adds a resizable map sidebar, Close Bin, confirmation before
+replacing an open session, labeled 3D surfaces and a rotatable preview. The new
+manual describes 0.2.18; these controls are not in the older installer.
 
-1. Install the prerequisites below (Node.js, pnpm, Rust + Tauri prerequisites).
-2. Clone this repo, then double-click **`build-installer.cmd`** at the repo
-   root. First run compiles a Rust release build (10+ minutes). Installers
-   land under `apps/desktop/src-tauri/target/release/bundle/` (`msi/` and
-   `nsis/`); a standalone `desktop.exe` needing no install lands one level
-   up, at `apps/desktop/src-tauri/target/release/desktop.exe`.
-3. To hack on the app instead (hot-reload, no installer), double-click
-   **`run-app.cmd`** — this runs `pnpm dev` for you.
+## What you can do
 
-Both `.cmd` files just wrap `pnpm install` plus one pnpm command (`pnpm dev`
-for the dev launcher, `pnpm --filter desktop tauri build` for the installer
-build), so you can run those from a terminal instead if you prefer seeing
-the output scroll by.
+- Find potential maps using family analysis, stored structures, shared axes and
+  generic byte patterns; search by name, address or dimensions and read the
+  detection evidence.
+- Inspect raw bytes, 2D traces, tables, curves, scalar values and named switch
+  states. Rotate a 3D surface with breakpoint labels and physical units.
+- Import RomRaider definitions; review table boundaries and axis pairs; add
+  conversion factors and organize shared axes in a reusable library.
+- Edit table values and stored breakpoints with undo/redo, original-value
+  comparison and byte-level change highlighting.
+- Save an edited BIN separately from its source, verify the written bytes, and
+  inspect corrected, uncorrectable and unchecked checksum regions.
+- Save projects and lineage; export RomRaider XML, TunerPro XDF, CSV/JSON map
+  lists and reviewed map packs.
 
-**Unsigned installer / "Windows protected your PC":** this is not a
-notarized release — there's no code-signing certificate yet — so Windows
-SmartScreen will flag the installer or `desktop.exe` on first run. Click
-**More info → Run anyway** to proceed. If you'd rather not trust an unsigned
-binary, build it yourself from source with the steps above so you know
-exactly what ran.
+The app is **offline**: it edits files and does not communicate with or flash an
+ECU. Detection confidence does not establish a table's meaning or tuning safety.
+MS41 program checksums are reported but never rewritten. Switch states are
+currently read-only. There is no Android version; macOS/Linux builds are untested.
+
+## Install and start
+
+1. Download the intended Windows x64 release as an `.msi` or `-setup.exe`.
+2. Run the installer and launch **BimmerStein Bin Analyzer**.
+3. Click **Open Bin**, then import a matching definition if available.
+4. Select a table and use **map**, **3d**, or **preview** to inspect it.
+
+Installers are unsigned. Windows SmartScreen may warn on first run; verify the
+release source and filename before proceeding. WebView2 Runtime is required.
+The [user manual](manual/USER_MANUAL.md) covers installation, every main workflow,
+conversion factors, shortcuts and troubleshooting.
+
+**Save Bin saves bytes. Save Project saves definitions and axes.** Save the BIN
+first, then its project, to retain an edited calibration and its descriptions.
+
+## Build from source
+
+Install the prerequisites below, then run **build-installer.cmd** from the
+repository root. It installs workspace packages and builds the Windows app.
+Installers are written under `apps/desktop/src-tauri/target/release/bundle/`;
+the standalone executable is `apps/desktop/src-tauri/target/release/desktop.exe`.
+The first Rust build can take several minutes.
+
+For development with automatic reload, use **run-app.cmd** or the commands below.
 
 ## Architecture
 
@@ -116,6 +123,10 @@ pnpm typecheck
 pnpm eval        # detection-quality report against fixtures
 pnpm dev         # desktop app (Tauri window; first run compiles Rust — minutes)
 ```
+
+To rebuild the printable manual, install Python's `reportlab` package and run
+`python manual/build_manual.py`. The Markdown manual and its screenshots are
+the source for the PDF.
 
 ## Fixtures & firmware
 

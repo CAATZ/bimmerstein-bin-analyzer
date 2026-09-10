@@ -102,6 +102,7 @@ describe('saveBinFlow — nothing changes unless the file lands', () => {
     a.setBin(createBinImage(new Uint8Array(64), 'previous.bin'));
     a.setBinPath('C:\\bins\\previous.bin');
     host.openAnswers = location === 'sibling' ? [projectPath] : [projectPath, source];
+    host.confirmAnswers = [true];
     await openProjectFlow(host);
     expect(get(bin)?.sha256).toBe(sha256Hex(bytes));
     a.editCell(byteMap(0x1010), 0, 0, 0x5a);
