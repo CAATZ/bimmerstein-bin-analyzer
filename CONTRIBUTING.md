@@ -15,7 +15,7 @@ pnpm test                # all package tests (Vitest)
 pnpm typecheck
 pnpm eval                # detection-quality gate against committed fixtures
 pnpm eval holdout        # anti-overfit gate against held-out fixtures
-pnpm eval accept         # real-bin 1D-curve gate (skips without local firmware)
+pnpm eval accept         # real-image acceptance (skips without local firmware)
 pnpm dev                 # desktop app (first run compiles Rust — minutes)
 ```
 

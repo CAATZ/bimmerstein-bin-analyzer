@@ -54,9 +54,12 @@ The complete user manual is included below and with the release downloads.
   inspect corrected, uncorrectable and unchecked checksum regions.
 - Save projects and lineage; export RomRaider XML, TunerPro XDF, CSV/JSON map
   lists and reviewed map packs.
+- Optionally connect an AI co-pilot to inspect a shared session and propose
+  value edits for review. See the [co-pilot guide](apps/mcp/README.md#co-pilot-mode---copilot).
 
-The app is **offline**: it edits files and does not communicate with or flash an
-ECU. Detection confidence does not establish a table's meaning or tuning safety.
+File analysis and editing run **locally**; the app does not communicate with or
+flash an ECU. Co-pilot sharing is optional and off by default. Detection
+confidence does not establish a table's meaning or tuning safety.
 MS41 program checksums are reported but never rewritten. Switch states are
 currently read-only. There is no Android version; macOS/Linux builds are untested.
 
@@ -87,7 +90,7 @@ For development with automatic reload, use **run-app.cmd** or the commands below
 
 ## Architecture
 
-Tauri 2 desktop shell, all logic in TypeScript (pnpm monorepo):
+Tauri 2 desktop shell with application logic in TypeScript (pnpm monorepo):
 
 | Package | Purpose |
 |---|---|

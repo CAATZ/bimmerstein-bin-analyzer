@@ -214,7 +214,7 @@
                 <span class="badge" title="No RomRaider representation on this full read; attached maps will be excluded from RomRaider export">no RR</span>
               {/if}
               <button onclick={() => openAttach(e)}>Attach…</button>
-              <button onclick={() => openEdit(e)} disabled={e.axis.kind === 'literal'} title="v1 editor is referenced-only; literal entries are created via 'Save to library'">Edit</button>
+              <button onclick={() => openEdit(e)} disabled={e.axis.kind === 'literal'} title="Edit a referenced axis; add literal axes with 'Save to library'">Edit</button>
               <button onclick={() => detachAll(e)} disabled={fan === 0}>Detach all</button>
               <button onclick={() => removeEntry(e)}>Remove</button>
             </div>

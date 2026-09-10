@@ -36,27 +36,15 @@ jobs:
       - name: Test (all packages)
         run: pnpm test
 
-      # Real BMW MS41 firmware is never committed (fixtures/README.md) —
-      # fixtures/ms41/*.bin is gitignored, so this checkout has none, and
-      # discoverFixtures() in packages/eval/src/cli.ts only pairs a .bin with
-      # its .groundtruth.json (a stray .groundtruth.json here is just never
-      # matched to a .bin and is silently skipped). Both commands below run
-      # against the committed synthetic fixtures only. Verified by running
-      # them in a clean `git worktree` checkout (no gitignored files) before
-      # this workflow was added: both exit 0. The real-MS41 spec-§5
-      # acceptance gate (MS41_GATE) only binds on a machine that has the real
-      # bins locally — it never runs here.
+      # Real firmware stays local (fixtures/README.md). Without those BINs,
+      # fixture evaluation and holdout cover only committed synthetic data.
       - name: Detection-quality eval (synthetic fixtures)
         run: pnpm eval
 
       - name: Detection-quality eval — holdout (anti-overfitting check)
         run: pnpm eval holdout
 
-      # Real-bin 1D-curve acceptance. Every case is gitignored firmware, so
-      # this necessarily SKIPS here and exits 0 — it is not a quality check on
-      # CI. It runs so that the command itself stays working: the gate it
-      # enforces previously had no consumer at all, and a runner that silently
-      # stopped executing would recreate exactly that defect. It binds for real
-      # only on a machine holding the local fixtures.
-      - name: Real-bin acceptance — curve + partial gates (skips without local firmware)
+      # Real-image curve, partial, checksum and exact-layout checks skip without
+      # local firmware. Running the command here verifies the CLI path only.
+      - name: Real-image acceptance (skips without local firmware)
         run: pnpm eval accept

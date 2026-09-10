@@ -8,10 +8,9 @@ import { crc16, type ChecksumReport, type FamilyChecksums } from '@binanalyzer/f
  * no registration call, no module-system pretence. `new Function` works because
  * `tauri.conf.json` sets `"csp": null`; nothing here needs a capability.
  *
- * Deliberately unsandboxed. These are the user's own modules, loaded
- * deliberately, in a build the user made (spec §1) — the shape check below
- * exists to tell a file that returned nothing from one that returned a family,
- * not to defend against the person at the keyboard.
+ * Deliberately unsandboxed. Users load trusted executable extensions through
+ * the installed app. The shape check validates the returned interface; it
+ * does not restrict what module code can execute.
  */
 const MEMBERS = ['applies', 'identify', 'verify', 'correct'] as const;
 

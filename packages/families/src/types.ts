@@ -81,8 +81,7 @@ export interface FamilyIdentity {
 }
 
 /**
- * A family's byte semantics. Registered at compile time; shaped as a future
- * public contract so runtime loading is a later, separate step.
+ * Byte semantics shared by built-in families and runtime-loaded modules.
  */
 export interface FamilyChecksums {
   /**

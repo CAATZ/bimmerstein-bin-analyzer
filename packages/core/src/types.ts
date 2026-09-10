@@ -120,8 +120,8 @@ export interface MapDef {
    * Named byte-pattern states — present ⇔ this map is a SWITCH table
    * (RomRaider type="Switch"). Canonical switch shape, enforced by
    * validateMapDef: cols === 1, format.width === 1 (u8), no axes; rows is the
-   * switch's byte count. v1 is read-only: states are MATCHED against the bin
-   * for display, never written.
+   * switch's byte count. Switch states are matched against the bin for
+   * display; selecting a named state does not write bytes.
    */
   states?: SwitchState[];
   notes?: string;

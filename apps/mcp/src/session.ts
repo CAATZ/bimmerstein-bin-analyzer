@@ -17,9 +17,9 @@ export interface ImportedDefs {
 }
 
 /**
- * One resident bin. `bytes` is immutable by convention: v1 is read-only and
- * nothing in this server writes a bin byte. `path` is provenance only — the
- * file is never reopened.
+ * One resident bin. Tools only read these buffers; co-pilot synchronization
+ * replaces the working snapshot when the app changes. `path` records the
+ * source location, not a firmware-write destination.
  */
 export interface OpenBin {
   binId: string;
@@ -92,11 +92,9 @@ export function diffPair(entry: OpenBin): { working: Uint8Array; original: Uint8
 }
 
 /**
- * The Phase-2 seam. Phase 1 owns bins in memory; the co-pilot implementation
- * (spec 2026-08-01-mcp-copilot-design.md) proxies to the live desktop store
- * over a loopback link, so every method is a round trip and the interface is
- * asynchronous. Tool surfaces DIFFER by mode — see that spec §8; the shared
- * contract is this interface plus binId === sha256.
+ * Headless sessions own bins in memory; co-pilot sessions proxy to the live
+ * desktop store over a loopback link. The interface is asynchronous to support
+ * both implementations. Tool surfaces differ by mode; binId is the file hash.
  */
 export interface SessionStore {
   open(entry: OpenBin): Promise<OpenResult>;

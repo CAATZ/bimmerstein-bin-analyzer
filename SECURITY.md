@@ -28,13 +28,25 @@ strictly as data:
   hexdump, or a WebGL surface. They never reach the DOM as markup.
 - Text originating in an imported definition (map names, categories, units) is
   rendered through the UI framework's escaping, never as HTML.
-- The application is **read-only with respect to firmware**: it never writes to
-  a bin. The only files it writes are project files and definition exports, and
-  only to a path the user picked in a save dialog.
+- Value and breakpoint edits change a working buffer with undo/redo. Saving a
+  BIN writes a separate output, applies supported checksum corrections and
+  verifies the written bytes by reading them back. The original source path
+  is protected against overwrite.
+- Projects, definitions and map packs are written through the app's file
+  dialogs. Loading a file does not authorize a firmware save or ECU operation;
+  the app has no ECU communication or flashing interface.
 
-Realistic impact of a malformed input is therefore a crash, a hang, or a wrong
-analysis result — not code execution. Reports demonstrating otherwise are
-exactly what this policy is for.
+Malformed inputs can cause incorrect analysis, rejected operations, hangs or
+crashes. Incorrect definitions or edits can also produce unsuitable firmware
+output; checksum verification does not establish tuning safety. Please report
+violations of the parsing, rendering or save boundaries above.
+
+## Family modules
+
+Loadable JavaScript family modules are executable extensions, not data files.
+They run in the desktop process without a sandbox and can affect identity,
+checksum verification and correction. Load only trusted modules. Interface
+checks and exception handling do not make an untrusted module safe.
 
 ## Companion server
 
@@ -47,13 +59,24 @@ directory. Nothing listens when the server is not running. The desktop side is
 gated by an explicit consent toggle that defaults to off and must be turned on
 by the user.
 
-Writing files is refused unless the server was started with
-`--allow-write <dir>`, and the resolved real path must be inside that directory
-(symlinks are resolved before the check).
+The co-pilot connects the shared session to the user's configured AI client.
+That client may send the data it reads to its provider; the loopback link is
+not a guarantee that shared data stays on the computer.
+
+Single map/axis definition changes can apply directly with undo. Bulk definition
+changes and every value edit require review in the app. The server cannot save
+a BIN. It can request the app's Save Project dialog, where the user chooses the
+destination.
+
+The server can write definition exports only with `--allow-write <dir>`;
+the resolved real path must be inside that directory, with symlinks resolved
+before the check. This option does not control the desktop's file dialogs or
+the server's local connection handshake file.
 
 ## Unsigned builds
 
 Released installers are **not code-signed** — there is no certificate for this
-project yet. Windows SmartScreen will warn on first run. If you would rather not
-trust an unsigned binary, build from source; the README documents how, and the
-build is reproducible from this repository.
+project yet. Windows SmartScreen may warn on first run. Verify the release
+source, filename and published checksums before proceeding. Source build
+instructions are in the README; byte-identical reproducible builds are not
+currently verified.

@@ -4,7 +4,7 @@ import { COPILOT_TOOLS, HEADLESS_TOOLS } from './tools/index.js';
 import { err, type Deps } from './result.js';
 
 export const SERVER_NAME = 'bimmerstein-bin-analyzer';
-export const SERVER_VERSION = '0.2.1';
+export const SERVER_VERSION = '0.2.18';
 
 /**
  * Sent once, in the initialize response — the right place for the
@@ -51,7 +51,7 @@ escalates a burst into a proposal anyway.
 VALUE edits are different: propose_map_edits is the ONLY way to change bytes,
 and EVERY value edit is a proposal however small — there is no direct-apply
 path for a byte. Read the cell first (read_map values:"raw" or "both") and send
-its raw byte as expectedRaw; a row whose byte moved since you read it is
+its raw value as expectedRaw; a row whose value changed since you read it is
 skipped and reported back to you.
 
 read_map and read_bytes show the WORKING buffer by default — what the user is

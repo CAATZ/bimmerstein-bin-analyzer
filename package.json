@@ -2,7 +2,7 @@
   "name": "bimmerstein-bin-analyzer",
   "private": true,
   "version": "0.2.18",
-  "description": "Open-source ECU bin tuning-table analyzer",
+  "description": "Open-source Windows ECU binary analysis and map editing app",
   "license": "GPL-3.0-or-later",
   "packageManager": "pnpm@9.15.0",
   "engines": {

@@ -4,7 +4,7 @@ import { renderAffineExpression } from './expression.js';
 import { xmlEscape } from './xml.js';
 
 /**
- * TunerPro XDF export (spec §6) — XDF format 1.70, export only in v1.
+ * TunerPro XDF 1.70 export. XDF import is not supported.
  * Every emitted construct is copied from a TunerPro-WRITTEN golden sample
  * (test/fixtures/tunerpro-golden.xdf — the golden-sample rule forbids
  * trusting memory here): mmedtypeflags 0x01 = signed, 0x02 = LSB-first
@@ -85,8 +85,8 @@ function pushMapAxis(out: string[], id: 'x' | 'y', axis: AxisDef | undefined, co
 
 export function exportXdf(title: string, binSize: number, maps: MapDef[]): Result<string> {
   for (const m of maps) {
-    if (m.orientation !== 'row-major') return { ok: false, error: `map "${m.name}": col-major export is not supported in v1` };
-    if (m.format.float === true) return { ok: false, error: `map "${m.name}": float export is not supported in v1` };
+    if (m.orientation !== 'row-major') return { ok: false, error: `map "${m.name}": col-major export is not supported` };
+    if (m.format.float === true) return { ok: false, error: `map "${m.name}": float export is not supported` };
     for (const [role, axis, count] of [['x', m.xAxis, m.cols], ['y', m.yAxis, m.rows]] as const) {
       if (axis?.kind === 'literal' && (axis.values === undefined || axis.values.length !== count)) {
         return { ok: false, error: `map "${m.name}": literal ${role} axis has ${axis.values?.length ?? 0} values, expected ${count}` };
