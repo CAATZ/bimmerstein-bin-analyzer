@@ -107,7 +107,8 @@ libraries above them are pure and import nothing from an app.
 
 To build from source (either launcher, or the commands below):
 
-- Node.js ≥ 22 LTS, pnpm ≥ 9 (`corepack enable`)
+- Node.js ≥ 22 and Corepack; use the pnpm version pinned in `package.json`
+  (`corepack enable`, then `corepack pnpm --version`)
 - Rust stable + [Tauri 2 prerequisites](https://tauri.app/start/prerequisites/),
   including the MSVC "Desktop development with C++" workload
 - WebView2 Runtime — ships with Windows 11 already; Windows 10 users may need
@@ -149,6 +150,10 @@ Bug reports and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md)
 covers the setup, the package boundaries, and the invariants that keep
 detection quality honest — most importantly that the quality gates are
 ratchets and are never relaxed to make a change fit.
+
+[Developing ECU families](FAMILY_DEVELOPMENT.md) covers loadable checksum and
+identity modules, compiled map detectors, address and axis contracts, runnable
+synthetic examples, validation, and Windows builds.
 
 Security issues: please follow [SECURITY.md](SECURITY.md) rather than opening a
 public issue.
