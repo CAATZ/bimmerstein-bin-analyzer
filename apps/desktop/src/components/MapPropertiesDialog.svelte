@@ -2,7 +2,7 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
   import type { AxisDef, AxisLibEntry, MapDef, Scaling } from '@binanalyzer/core';
-  import { readAxisValues } from '@binanalyzer/core';
+  import { formatPhysical, readAxisValues } from '@binanalyzer/core';
   import { buildPoolIndex, classifyRegions, DEFAULT_SCAN_CONFIG, poolAnchors, scanPrefixedAxes, type PoolAnchor, type PrefixedAxis } from '@binanalyzer/engine';
   import * as actions from '../store/actions.js';
   import { axisLibrary, maps, workingBytes } from '../store/stores.js';
@@ -30,6 +30,12 @@
   let factor = $state(String(initial.scaling.factor));
   let offset = $state(String(initial.scaling.offset));
   let digits = $state(String(initial.scaling.digits));
+  const conversionExample = $derived.by(() => {
+    const f = Number(factor), o = Number(offset), d = Number(digits);
+    if ([factor, offset, digits].some((v) => v.trim() === '') || ![f, o, d].every(Number.isFinite) || d < 0) return 'Enter numeric factor, offset and digits to preview the conversion.';
+    const scaling = { ...map.scaling, factor: f, offset: o, digits: Math.min(20, Math.trunc(d)), units };
+    return `Raw 100 → ${formatPhysical(100, scaling)} ${map.scaling.rawExpression !== undefined ? '(raw fallback)' : units}`.trim();
+  });
 
   // Axis operations apply IMMEDIATELY via setMapAxis (each validated + toasted);
   // name/category/scaling stay staged on Save as before. Read the live map from
@@ -223,18 +229,24 @@
 <div class="overlay" role="dialog" aria-label="Map properties">
   <div class="dialog">
     <h3>Map properties — 0x{live.address.toString(16).toUpperCase()} · {live.rows}×{live.cols}</h3>
+    <h4>Table</h4>
+    <p class="axdesc">Name, category and scaling are applied when you choose Save.</p>
     <label>Name <input bind:value={name} /></label>
     <label>Category <input bind:value={category} placeholder="(none)" /></label>
     <fieldset>
-      <legend>Scaling (physical = raw × factor + offset)</legend>
+      <legend>Scaling</legend>
+      <p class="axdesc">Physical value = raw × factor + offset</p>
       <label>factor <input bind:value={factor} /></label>
       <label>offset <input bind:value={offset} /></label>
       <label>units <input bind:value={units} /></label>
       <label>digits <input bind:value={digits} /></label>
+      <output class="conversion-example" aria-label="Conversion example">{conversionExample}</output>
       {#if map.scaling.rawExpression !== undefined}
         <p class="raw">Imported non-affine expression "{map.scaling.rawExpression}" is preserved; editing factor/offset here does not remove it.</p>
       {/if}
     </fieldset>
+    <h4>Axes and layout</h4>
+    <p class="axdesc immediate">Axis and layout actions apply immediately. Cancel closes this dialog without reverting those actions; use Undo after closing to restore them.</p>
     {#each SLOTS as slot (slot)}
       <fieldset>
         <legend>{slot.toUpperCase()} axis</legend>
@@ -314,9 +326,9 @@
         </fieldset>
       {/if}
     {/if}
-    <div class="row">
+    <div class="row dialog-actions">
       <button onclick={onclose}>Cancel</button>
-      <button onclick={save}>Save</button>
+      <button class="primary" onclick={save}>Save</button>
     </div>
   </div>
 </div>
@@ -344,7 +356,7 @@
     border: 1px solid #3a3f48;
     border-radius: 8px;
     padding: 16px;
-    width: 460px;
+    width: 540px;
     max-width: calc(100vw - 48px);
     max-height: calc(100vh - 64px);
     overflow-y: auto;
@@ -361,7 +373,14 @@
   }
   input {
     width: 220px;
+    max-width: 65%;
   }
+  h3 { margin: 0 0 8px; font-size: 17px; }
+  h4 { margin: 8px 0 0; font-size: 14px; }
+  legend { font-weight: 600; color: var(--fg); padding: 0 6px; }
+  .conversion-example { padding: 10px; background: #243750; border-radius: 5px; color: #bddbff; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .immediate { padding: 8px 10px; border-left: 2px solid var(--accent); background: var(--bg); line-height: 1.5; }
+  .dialog-actions { position: sticky; bottom: -16px; margin: 0 -16px -16px; padding: 12px 16px; background: var(--bg-panel); border-top: 1px solid var(--border); }
   fieldset {
     border: 1px solid #3a3f48;
     border-radius: 6px;

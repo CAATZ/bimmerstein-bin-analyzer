@@ -4,9 +4,9 @@
 
 **ECU Binary Analysis and Map Editing**
 
-Version 0.2.18 | Windows x64 | September 2026
+Version 0.2.20 | Windows x64 | September 2026
 
-This manual covers the 0.2.18 application. Check the version of your installed
+This manual covers the 0.2.20 application. Check the version of your installed
 release if a control described here is missing. Screenshots use synthetic
 demonstration data; they are not tuning recommendations or real ECU calibrations.
 
@@ -91,10 +91,10 @@ or exported definitions. Keep backups of those files before updating.
    bar. File identity matters more than its name.
 3. Wait for **scan done**. **Cancel scan** stops a running scan; **Rescan** starts
    another scan of the current working bytes.
-4. If you have the matching RomRaider definition, click **Import Def**, choose
+4. If you have the matching RomRaider definition, click **File → Import Definition…**, choose
    its XML file and select the correct ROM entry when prompted.
-5. Select a map in the left sidebar, then click **map** for its values or **3d**
-   for a surface. Use **preview** to keep a small surface visible beside another view.
+5. Select a map in the left sidebar, then click **Table** for its values or **3D**
+   for a surface. Use **Preview** to keep a small surface visible beside another view.
 6. Review the address, dimensions, byte format, axes and scaling before editing.
 7. Save a project to preserve your table definitions. If you edited values,
    save the BIN to a separate file first.
@@ -108,6 +108,25 @@ or save reports.
 
 ## 4. Workspace and navigation
 
+The top row contains **File**, **Edit** and **Tools**. Open a group with a click,
+or focus it with **Tab** and press **Enter**. **Escape** closes the group and
+returns focus to its label. **Open Bin**, **Save Bin** and **Rescan** remain in
+the main toolbar. Undo, Redo and Original values are also available under Edit.
+
+**User Manual** opens this version's bundled PDF in your default viewer, even
+without an internet connection. **About** shows the installed version, developer,
+license and repository/support links. **Copy version information** prepares the
+application details for a bug report. Press **Escape** or **Close** to return.
+
+Right-clicking the workspace does not open browser navigation or reload commands.
+Text fields retain their normal editing menu.
+
+The loaded BIN name appears at the upper right. **Unsaved BIN changes** means
+the current bytes differ from their save baseline; **BIN saved** confirms the
+current buffer matches its last successful save. These indicators describe BIN
+bytes. Save definitions and axes separately with **File → Save Project**.
+Hover the file name for its size and full SHA-256 fingerprint.
+
 ### Resize the map list
 
 Drag the narrow vertical divider at the right edge of the sidebar. Widen it to
@@ -115,24 +134,24 @@ read longer names, addresses and filter choices. The divider can also receive
 keyboard focus with **Tab**: **Left/Right Arrow** changes its width, and **Home**
 restores the default. Double-clicking the divider also resets it.
 
-The width is limited so the main view remains available. It lasts for the
-current app window and is not stored in a project. Scroll the sidebar to reach
+The width is limited so the main view remains available. Your sidebar width is
+remembered between sessions as an application preference, separate from projects. Scroll the sidebar to reach
 additional maps. Hover a truncated map name to read its full name.
 
 ### View controls
 
 | Control | Use |
 |---|---|
-| hex | Inspect addresses, raw values, selections and detected regions |
-| 2d | View a trace of the selected data/range |
-| 3d | View the selected grid as a labeled surface |
-| map | View a table, a curve with its values, or named switch states |
-| preview | Show or hide the small 3D surface |
+| Hex | Inspect addresses, raw values, selections and detected regions |
+| 2D | View a trace of the selected data/range |
+| 3D | View the selected grid as a labeled surface |
+| Table | View a table, a curve with its values, or named switch states |
+| Preview | Show or hide the small 3D surface |
 | Swap X/Y | Transpose a selected two-dimensional map for display |
 
 **width** is the number of bytes per raw value: 1, 2 or 4. **LoHi (LE)** means
 little-endian; **HiLo (BE)** means big-endian. **signed** changes the interpretation
-of raw values. These toolbar controls frame raw browsing and new manual
+of raw values. These controls appear in Hex and 2D views and frame raw browsing and new manual
 selections; existing maps retain their own stored format.
 
 Use **M/W** to increase/decrease the raw view's column count and **Ctrl+Left/Right**
@@ -147,8 +166,8 @@ Use **Search maps** for a name, hexadecimal address or shape such as `20x16`.
 Combine it with **All shapes** and **All methods**, or use **Clear filters** to
 restore the complete lists. When filtered, the heading shows visible/total counts.
 
-Click a potential map to inspect it and read its **Detection evidence** text
-above the lists. Badges describe how it was found:
+Click a potential map, then expand **Detection evidence** above the lists to
+read how it was found. Badges describe how it was found:
 
 | Method | Meaning |
 |---|---|
@@ -163,10 +182,17 @@ and a definition known to match that firmware.
 
 ### Confirm or define a map
 
-Double-click a potential map, or select it and press **K**, to promote it to
+The compact confirmation control appears when a selection exists. **K**,
+double-clicking a potential map and **Edit → Confirm selection** remain available.
+After confirmation, the control shows **Confirmed**; confirming again does not
+create a duplicate. **Ctrl+Z** undoes confirmation without changing BIN bytes.
+
+Select a potential map and click **Confirm selection** beside the address in
+the main toolbar to promote it to
 **Maps**. Promotion records a table definition; it does not rewrite its values.
 For a manual map, select a byte range in the raw view, choose a suitable width
-and column framing, then press **K**. Check the resulting dimensions and range.
+and column framing, then click **Confirm selection** or press **K**. Check the
+resulting dimensions and range.
 
 Confirmed maps have a **Properties** pencil button. The remove button removes
 the map definition, not its bytes. Undo can restore a removed definition.
@@ -185,7 +211,7 @@ review, not confirmation that it belongs to the selected function.
 
 ## 6. Definitions and addresses
 
-**Import Def** accepts RomRaider ECU XML. If the file describes more than one
+**File → Import Definition…** accepts RomRaider ECU XML. If the file describes more than one
 ROM, select the entry corresponding to the loaded firmware. Import messages
 report skipped or unsupported content; read them before relying on the result.
 
@@ -232,19 +258,20 @@ example; it is not a prescribed MS41 conversion.
 | units | Describe the physical quantity, such as rpm or V |
 | digits | Number of decimal places displayed |
 
+The live conversion example uses raw value 100 to preview your factor, offset,
+units and decimal places before saving.
+
 Changing scaling describes the same existing bytes differently. Typing a new
 cell value performs the inverse conversion and changes bytes. Do not substitute
 a guessed factor for a verified definition or firmware measurement.
 
 ![Map properties scaling controls](images/map-properties.png)
 
-Each axis has its **own** scaling. Changing the map factor does not change the
-X or Y breakpoint conversion. Use the axis controls for that.
+Each axis has its **own** scaling. Use the axis controls to set its conversion.
 
-Unsupported imported nonlinear expressions remain preserved and are shown as
-raw values with a warning. Changing factor/offset does not remove such an
-expression. Use a correctly supported definition rather than assuming the
-warning has been resolved. A zero factor cannot be inverted for value editing.
+Unsupported nonlinear expressions stay preserved and display raw values with a
+warning. Changing factor/offset does not remove them. A zero factor cannot be
+inverted for value editing.
 
 ## 8. Axes and the axis library
 
@@ -262,7 +289,7 @@ axis library. **Pick from library** lists compatible entries for the selected
 slot. **Detach** removes its library link while preserving the map's inline
 axis definition.
 
-Click **Axes** in the toolbar to open the library. You can create a referenced
+Choose **Tools → Axes** to open the library. You can create a referenced
 axis, inspect its attached maps, attach it to compatible slots, edit its metadata,
 or detach/remove it. After editing a library entry, choose whether to update its
 attached slots; existing copies are not silently changed.
@@ -276,7 +303,13 @@ changing a value. Literal/index headers have no editable storage bytes.
 
 ## 9. Table, curve and switch views
 
-**map** adapts to the selected definition:
+In a table, use **Text size** to adjust readability and **Heatmap** to color
+cells by their displayed physical values. The legend shows the current range.
+These preferences are remembered and do not change BIN bytes or definitions.
+Hover a cell to highlight its row and column headers. Edited cells retain an
+amber underline and background; selected ranges retain a blue outline.
+
+**Table** adapts to the selected definition:
 
 - A two-dimensional table shows a spreadsheet with X headers across columns
   and Y headers down rows. The header identifies its data address, dimensions,
@@ -299,11 +332,12 @@ bindings instead of trying to fix them through display transposition.
 
 ## 10. 3D surfaces and preview
 
-Select a table with at least two rows and two columns, then click **3d**.
+Select a table with at least two rows and two columns, then click **3D**.
 The surface shows colored cells, a base grid, breakpoint tick labels and axis
 names/units from the selected definition. The title identifies the map and its
 value units. Vertical ticks use the scaled physical values; blue represents
-lower values and red higher values within this surface.
+lower values and teal higher values within this surface. The table heatmap uses
+the same physical-value palette.
 
 ![Full 3D surface with named axes, units and value ticks](images/surface-3d.png)
 
@@ -311,10 +345,15 @@ Drag with the left mouse button to rotate. Scroll over the canvas to zoom.
 **Reset view** restores the initial camera angle and zoom. The surface updates
 when data or scaling changes while retaining its current camera orientation.
 
-**preview** opens the same surface in a smaller panel while you use another
-view. Drag directly inside that panel to rotate it; scroll there to zoom.
-Its **Reset** button affects only the preview camera. Press **P** or click
-**preview** again to hide it when it covers information you need.
+**Preview** opens the same surface in a split panel while you use another view.
+Use **Position → Below / Beside** to choose its location. Drag the divider to
+resize it, or focus the divider and use arrow keys; **Home** resets its size.
+Its position and size are remembered between sessions. The preview occupies
+its own space without covering table cells.
+
+Drag directly inside the surface to rotate it; scroll there to zoom. **Reset**
+affects only the preview camera. Press **P**, click **Preview** again, or use the
+panel's close button to hide it.
 
 ![Compact 3D preview](images/preview-3d.png)
 
@@ -395,12 +434,12 @@ to include them.
 
 ## 13. Projects, closing and replacing files
 
-**Save Project** writes a `.binproj.json` containing confirmed maps, potential
+**File → Save Project** writes a `.binproj.json` containing confirmed maps, potential
 maps, axes, value defaults and the identity of the associated BIN. After saving
 an edited BIN, save its project beside that output so reopening can locate it.
 Projects can retain the original source identity as lineage for an edited file.
 
-**Open Project** first looks for the recorded BIN beside the project. If it is
+**File → Open Project** first looks for the recorded BIN beside the project. If it is
 missing, select its location. A SHA-256 mismatch produces a separate warning
 because the map addresses might describe different bytes. Cancel if you cannot
 establish that the files belong together. Incompatible out-of-range definitions
@@ -409,7 +448,7 @@ detection results and region shading.
 
 ### Close the current BIN
 
-Click **Close Bin**. The confirmation reminds you to save both byte edits and
+Click **File → Close Bin**. The confirmation reminds you to save both byte edits and
 project metadata as appropriate. Cancel to return to your work, or continue to
 clear the loaded session and stop its running scan. The application remains open.
 Closing a BIN does not delete its file.
@@ -428,7 +467,7 @@ if you have not changed a BIN value.
 
 ## 14. Exports and map packs
 
-Choose a format next to **Export**, then choose a destination.
+Open **File**, choose an **Export format**, then click **Export** and choose a destination.
 
 | Format | Intended use |
 |---|---|
@@ -442,11 +481,11 @@ exports describe confirmed maps; review format warnings and unsupported items.
 The Export button requires at least one confirmed map. Display-only Swap X/Y
 does not alter exported definitions.
 
-**Export Pack** creates a reusable map pack from edited confirmed tables. A pack
+**File → Export Pack** creates a reusable map pack from edited confirmed tables. A pack
 records its base-image identity and expected bytes so the receiving app can
 check compatibility. It is not a complete firmware image.
 
-**Apply Pack** opens a review panel. Inspect its image match, each table's byte
+**File → Apply Pack** opens a review panel. Inspect its image match, each table's byte
 comparison, available details and any conflict/mismatch explanation. Select only
 eligible rows you intend to apply, then apply them. Incompatible rows are blocked;
 do not treat a pack as a general cross-firmware conversion tool. Applying changes
@@ -456,7 +495,7 @@ the working buffer; save the BIN separately when satisfied. Cancel applies nothi
 
 ### Families
 
-**Families** lists built-in and loaded family modules. A family module can
+**Tools → Families…** lists built-in and loaded family modules. A family module can
 recognize an image and provide byte/checksum semantics. Use **Add module** to
 select a module file, **Reload** to reload configured modules, and the remove
 control for an added module. The dialog identifies the configured folder.
@@ -468,7 +507,8 @@ tables in that ECU can be found.
 
 ### Optional co-pilot connection
 
-**Share session with co-pilot** is off by default. Enabling it permits a
+Under **Tools**, **Share session with co-pilot** is a horizontal row with its
+checkbox on the right; click the label or checkbox. Sharing is off by default. Enabling it permits a
 configured AI client to inspect the session and submit proposals. The
 status bar shows whether it is waiting, connected or reconnecting. Disable
 sharing when the session should no longer be exposed.
@@ -521,7 +561,7 @@ a 3D canvas. Left-drag a 3D canvas to rotate it. Tab navigates focusable control
 | Editing factor has no effect | Look for an imported unsupported-expression warning; it preserves raw display |
 | A breakpoint cannot be edited | Literal and index axes have no editable BIN storage |
 | A 3D view is blank | Select at least a 2x2 table; check for invalid values and use Reset view |
-| 3D preview obscures a control | Toggle preview off with P or the toolbar button |
+| Need more room for the table | Resize or reposition the preview, or hide it with P |
 | Project cannot find its BIN | Place the recorded BIN beside it or locate the exact file when prompted |
 | Project reports a different hash | Verify you selected the correct source or saved output; do not accept solely because names match |
 | Save refuses the destination | Choose a different path from the originally opened BIN |

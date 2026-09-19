@@ -33,6 +33,7 @@
   import { detectOsKind, linkFilePathFor, makeReadLink, type OsPaths } from './copilot/link-file.js';
   import { mountCoPilot, type CoPilotMount } from './copilot/mount.js';
   import { persistCoPilotConsent } from './store/consent.js';
+  import { persistWorkspace, workspace } from './store/workspace.js';
   import { appLocalDataDir, homeDir, localDataDir } from '@tauri-apps/api/path';
 
   let showChecksums = $state(false);
@@ -74,7 +75,7 @@
   }
 
   function onKeydown(e: KeyboardEvent): void {
-    if ($modalOpen) return; // a modal dialog is open — it owns input, not the global keymap
+    if ($modalOpen || (e.target instanceof Element && e.target.closest('details'))) return;
     const action = resolveKey({
       key: e.key,
       ctrl: e.ctrlKey,
@@ -141,6 +142,7 @@
   let coPilot: CoPilotMount | null = null;
   let stopConsentPersistence: (() => void) | null = null;
   let stopFamilyPaths: (() => void) | null = null;
+  let stopWorkspace: (() => void) | null = null;
   let appLocalData = $state('');
 
   onMount(() => {
@@ -155,6 +157,7 @@
     // the current value, so a user who left the toggle on last session gets
     // their link back without re-ticking it (spec §4.5).
     stopConsentPersistence = persistCoPilotConsent(localStorage);
+    stopWorkspace = persistWorkspace(localStorage);
 
     // Drop-in family modules, before any bin can be opened: a bin opened while
     // they were still loading would resolve no family
@@ -182,10 +185,11 @@
     coPilot?.stop();
     stopConsentPersistence?.();
     stopFamilyPaths?.();
+    stopWorkspace?.();
   });
 </script>
 
-<svelte:window onkeydown={onKeydown} />
+<svelte:window onkeydown={onKeydown} oncontextmenu={(event) => { if (!isEditable(event.target)) event.preventDefault(); }} />
 
 <ProposalPanel onDecide={(id, ids) => coPilot?.current()?.decideProposal(id, ids)} />
 <PackPanel />
@@ -194,9 +198,10 @@
   <Toolbar onSaveBin={(prompt: boolean) => void onSaveBin(prompt)} {appLocalData} />
   <div class="body">
     <Sidebar />
+    <div class="work-area" class:preview-right={$workspace.previewPosition === 'right'}>
     <main class="view">
       {#if $bin === null}
-        <div class="empty">Open a bin (toolbar) or drop one on the window to begin.</div>
+        <div class="empty welcome"><strong>Your calibration workspace</strong><span>Open a BIN or drop one here to begin.</span><span>To resume saved definitions and axes, choose File → Open Project.</span></div>
       {:else if $viewParams.viewMode === 'hex'}
         <HexdumpView />
       {:else if $viewParams.viewMode === '2d'}
@@ -211,15 +216,14 @@
         <MapView />
       {/if}
     </main>
+    {#if $viewParams.previewOpen}<PreviewPanel />{/if}
+    </div>
   </div>
   <StatusBar
     onShowChecksums={() => (showChecksums = true)}
     onShowSaveReport={() => (showSaveReport = true)}
   />
   <Toasts />
-  {#if $viewParams.previewOpen}
-    <PreviewPanel />
-  {/if}
   {#if showChecksums}
     <ChecksumDialog onClose={() => (showChecksums = false)} />
   {/if}

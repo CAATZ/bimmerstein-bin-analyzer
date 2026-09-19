@@ -34,10 +34,10 @@ verification, or export definitions for another editor.
 
 ![BimmerStein Bin Analyzer workspace with synthetic demonstration data](manual/images/workspace.png)
 
-**Latest release: [v0.2.18](https://github.com/CAATZ/bimmerstein-bin-analyzer/releases/tag/v0.2.18).**
-This release adds a resizable map sidebar, Close Bin, confirmation before
-replacing an open session, labeled 3D surfaces and a rotatable preview.
-The complete user manual is included below and with the release downloads.
+**Current source: 0.2.20. Latest published release: [v0.2.18](https://github.com/CAATZ/bimmerstein-bin-analyzer/releases/tag/v0.2.18).**
+The source adds the refreshed workspace, contextual selection confirmation,
+About information and an offline user manual. The manual describes 0.2.20;
+these latest controls are not yet in the published installer.
 
 ## What you can do
 
@@ -68,7 +68,7 @@ currently read-only. There is no Android version; macOS/Linux builds are unteste
 1. Download the intended Windows x64 release as an `.msi` or `-setup.exe`.
 2. Run the installer and launch **BimmerStein Bin Analyzer**.
 3. Click **Open Bin**, then import a matching definition if available.
-4. Select a table and use **map**, **3d**, or **preview** to inspect it.
+4. Select a table and use **Table**, **3D**, or **Preview** to inspect it.
 
 Installers are unsigned. Windows SmartScreen may warn on first run; verify the
 release source and filename before proceeding. WebView2 Runtime is required.

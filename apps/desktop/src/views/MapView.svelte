@@ -1,6 +1,8 @@
 <!-- apps/desktop/src/views/MapView.svelte -->
 <script lang="ts">
-  import { formatPhysical } from '@binanalyzer/core';
+  import { formatPhysical, toPhysical } from '@binanalyzer/core';
+  import { setWorkspace, workspace } from '../store/workspace.js';
+  import { heatColor } from '../lib/presentation.js';
   import type { MapDef } from '@binanalyzer/core';
   import { cellRange, editJournal, maps, potentialMaps, selection, showOriginal, transposeMaps, workingBytes } from '../store/stores.js';
   import { axisLabels, gridFromMap, sourceAxis, sourceCell } from '../lib/griddata.js';
@@ -72,6 +74,12 @@
     const m = map;
     if (!w || !m) return [];
     return axisLabels(bytesForDisplay(w, showOrig, journal), yAxis, grid?.rows ?? 0);
+  });
+  let hovered = $state<{ row: number; col: number } | null>(null);
+  const physicalRange = $derived.by(() => {
+    if (!grid || !map) return { min: 0, max: 0 };
+    const a = toPhysical(grid.min, map.scaling), b = toPhysical(grid.max, map.scaling);
+    return { min: Math.min(a, b), max: Math.max(a, b) };
   });
 
   /** I3: is the axis breakpoint at `index` on side `which` changed vs the file
@@ -277,30 +285,45 @@
 {:else}
   <div class="mapview">
     <header>
-      <strong>{map.name}</strong>
+      <div class="map-heading"><strong>{map.name}</strong>
       <span class="meta">
         0x{map.address.toString(16).toUpperCase()} · {grid.rows}×{grid.cols} ·
         {map.format.width * 8}-bit {map.format.signed ? 'signed' : 'unsigned'} ·
         {map.scaling.units === '' ? 'raw' : map.scaling.units}
       </span>
-      <span class="cell" title={selectedInfoText}>{selectedInfoText}</span>
+      </div>
       {#if $showOriginal}
         <span class="origbadge">showing ORIGINAL values (F11)</span>
       {/if}
       {#if sharedNames.length > 0}
         <span class="origbadge">axis shared with {sharedNames.length} other map(s): {sharedNames.join(', ')}</span>
       {/if}
-      <span class="grow"></span>
       <button disabled={$editJournal.size === 0} onclick={revertSelection}>Revert selection</button>
       <button disabled={$editJournal.size === 0} onclick={() => actions.revertAll()}>Revert all changes</button>
     </header>
+    <div class="table-tools">
+      <label>Text size <select aria-label="Table text size" value={$workspace.tableFontSize}
+        onchange={(e) => setWorkspace({ tableFontSize: Number(e.currentTarget.value) })}>
+        {#each [11, 12, 13, 14, 16, 18] as size}<option value={size}>{size}px</option>{/each}
+      </select></label>
+      <label><input type="checkbox" checked={$workspace.heatmap} onchange={(e) => setWorkspace({ heatmap: e.currentTarget.checked })} /> Heatmap</label>
+      {#if $workspace.heatmap}
+        <span class="heat-legend" title="Colors follow the displayed physical values">
+          {Number.isFinite(physicalRange.min) ? physicalRange.min.toLocaleString(undefined, { maximumFractionDigits: 3 }) : '—'}
+          <span class="heat-ramp"></span>
+          {Number.isFinite(physicalRange.max) ? physicalRange.max.toLocaleString(undefined, { maximumFractionDigits: 3 }) : '—'} {map.scaling.rawExpression !== undefined ? 'raw' : map.scaling.units}
+        </span>
+      {/if}
+      <span class="edit-key" title="Amber marks bytes changed from the opened file">Edited</span>
+    </div>
+    <div class="cell" title={selectedInfoText}>{selectedInfoText || 'Click to select · Shift-click for a range · Double-click to edit'}</div>
     {#if map.scaling.rawExpression !== undefined}
       <div class="banner">
         Non-affine scaling "{map.scaling.rawExpression}" — showing RAW values (spec §3: never silently mis-scale).
       </div>
     {/if}
-    <div class="gridscroll">
-      <table>
+    <div class="gridscroll" role="region" aria-label="Table values" onpointerleave={() => (hovered = null)}>
+      <table style:font-size="{$workspace.tableFontSize}px">
         <thead>
           <tr>
             <th class="corner" title={`${yAxis?.name ?? ''} \\ ${xAxis?.name ?? ''}`}>
@@ -309,6 +332,7 @@
             {#each xLabels as label, i (i)}
               <th
                 class="axishdr"
+                class:hover-guide={hovered?.col === i}
                 class:changed={axisChanged(xSlot, i)}
                 ondblclick={() => beginAxisEdit(xSlot, i)}
                 >{#if axisEditing?.which === xSlot && axisEditing?.index === i}<input
@@ -329,6 +353,7 @@
             <tr>
               <th
                 class="axishdr"
+                class:hover-guide={hovered?.row === r}
                 class:changed={axisChanged(ySlot, r)}
                 ondblclick={() => beginAxisEdit(ySlot, r)}
                 >{#if axisEditing?.which === ySlot && axisEditing?.index === r}<input
@@ -343,6 +368,9 @@
                   />{:else}{yLabels[r] ?? String(r)}{/if}</th>
               {#each row as v, c (c)}
                 <td
+                  style:--cell-fill={$workspace.heatmap ? heatColor(toPhysical(v, map.scaling), physicalRange.min, physicalRange.max) : 'transparent'}
+                  class:hover-guide={hovered?.row === r || hovered?.col === c}
+                  onpointerenter={() => (hovered = { row: r, col: c })}
                   class:inrange={inRange(r, c)}
                   class:changed={isCellChanged($editJournal, displayedCellOffset(map, r, c), map.format.width)}
                   onclick={(ev) => clickCell(r, c, ev.shiftKey)}
@@ -374,22 +402,27 @@
     flex-direction: column;
   }
   header {
-    padding: 8px 12px;
+    padding: 16px 18px 10px;
     display: flex;
     gap: 12px;
-    align-items: baseline;
+    align-items: center;
+    flex-wrap: wrap;
   }
+  .map-heading { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 180px; }
+  .map-heading strong { font-size: 16px; line-height: 1.4; overflow-wrap: anywhere; }
+  .table-tools { display: flex; align-items: center; gap: 16px; padding: 6px 18px; flex-wrap: wrap; font-size: 12px; color: var(--fg-dim); }
+  .table-tools label { display: flex; align-items: center; gap: 6px; }
+  .heat-legend { display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+  .heat-ramp { width: 72px; height: 8px; border-radius: 4px; background: linear-gradient(to right, hsl(220, 55%, 22%), hsl(165, 55%, 30%)); }
+  .edit-key { border-bottom: 2px solid var(--warn); margin-left: auto; }
   .meta {
     color: var(--fg-dim);
     font-size: 12px;
   }
-  header .grow {
-    flex: 1;
-  }
   .cell {
     /* Keep selection from moving the table between the two clicks of an edit. */
-    flex: 0 0 15rem;
-    height: 1.5em;
+    flex: 0 0 28px;
+    padding: 4px 18px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -406,7 +439,10 @@
   }
   td {
     cursor: cell;
+    background: var(--cell-fill);
   }
+  td.hover-guide { box-shadow: inset 0 0 0 100px #ffffff09; }
+  th.hover-guide { color: #fff; background: #344c68; }
   th.axishdr {
     cursor: cell;
   }
@@ -419,6 +455,8 @@
   td.changed,
   th.axishdr.changed {
     background: #3a2f14;
+    border-bottom: 2px solid var(--warn);
+    color: #ffe2a7;
   }
   .celledit {
     width: 6em;
@@ -438,17 +476,17 @@
   .gridscroll {
     flex: 1;
     overflow: auto;
-    padding: 0 12px 12px;
+    padding: 0 18px 18px;
   }
   table {
     border-collapse: collapse;
     font-family: Consolas, monospace;
-    font-size: 12px;
+    font-variant-numeric: tabular-nums;
   }
   th,
   td {
     border: 1px solid #333842;
-    padding: 3px 8px;
+    padding: 6px 10px;
     text-align: right;
     white-space: nowrap;
   }
@@ -456,11 +494,13 @@
     position: sticky;
     top: 0;
     background: var(--bg-raise);
+    z-index: 2;
   }
   tbody th {
     position: sticky;
     left: 0;
     background: var(--bg-raise);
+    z-index: 1;
   }
   .corner {
     color: var(--fg-dim);

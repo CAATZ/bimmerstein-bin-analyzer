@@ -92,7 +92,8 @@ def build():
         picture = re.fullmatch(r'!\[([^]]*)\]\(([^)]+)\)', line)
         if picture:
             image = Image(str(ROOT / picture[2]))
-            scale = min(WIDTH / image.imageWidth, 360 / image.imageHeight, 1)
+            max_height = 180 if picture[2].endswith('map-properties.png') else 360
+            scale = min(WIDTH / image.imageWidth, max_height / image.imageHeight, 1)
             image.drawWidth, image.drawHeight = image.imageWidth * scale, image.imageHeight * scale
             image.hAlign = 'CENTER'
             story.append(KeepTogether([Spacer(1, 5), image, Spacer(1, 5), Paragraph(inline(picture[1]), styles['Caption'])]))
@@ -132,13 +133,13 @@ def build():
         canvas.line(44, 38, A4[0] - 44, 38)
         canvas.setFillColor(colors.HexColor('#596a7a'))
         canvas.setFont('Helvetica', 8)
-        canvas.drawString(44, 25, 'BimmerStein Bin Analyzer | User Manual | 0.2.18')
+        canvas.drawString(44, 25, 'BimmerStein Bin Analyzer | User Manual | 0.2.20')
         canvas.drawRightString(A4[0] - 44, 25, str(doc.page))
         canvas.restoreState()
 
     doc = SimpleDocTemplate(str(OUTPUT), pagesize=A4, rightMargin=44, leftMargin=44,
                             topMargin=38, bottomMargin=52, title='BimmerStein Bin Analyzer User Manual',
-                            author='Cristian Ayon', subject='Version 0.2.18 - Windows x64')
+                            author='Cristian Ayon', subject='Version 0.2.20 - Windows x64')
     doc.build(story, onFirstPage=page_chrome, onLaterPages=page_chrome)
     print(OUTPUT)
 

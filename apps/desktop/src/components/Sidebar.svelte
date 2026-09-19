@@ -2,6 +2,7 @@
 <script lang="ts">
   import type { MapDef } from '@binanalyzer/core';
   import { mapFilter, maps, potentialMaps, selection } from '../store/stores.js';
+  import { DEFAULT_WORKSPACE, setWorkspace, workspace } from '../store/workspace.js';
   import * as actions from '../store/actions.js';
   import { isCurveShaped } from '../lib/curvedata.js';
   import { isSwitch } from '../lib/switchdata.js';
@@ -10,18 +11,17 @@
 
   let editing: MapDef | null = $state(null);
   let panel: HTMLDivElement;
-  let width = $state(260);
   let drag: { x: number; width: number } | null = null;
 
   function resize(next: number): void {
-    width = Math.round(Math.max(180, Math.min(next, (panel.parentElement?.clientWidth ?? 1000) * 0.6)));
+    setWorkspace({ sidebarWidth: Math.round(Math.max(180, Math.min(next, (panel.parentElement?.clientWidth ?? 1000) * 0.6))) });
   }
 
   function resizeKey(event: KeyboardEvent): void {
     if (!['ArrowLeft', 'ArrowRight', 'Home'].includes(event.key)) return;
     event.preventDefault();
     event.stopPropagation();
-    resize(event.key === 'Home' ? 260 : panel.clientWidth + (event.key === 'ArrowRight' ? 20 : -20));
+    resize(event.key === 'Home' ? DEFAULT_WORKSPACE.sidebarWidth : panel.clientWidth + (event.key === 'ArrowRight' ? 20 : -20));
   }
 
   const shownMaps = $derived(filterMaps($maps, $mapFilter));
@@ -30,7 +30,7 @@
   const filtered = $derived($mapFilter.query !== '' || $mapFilter.shape !== 'all' || $mapFilter.detector !== 'all');
 </script>
 
-<div class="sidebar-panel" bind:this={panel} style:width="{width}px">
+<div class="sidebar-panel" bind:this={panel} style:width="{$workspace.sidebarWidth}px">
 <aside class="sidebar" id="map-sidebar" aria-label="Maps">
   <div class="filters">
     <input type="search" aria-label="Search maps" placeholder="Name, address or 20x16" value={$mapFilter.query}
@@ -47,21 +47,24 @@
     </div>
     {#if filtered}<button onclick={() => actions.setMapFilter(DEFAULT_MAP_FILTER)}>Clear filters</button>{/if}
   </div>
-  <p class="evidence" aria-label="Detection evidence">{selectedPotential
-    ? detectionDescription(selectedPotential)
-    : 'Select a potential map for detection evidence.'}</p>
+  {#if selectedPotential}
+    <details class="evidence"><summary>Detection evidence</summary>
+      <p aria-label="Detection evidence">{detectionDescription(selectedPotential)}</p>
+    </details>
+  {/if}
   <h2>Maps ({filtered ? `${shownMaps.length}/` : ''}{$maps.length})</h2>
   <ul>
     {#each shownMaps as m (m.id)}
       <li class:selected={$selection?.mapId === m.id}>
         <button class="row" onclick={() => actions.selectMap(m)} title={m.name}>
-          <span class="name">{m.name}</span>
+          <span class="map-label"><span class="name">{m.name}</span>
+            <span class="addr">0x{m.address.toString(16).toUpperCase()} · {m.rows}×{m.cols}</span>
+          </span>
           {#if isSwitch(m)}
             <span class="sw" title="Switch (named-state table)">SW</span>
           {:else if isCurveShaped(m)}
             <span class="oned" title="1D curve (single-axis table)">1D</span>
           {/if}
-          <span class="addr">0x{m.address.toString(16).toUpperCase()}</span>
         </button>
         <button class="x" title="Properties" onclick={() => (editing = m)}>✎</button>
         <button class="x" title="Remove map" onclick={() => actions.removeMap(m.id)}>×</button>
@@ -82,7 +85,9 @@
             if (actions.promoteMap(m.id)) actions.pushToast('info', `Promoted ${m.name}`);
           }}
         >
-          <span class="name">{m.name}</span>
+          <span class="map-label"><span class="name">{m.name}</span>
+            <span class="addr">0x{m.address.toString(16).toUpperCase()} · {m.rows}×{m.cols}</span>
+          </span>
           {#if tier}
             <span class="tier tier-{m.detector}" title={tier.title}>{tier.label}</span>
           {/if}
@@ -100,7 +105,7 @@
 <button class="splitter" type="button" aria-label="Resize map sidebar"
   aria-controls="map-sidebar"
   title="Drag to resize. Arrow keys adjust width; Home or double-click resets."
-  onkeydown={resizeKey} ondblclick={() => resize(260)}
+  onkeydown={resizeKey} ondblclick={() => resize(DEFAULT_WORKSPACE.sidebarWidth)}
   onpointerdown={(e) => {
     if (e.button !== 0) return;
     e.preventDefault();
@@ -126,5 +131,7 @@
   .filter-row { display: flex; gap: 4px; margin: 4px 0; }
   .filter-row select { width: 50%; min-width: 0; }
   .evidence, .no-results { font-size: 12px; color: var(--fg-dim); margin: 8px 4px; line-height: 1.4; }
-  .evidence { height: 5.6em; overflow: auto; }
+  .evidence { padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
+  .evidence summary { cursor: pointer; }
+  .evidence p { max-height: 8em; overflow: auto; margin: 8px 0 0; }
 </style>

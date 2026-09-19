@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { SurfaceGrid } from '../lib/griddata.js';
+import { heatColor } from '../lib/presentation.js';
 
 /** Shared, render-on-demand surface. Plotting never changes the underlying table. */
 export class SurfaceRenderer {
@@ -90,7 +91,7 @@ export class SurfaceRenderer {
       const c = i % grid.cols;
       const t = (grid.values[r]![c]! - grid.min) / span;
       pos.setY(i, base + t * (top - base));
-      color.setHSL(0.66 * (1 - t), 0.8, 0.5);
+      color.setStyle(heatColor(grid.values[r]![c]!, grid.min, grid.max));
       colors.set([color.r, color.g, color.b], i * 3);
     }
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
