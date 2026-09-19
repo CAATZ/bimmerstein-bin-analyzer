@@ -45,6 +45,7 @@
   let axisLibOpen = $state(false);
   let familiesOpen = $state(false);
   let aboutOpen = $state(false);
+  let aboutSummary: HTMLElement;
   const confirmed = $derived($selection?.mapId !== undefined && $maps.some((map) => map.id === $selection?.mapId));
   const selectedMap = $derived([...$maps, ...$potentialMaps].find((map) => map.id === $selection?.mapId));
 
@@ -105,11 +106,14 @@
   </label>
     </div>
    </details>
-  </nav>
-  <div class="help-commands" role="group" aria-label="Help">
+   <details>
+    <summary bind:this={aboutSummary}>About</summary>
+    <div class="command-menu">
     <button onclick={() => void openHelp('manual')}>User Manual</button>
     <button onclick={() => (aboutOpen = true)}>About</button>
-  </div>
+    </div>
+   </details>
+  </nav>
   <div class="file-identity" title={$bin ? `${$bin.name}\n${$bin.size.toLocaleString()} bytes\nSHA-256 ${$bin.sha256}` : 'BimmerStein Bin Analyzer'}>
     <strong>{$bin?.name ?? 'Bin Analyzer'}</strong>
     {#if $bin}<span class:unsaved={dirty}>{dirty ? 'Unsaved BIN changes' : $saveTarget ? 'BIN saved' : 'BIN unchanged'}</span>{/if}
@@ -205,7 +209,7 @@
   <FamiliesDialog {appLocalData} onclose={() => (familiesOpen = false)} />
 {/if}
 {#if aboutOpen}
-  <AboutDialog onclose={() => (aboutOpen = false)} />
+  <AboutDialog onclose={() => { aboutOpen = false; aboutSummary.focus(); }} />
 {/if}
 
 <style>
@@ -219,7 +223,7 @@
   summary::-webkit-details-marker { display: none; }
   .command-menu { position: absolute; top: 100%; left: 0; z-index: 35; width: 270px; display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-panel); box-shadow: 0 12px 30px #0008; }
   .command-menu button { text-align: left; border-color: transparent; background: transparent; }
-  .command-menu button:hover:not(:disabled) { background: var(--bg-raise); }
+  .command-menu button:hover:not(:disabled), .command-menu label.copilot-toggle:hover { background: var(--bg-raise); }
   .command-menu label { display: flex; flex-direction: column; gap: 6px; padding: 6px; color: var(--fg-dim); font-size: 12px; }
   .command-menu hr { border: 0; border-top: 1px solid var(--border); width: 100%; }
   kbd { float: right; font: inherit; color: var(--fg-dim); }
@@ -238,12 +242,14 @@
     align-items: center;
     gap: 4px;
     margin: 0;
-    color: var(--fg-dim);
+    padding: 5px 10px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font: inherit;
+    color: var(--fg);
+    cursor: pointer;
   }
   .copilot-toggle input { flex-shrink: 0; margin: 0; }
-  .help-commands { display: flex; gap: 4px; flex-shrink: 0; }
-  .help-commands button { background: transparent; border-color: transparent; color: var(--fg-dim); padding: 6px 8px; font-size: 12px; }
-  .help-commands button:hover { background: var(--bg-raise); color: var(--fg); }
   .selection-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; font-size: 12px; }
   .selection-summary { color: var(--fg-dim); white-space: nowrap; }
   .confirm-selection { display: inline-flex; align-items: center; gap: 7px; background: #263952; border-color: #446895; font-size: 12px; }

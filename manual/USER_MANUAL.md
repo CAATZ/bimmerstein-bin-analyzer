@@ -4,9 +4,9 @@
 
 **ECU Binary Analysis and Map Editing**
 
-Version 0.2.20 | Windows x64 | September 2026
+Version 0.2.19 | Windows x64 | September 2026
 
-This manual covers the 0.2.20 application. Check the version of your installed
+This manual covers the 0.2.19 application. Check the version of your installed
 release if a control described here is missing. Screenshots use synthetic
 demonstration data; they are not tuning recommendations or real ECU calibrations.
 
@@ -108,13 +108,13 @@ or save reports.
 
 ## 4. Workspace and navigation
 
-The top row contains **File**, **Edit** and **Tools**. Open a group with a click,
+The top row contains **File**, **Edit**, **Tools** and **About**. Open a group with a click,
 or focus it with **Tab** and press **Enter**. **Escape** closes the group and
 returns focus to its label. **Open Bin**, **Save Bin** and **Rescan** remain in
 the main toolbar. Undo, Redo and Original values are also available under Edit.
 
-**User Manual** opens this version's bundled PDF in your default viewer, even
-without an internet connection. **About** shows the installed version, developer,
+**About → User Manual** opens this version's bundled PDF in your default viewer, even
+without an internet connection. **About → About** shows the installed version, developer,
 license and repository/support links. **Copy version information** prepares the
 application details for a bug report. Press **Escape** or **Close** to return.
 

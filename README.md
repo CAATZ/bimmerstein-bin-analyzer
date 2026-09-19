@@ -34,9 +34,9 @@ verification, or export definitions for another editor.
 
 ![BimmerStein Bin Analyzer workspace with synthetic demonstration data](manual/images/workspace.png)
 
-**Current source: 0.2.20. Latest published release: [v0.2.18](https://github.com/CAATZ/bimmerstein-bin-analyzer/releases/tag/v0.2.18).**
+**Current source: 0.2.19. Latest published release: [v0.2.18](https://github.com/CAATZ/bimmerstein-bin-analyzer/releases/tag/v0.2.18).**
 The source adds the refreshed workspace, contextual selection confirmation,
-About information and an offline user manual. The manual describes 0.2.20;
+About information and an offline user manual. The manual describes 0.2.19;
 these latest controls are not yet in the published installer.
 
 ## What you can do

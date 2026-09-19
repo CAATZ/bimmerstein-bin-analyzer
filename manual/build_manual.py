@@ -133,13 +133,13 @@ def build():
         canvas.line(44, 38, A4[0] - 44, 38)
         canvas.setFillColor(colors.HexColor('#596a7a'))
         canvas.setFont('Helvetica', 8)
-        canvas.drawString(44, 25, 'BimmerStein Bin Analyzer | User Manual | 0.2.20')
+        canvas.drawString(44, 25, 'BimmerStein Bin Analyzer | User Manual | 0.2.19')
         canvas.drawRightString(A4[0] - 44, 25, str(doc.page))
         canvas.restoreState()
 
     doc = SimpleDocTemplate(str(OUTPUT), pagesize=A4, rightMargin=44, leftMargin=44,
                             topMargin=38, bottomMargin=52, title='BimmerStein Bin Analyzer User Manual',
-                            author='Cristian Ayon', subject='Version 0.2.20 - Windows x64')
+                            author='Cristian Ayon', subject='Version 0.2.19 - Windows x64')
     doc.build(story, onFirstPage=page_chrome, onLaterPages=page_chrome)
     print(OUTPUT)
 
