@@ -40,7 +40,7 @@ demonstration data; they are not tuning recommendations or real ECU calibrations
 
 BimmerStein Bin Analyzer opens a saved ECU firmware image, searches for potential
 calibration tables, and lets you inspect their layout, axes and values. You can
-import ECU XML definitions, refine detected tables, edit values, save a separate
+import RomRaider definitions, refine detected tables, edit values, save a separate
 BIN, and export definitions or map packs.
 
 The primary validated family is **BMW Siemens MS41**, including stock and
@@ -91,7 +91,7 @@ or exported definitions. Keep backups of those files before updating.
    bar. File identity matters more than its name.
 3. Wait for **scan done**. **Cancel scan** stops a running scan; **Rescan** starts
    another scan of the current working bytes.
-4. If you have the matching ECU XML definition, click **File → Import Definition…**, choose
+4. If you have the matching RomRaider definition, click **File → Import Definition…**, choose
    its XML file and select the correct ROM entry when prompted.
 5. Select a map in the left sidebar, then click **Table** for its values or **3D**
    for a surface. Use **Preview** to keep a small surface visible beside another view.
@@ -224,7 +224,7 @@ to how the definition was authored, not according to which answer imports more m
 Addresses in map properties identify **byte offsets in the loaded file**. A
 24 KB calibration-only file and a 256 KB full read do not share a universal
 additive offset. The app's MS41 mapping accounts for the full-read layout.
-ECU XML exports reverse a supported full-read mapping where possible.
+RomRaider exports reverse a supported full-read mapping where possible.
 
 Out-of-range definitions are skipped rather than extending the image. An axis
 with malformed or nonnumeric labels can fall back to indices with a warning.
