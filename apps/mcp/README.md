@@ -1,7 +1,7 @@
 # BimmerStein Bin Analyzer — MCP server
 
 A stdio [Model Context Protocol](https://modelcontextprotocol.io) server that
-exposes the BimmerStein detection engine to an AI client: open an ECU `.bin`, scan
+exposes the BimmerStein detection engine to an MCP client: open an ECU `.bin`, scan
 it, enumerate and decode maps and axes, import a RomRaider definition, export
 definitions — with the desktop app not running.
 
@@ -48,7 +48,7 @@ Node runtime.
 | `get_map` | One map in full, with decoded axes |
 | `read_map` | Decode values — by `mapId`, or an **ad-hoc** definition at any address |
 | `read_bytes` | Bounded hex / decoded window |
-| `list_detected_axes` | Count-prefixed axis runs (the shared MS4x axis pool) |
+| `list_detected_axes` | Count-prefixed axis runs (the shared axis pool) |
 | `verify_checksums` | Report supported checksum checks and unchecked regions without correcting bytes |
 | `import_definition` | RomRaider XML → maps, storageaddress-framed on full reads |
 | `export_definition` | RomRaider / XDF / CSV / JSON |
@@ -115,5 +115,5 @@ since it was read is skipped and reported. Accepted edits are undoable.
 `save_project` asks the app to run its own Save Project dialog; it is independent
 of `--allow-write`. Only the user can save a BIN through the desktop controls.
 Disabling session sharing disconnects the app. Sharing may expose file contents
-and metadata to the configured AI client and its provider; no AI connection is
+and metadata to the configured MCP client and its provider; no client connection is
 needed for ordinary local analysis and editing.

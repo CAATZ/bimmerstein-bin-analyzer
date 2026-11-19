@@ -59,7 +59,7 @@ directory. Nothing listens when the server is not running. The desktop side is
 gated by an explicit consent toggle that defaults to off and must be turned on
 by the user.
 
-The co-pilot connects the shared session to the user's configured AI client.
+The co-pilot connects the shared session to the user's configured MCP client.
 That client may send the data it reads to its provider; the loopback link is
 not a guarantee that shared data stays on the computer.
 

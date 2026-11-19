@@ -24,7 +24,7 @@ This file covers the app's internal structure for contributors.
 | `src/platform/` | Host APIs and file, family-module and save flows |
 | `src/views/` | Hexdump, 2D, tables, curves, switches and 3D surfaces/preview |
 | `src/components/` | toolbar, sidebar, status bar, toasts, dialogs (thin) |
-| `src/copilot/` | Optional AI co-pilot connection, session sharing and reviewed proposals |
+| `src/copilot/` | Optional co-pilot connection, session sharing and reviewed proposals |
 | `src-tauri/` | Rust shell, application configuration, plugin registration and icons |
 
 Use the core codecs for byte decoding and the existing edit journal and save

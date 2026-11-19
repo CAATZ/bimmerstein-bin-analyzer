@@ -40,7 +40,7 @@ demonstration data; they are not tuning recommendations or real ECU calibrations
 
 BimmerStein Bin Analyzer opens a saved ECU firmware image, searches for potential
 calibration tables, and lets you inspect their layout, axes and values. You can
-import RomRaider definitions, refine detected tables, edit values, save a separate
+import ECU XML definitions, refine detected tables, edit values, save a separate
 BIN, and export definitions or map packs.
 
 The primary validated family is **BMW Siemens MS41**, including stock and
@@ -91,7 +91,7 @@ or exported definitions. Keep backups of those files before updating.
    bar. File identity matters more than its name.
 3. Wait for **scan done**. **Cancel scan** stops a running scan; **Rescan** starts
    another scan of the current working bytes.
-4. If you have the matching RomRaider definition, click **File → Import Definition…**, choose
+4. If you have the matching ECU XML definition, click **File → Import Definition…**, choose
    its XML file and select the correct ROM entry when prompted.
 5. Select a map in the left sidebar, then click **Table** for its values or **3D**
    for a surface. Use **Preview** to keep a small surface visible beside another view.
@@ -224,7 +224,7 @@ to how the definition was authored, not according to which answer imports more m
 Addresses in map properties identify **byte offsets in the loaded file**. A
 24 KB calibration-only file and a 256 KB full read do not share a universal
 additive offset. The app's MS41 mapping accounts for the full-read layout.
-RomRaider exports reverse a supported full-read mapping where possible.
+ECU XML exports reverse a supported full-read mapping where possible.
 
 Out-of-range definitions are skipped rather than extending the image. An axis
 with malformed or nonnumeric labels can fall back to indices with a warning.
@@ -474,7 +474,7 @@ Open **File**, choose an **Export format**, then click **Export** and choose a d
 | CSV | A map inventory for inspection or a spreadsheet |
 | JSON | A structured map inventory, including available metadata |
 | RomRaider XML | Confirmed table definitions for a compatible editor |
-| TunerPro XDF | Confirmed definitions in TunerPro's format |
+| TunerPro XDF | Confirmed definitions in XDF format |
 
 CSV/JSON are map lists, not a replacement for a saved edited BIN. Definition
 exports describe confirmed maps; review format warnings and unsupported items.
@@ -509,7 +509,7 @@ tables in that ECU can be found.
 
 Under **Tools**, **Share session with co-pilot** is a horizontal row with its
 checkbox on the right; click the label or checkbox. Sharing is off by default. Enabling it permits a
-configured AI client to inspect the session and submit proposals. The
+configured MCP client to inspect the session and submit proposals. The
 status bar shows whether it is waiting, connected or reconnecting. Disable
 sharing when the session should no longer be exposed.
 
@@ -518,7 +518,7 @@ definition changes and every value edit require review. Check the target map,
 addresses and before/after values before accepting proposal rows. Accepted value
 edits change the working session; only you can save the BIN. The co-pilot can
 request the app's Save Project dialog, which saves definitions rather than bytes.
-Shared data may be sent to your AI client's provider.
+Shared data may be sent to your MCP client's provider.
 Connection setup and the command reference are in the repository's
 **apps/mcp/README.md**. No external connection is required for ordinary offline use.
 

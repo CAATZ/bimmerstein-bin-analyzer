@@ -45,15 +45,15 @@ an About menu and an offline user manual. The manual describes version 0.2.19.
   detection evidence.
 - Inspect raw bytes, 2D traces, tables, curves, scalar values and named switch
   states. Rotate a 3D surface with breakpoint labels and physical units.
-- Import RomRaider definitions; review table boundaries and axis pairs; add
+- Import ECU XML definitions; review table boundaries and axis pairs; add
   conversion factors and organize shared axes in a reusable library.
 - Edit table values and stored breakpoints with undo/redo, original-value
   comparison and byte-level change highlighting.
 - Save an edited BIN separately from its source, verify the written bytes, and
   inspect corrected, uncorrectable and unchecked checksum regions.
-- Save projects and lineage; export RomRaider XML, TunerPro XDF, CSV/JSON map
+- Save projects and lineage; export ECU XML, XDF, CSV/JSON map
   lists and reviewed map packs.
-- Optionally connect an AI co-pilot to inspect a shared session and propose
+- Optionally connect an MCP client to inspect a shared session and propose
   value edits for review. See the [co-pilot guide](apps/mcp/README.md#co-pilot-mode---copilot).
 
 File analysis and editing run **locally**; the app does not communicate with or
