@@ -8,7 +8,10 @@ echo ============================================================
 echo.
 call corepack pnpm install --prefer-offline
 if errorlevel 1 (echo. & echo *** pnpm install failed - see messages above *** & pause & exit /b 1)
-call corepack pnpm --filter desktop tauri build
+powershell -NoProfile -Command ^
+  "$flags = if ($env:CARGO_ENCODED_RUSTFLAGS) { $env:CARGO_ENCODED_RUSTFLAGS -split [char]31 } elseif ($env:RUSTFLAGS) { $env:RUSTFLAGS -split ' ' | Where-Object { $_ } };" ^
+  "$env:CARGO_ENCODED_RUSTFLAGS = (@($flags | Where-Object { $_ }) + ('--remap-path-prefix=' + $env:USERPROFILE + '=/build')) -join [char]31;" ^
+  "cmd /d /c 'corepack pnpm --filter desktop tauri build'; exit $LASTEXITCODE"
 if errorlevel 1 (echo. & echo *** build failed - see messages above *** & pause & exit /b 1)
 echo.
 echo ============================================================
